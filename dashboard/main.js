@@ -6,6 +6,7 @@ import { GridLayout } from './lib/grid-layout.js';
 import { loadLayout } from './lib/layout-store.js';
 import { login, register, logout, isAuthenticated, getUser, getToken, restoreSession } from './lib/auth.js';
 import { loadFromServer, savePreferences, saveConnectorConfig } from './lib/state-sync.js';
+import { initMobileNav } from './lib/mobile-nav.js';
 
 window.Chart = Chart;
 
@@ -366,6 +367,7 @@ async function initApp() {
   // Always initialize dashboard features (they show beneath auth overlay)
   initRealtime();
   initGridLayout();
+  initMobileNav();
 
   // Listen for theme changes to persist preference
   const themeBtn = document.querySelector('.theme-btn, #theme-btn, [data-action="toggle-theme"]');
