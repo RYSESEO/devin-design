@@ -8,12 +8,14 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import { createWebSocketServer } from './ws/index.js';
-import { KpiStream, ActivityStream, NotificationStream } from './ws/streams.js';
+import { KpiStream, ActivityStream, NotificationStream, AlertStream } from './ws/streams.js';
 import streamRouter from './routes/stream.js';
 import authRouter from './routes/auth.js';
 import stateRouter from './routes/state.js';
 import proxyRouter from './routes/proxy.js';
 import oauthRouter from './routes/oauth.js';
+import intelligenceRouter from './routes/intelligence.js';
+import automationsRouter from './routes/automations.js';
 import { optionalAuth } from './middleware/auth.js';
 import db from './db/index.js';
 
@@ -122,6 +124,12 @@ app.use('/api/proxy', proxyRouter);
 // OAuth routes (require auth - handled inside router)
 app.use('/api/oauth', oauthRouter);
 
+// Intelligence routes (require auth - handled inside router)
+app.use('/api/intelligence', intelligenceRouter);
+
+// Automations routes (require auth - handled inside router)
+app.use('/api/automations', automationsRouter);
+
 // Optional auth for other routes
 app.use(optionalAuth);
 
@@ -145,6 +153,9 @@ const server = createServer(app);
 
 // WebSocket server setup
 const { wss, broadcast, stopHeartbeat } = createWebSocketServer();
+
+// Expose broadcast for use in route handlers (e.g., alert triggering)
+app.locals.broadcast = broadcast;
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
@@ -182,11 +193,12 @@ server.on('upgrade', (request, socket, head) => {
 });
 
 // Start data streams (only in non-test environment)
-let kpiStream, activityStream, notificationStream;
+let kpiStream, activityStream, notificationStream, alertStream;
 if (process.env.NODE_ENV !== 'test') {
   kpiStream = new KpiStream(broadcast);
   activityStream = new ActivityStream(broadcast);
   notificationStream = new NotificationStream(broadcast);
+  alertStream = new AlertStream(broadcast);
   kpiStream.start();
   activityStream.start();
   notificationStream.start();

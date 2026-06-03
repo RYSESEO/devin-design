@@ -424,6 +424,7 @@ async function initApp() {
   registerPanel('ch-btn', () => { if (window.initContentHub) { window.initContentHub(); return true; } return false; });
   registerPanel('eco-btn', () => { if (window.initEcosystem) { window.initEcosystem(); return true; } return false; });
   registerPanel('intel-btn', () => { if (window.initIntelligence) { window.initIntelligence(); return true; } return false; });
+  registerPanel('auto-btn', () => { if (window.initAutomations) { window.initAutomations(); return true; } return false; });
   registerPanel('toolkit-btn', () => { if (window.initToolkit) { window.initToolkit(); return true; } return false; });
   initLazyPanels();
 

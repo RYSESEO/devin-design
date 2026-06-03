@@ -7,6 +7,8 @@ const legacyScripts = [
   'connectors.js',
   'toolkit.js',
   'intelligence.js',
+  'actionable-intel.js',
+  'automations.js',
   'ecosystem.js',
   'content-hub.js',
   'social-dashboard.js',

@@ -12,6 +12,8 @@
   <script src="connectors.js"></script>
   <script src="toolkit.js"></script>
   <script src="intelligence.js"></script>
+  <script src="actionable-intel.js"></script>
+  <script src="automations.js"></script>
   <script src="ecosystem.js"></script>
   <script src="content-hub.js"></script>
   <script src="social-dashboard.js"></script>
@@ -125,6 +127,9 @@
       </button>
       <button class="intel-btn" id="intel-btn" title="Intelligence & Business (I)" aria-label="Intelligence">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="10" y1="21" x2="14" y2="21"/></svg>
+      </button>
+      <button class="auto-btn" id="auto-btn" title="Automation Hub (U)" aria-label="Automation Hub">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       </button>
       <button class="toolkit-btn" id="toolkit-btn" title="Designer & Dev Toolkit (D)" aria-label="Toolkit">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
@@ -559,6 +564,7 @@
           <div class="shortcut-row"><kbd>S</kbd><span>Data connections</span></div>
           <div class="shortcut-row"><kbd>D</kbd><span>Designer & Dev toolkit</span></div>
           <div class="shortcut-row"><kbd>I</kbd><span>Intelligence panel</span></div>
+          <div class="shortcut-row"><kbd>Alt+I</kbd><span>Intelligence Actions tab</span></div>
           <div class="shortcut-row"><kbd>M</kbd><span>Social Media Dashboard</span></div>
           <div class="shortcut-row"><kbd>C</kbd><span>Content Hub</span></div>
           <div class="shortcut-row"><kbd>P</kbd><span>Ecosystem panel</span></div>
@@ -568,6 +574,7 @@
           <div class="shortcut-row"><kbd>V</kbd><span>Voice Control</span></div>
           <div class="shortcut-row"><kbd>R</kbd><span>Competitive Intelligence</span></div>
           <div class="shortcut-row"><kbd>W</kbd><span>Widget Builder</span></div>
+          <div class="shortcut-row"><kbd>U</kbd><span>Automation Hub</span></div>
           <div class="shortcut-row"><kbd>L</kbd><span>Customize Layout</span></div>
           <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
           <div class="shortcut-row"><kbd>Escape</kbd><span>Close any overlay</span></div>
@@ -673,6 +680,7 @@
           <button class="intel-tab active" data-tab="insights">Insights</button>
           <button class="intel-tab" data-tab="business">Business</button>
           <button class="intel-tab" data-tab="reports">Reports</button>
+          <button class="intel-tab" data-tab="actions">Actions</button>
         </div>
       </div>
       <div class="intel-body">
@@ -728,6 +736,34 @@
             <h4 class="intel-section-title">Data Annotations</h4>
             <p class="intel-section-desc">Mark important events on your data timeline.</p>
             <div id="intel-annotations"></div>
+          </div>
+        </div>
+        <!-- Actions Pane -->
+        <div class="intel-pane" data-pane="actions">
+          <div class="intel-section">
+            <h4 class="intel-section-title">Actionable Recommendations</h4>
+            <p class="intel-section-desc">AI-powered suggestions with one-click actions.</p>
+            <div id="intel-recommendations"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Revenue Attribution</h4>
+            <p class="intel-section-desc">Revenue breakdown by source and UTM campaign.</p>
+            <div id="intel-attribution"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Alert Manager</h4>
+            <p class="intel-section-desc">Create threshold alerts with automated actions.</p>
+            <div id="intel-alert-mgr"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Goal Setting</h4>
+            <p class="intel-section-desc">Set goals with progress tracking and forecasted completion.</p>
+            <div id="intel-goal-setting"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Daily Digest</h4>
+            <p class="intel-section-desc">Your morning briefing with key metrics and insights.</p>
+            <div id="intel-digest"></div>
           </div>
         </div>
       </div>
@@ -1140,6 +1176,40 @@
         <div class="wb-pane" data-wbpane="templates">
           <p class="wb-pane-desc">Start with a pre-built layout.</p>
           <div class="wb-templates" id="wb-templates"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Automation Hub Panel ═══ -->
+  <div class="auto-overlay" id="automation-panel">
+    <div class="auto-drawer">
+      <div class="auto-header">
+        <div class="auto-title-row">
+          <h3>Automation Hub</h3>
+          <button class="auto-close-btn" id="auto-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="auto-tabs">
+          <button class="auto-tab active" data-tab="workflows">Workflows</button>
+          <button class="auto-tab" data-tab="templates">Templates</button>
+          <button class="auto-tab" data-tab="leads">Leads</button>
+          <button class="auto-tab" data-tab="notifications">Notifications</button>
+        </div>
+      </div>
+      <div class="auto-body">
+        <div class="auto-pane active" data-apane="workflows">
+          <div id="auto-workflows"></div>
+        </div>
+        <div class="auto-pane" data-apane="templates">
+          <div id="auto-templates"></div>
+        </div>
+        <div class="auto-pane" data-apane="leads">
+          <div id="auto-leads"></div>
+        </div>
+        <div class="auto-pane" data-apane="notifications">
+          <div id="auto-notifications"></div>
         </div>
       </div>
     </div>
