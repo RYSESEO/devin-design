@@ -2,7 +2,7 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import db from '../db/index.js';
 import { requireAuth } from '../middleware/auth.js';
-import { requireApiKey } from '../middleware/apikey.js';
+import { requireApiKey, requirePermission } from '../middleware/apikey.js';
 
 const router = Router();
 
@@ -65,7 +65,7 @@ router.delete('/keys/:id', requireAuth, (req, res) => {
 // --- Public API routes (require API key) ---
 
 // GET /api/v1/metrics - return user's KPI data
-router.get('/v1/metrics', requireApiKey, (req, res) => {
+router.get('/v1/metrics', requireApiKey, requirePermission('read'), (req, res) => {
   // Try to get from user_state
   const state = db.prepare(
     "SELECT value FROM user_state WHERE user_id = ? AND key = 'kpi_data'"
@@ -86,7 +86,7 @@ router.get('/v1/metrics', requireApiKey, (req, res) => {
 });
 
 // GET /api/v1/orders - return order history
-router.get('/v1/orders', requireApiKey, (req, res) => {
+router.get('/v1/orders', requireApiKey, requirePermission('read'), (req, res) => {
   const orders = db.prepare(
     'SELECT * FROM order_history WHERE user_id = ? ORDER BY order_date DESC LIMIT 100'
   ).all(req.apiUser.id);
@@ -106,7 +106,7 @@ router.get('/v1/orders', requireApiKey, (req, res) => {
 });
 
 // GET /api/v1/reports - return generated reports
-router.get('/v1/reports', requireApiKey, (req, res) => {
+router.get('/v1/reports', requireApiKey, requirePermission('read'), (req, res) => {
   const reports = db.prepare(
     'SELECT id, title, created_at FROM client_reports WHERE user_id = ? ORDER BY created_at DESC LIMIT 50'
   ).all(req.apiUser.id);

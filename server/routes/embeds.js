@@ -2,6 +2,27 @@ import { Router } from 'express';
 
 const router = Router();
 
+// Sanitize string for safe HTML interpolation
+function escapeHtml(str) {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Sanitize color values - only allow valid CSS color formats
+function sanitizeColor(color) {
+  if (!color) return null;
+  // Allow hex colors, rgb/rgba, hsl/hsla, and named colors (alphanumeric only)
+  if (/^#[0-9a-fA-F]{3,8}$/.test(color)) return color;
+  if (/^(rgb|hsl)a?\([0-9,.\s%]+\)$/.test(color)) return color;
+  if (/^[a-zA-Z]+$/.test(color)) return color;
+  return null;
+}
+
 // GET /api/embeds/chart/:type - returns full HTML page with Chart.js
 router.get('/chart/:type', (req, res) => {
   const { type } = req.params;
@@ -13,10 +34,19 @@ router.get('/chart/:type', (req, res) => {
 
   const { data, labels, title, color } = req.query;
 
-  const chartData = data ? JSON.parse(data) : [10, 20, 30, 40, 50];
-  const chartLabels = labels ? JSON.parse(labels) : ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
-  const chartTitle = title || 'Chart';
-  const chartColor = color || '#6366f1';
+  let chartData, chartLabels;
+  try {
+    chartData = data ? JSON.parse(data) : [10, 20, 30, 40, 50];
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid JSON in data parameter' });
+  }
+  try {
+    chartLabels = labels ? JSON.parse(labels) : ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid JSON in labels parameter' });
+  }
+  const chartTitle = escapeHtml(title || 'Chart');
+  const chartColor = sanitizeColor(color) || '#6366f1';
 
   if (type === 'kpi') {
     const kpiValue = Array.isArray(chartData) ? chartData[0] : chartData;
@@ -95,10 +125,19 @@ router.get('/snippet/:type', (req, res) => {
 
   const { data, labels, title, color } = req.query;
 
-  const chartData = data ? JSON.parse(data) : [10, 20, 30, 40, 50];
-  const chartLabels = labels ? JSON.parse(labels) : ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
-  const chartTitle = title || 'Chart';
-  const chartColor = color || '#6366f1';
+  let chartData, chartLabels;
+  try {
+    chartData = data ? JSON.parse(data) : [10, 20, 30, 40, 50];
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid JSON in data parameter' });
+  }
+  try {
+    chartLabels = labels ? JSON.parse(labels) : ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid JSON in labels parameter' });
+  }
+  const chartTitle = escapeHtml(title || 'Chart');
+  const chartColor = sanitizeColor(color) || '#6366f1';
 
   let snippet;
 

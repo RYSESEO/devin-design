@@ -22,3 +22,15 @@ export function requireApiKey(req, res, next) {
   req.apiUser = { id: row.user_id, permissions: JSON.parse(row.permissions) };
   next();
 }
+
+export function requirePermission(permission) {
+  return function(req, res, next) {
+    if (!req.apiUser || !req.apiUser.permissions) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+    if (!req.apiUser.permissions.includes(permission)) {
+      return res.status(403).json({ error: `API key lacks '${permission}' permission` });
+    }
+    next();
+  };
+}

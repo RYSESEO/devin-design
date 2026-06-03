@@ -160,12 +160,18 @@ var BenchmarksPanel = {
     var submitBtn = document.getElementById('bench-submit-btn');
     if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
 
-    var promises = [];
-    if (revenue) promises.push(_benchPost('/api/benchmarks/submit', { metric: 'revenue', value: revenue }));
-    if (conversion) promises.push(_benchPost('/api/benchmarks/submit', { metric: 'conversion_rate', value: conversion }));
-    if (traffic) promises.push(_benchPost('/api/benchmarks/submit', { metric: 'traffic', value: traffic }));
+    var period = new Date().toISOString().slice(0, 7); // e.g. "2025-01"
+    var metrics = [];
+    if (revenue) metrics.push({ metric: 'revenue', value: revenue, period: period });
+    if (conversion) metrics.push({ metric: 'conversion_rate', value: conversion, period: period });
+    if (traffic) metrics.push({ metric: 'traffic', value: traffic, period: period });
 
-    Promise.all(promises).then(function() {
+    if (metrics.length === 0) {
+      if (submitBtn) { submitBtn.textContent = 'Submit My Metrics'; submitBtn.disabled = false; }
+      return;
+    }
+
+    _benchPost('/api/benchmarks/submit', { metrics: metrics }).then(function() {
       if (submitBtn) { submitBtn.textContent = 'Submitted!'; submitBtn.disabled = false; }
       setTimeout(function() { if (submitBtn) submitBtn.textContent = 'Submit My Metrics'; }, 2000);
       self.loadBenchmarks();

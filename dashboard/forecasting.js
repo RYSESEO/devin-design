@@ -170,10 +170,11 @@ var ForecastingPanel = {
 
     var seasonality = data.seasonality || {};
     var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     var html = '<div class="fc-season-grid">';
 
     days.forEach(function(day, i) {
-      var index = seasonality[i] || 1.0;
+      var index = seasonality[dayKeys[i]] || 1.0;
       var intensity = Math.min(Math.max((index - 0.5) / 1.0, 0), 1);
       var bg = 'rgba(168,85,247,' + (intensity * 0.8 + 0.1).toFixed(2) + ')';
       html += '<div class="fc-season-cell" style="background:' + bg + '" title="Index: ' + index.toFixed(2) + '">' +

@@ -68,10 +68,19 @@ router.get('/:id/members', (req, res) => {
 // POST /api/workspaces/:id/members - add member (requires owner/admin role)
 router.post('/:id/members', (req, res) => {
   const workspaceId = req.params.id;
-  const { user_id, role } = req.body;
+  let { user_id, email, role } = req.body;
+
+  // If email is provided instead of user_id, resolve it
+  if (!user_id && email) {
+    const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found with that email' });
+    }
+    user_id = user.id;
+  }
 
   if (!user_id) {
-    return res.status(400).json({ error: 'user_id is required' });
+    return res.status(400).json({ error: 'user_id or email is required' });
   }
 
   // Check requester has owner/admin role
@@ -128,6 +137,16 @@ router.put('/:id/members/:userId', (req, res) => {
 
   if (!target) {
     return res.status(404).json({ error: 'Member not found' });
+  }
+
+  // Prevent last owner from demoting themselves
+  if (String(targetUserId) === String(req.user.id) && role !== 'owner') {
+    const ownerCount = db.prepare(
+      "SELECT COUNT(*) as count FROM workspace_members WHERE workspace_id = ? AND role = 'owner'"
+    ).get(workspaceId);
+    if (ownerCount.count <= 1) {
+      return res.status(400).json({ error: 'Cannot demote the last owner. Promote another member to owner first.' });
+    }
   }
 
   db.prepare(
