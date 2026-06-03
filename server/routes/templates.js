@@ -64,13 +64,20 @@ router.post('/', (req, res) => {
 
   const layoutStr = typeof layout_json === 'string' ? layout_json : JSON.stringify(layout_json);
 
-  const result = db.prepare(`
-    INSERT INTO dashboard_templates (name, description, category, layout_json, is_custom, user_id)
-    VALUES (?, ?, 'custom', ?, 1, ?)
-  `).run(name, description || null, layoutStr, req.user.id);
+  try {
+    const result = db.prepare(`
+      INSERT INTO dashboard_templates (name, description, category, layout_json, is_custom, user_id)
+      VALUES (?, ?, 'custom', ?, 1, ?)
+    `).run(name, description || null, layoutStr, req.user.id);
 
-  const template = db.prepare('SELECT * FROM dashboard_templates WHERE id = ?').get(result.lastInsertRowid);
-  res.status(201).json(template);
+    const template = db.prepare('SELECT * FROM dashboard_templates WHERE id = ?').get(result.lastInsertRowid);
+    res.status(201).json(template);
+  } catch (err) {
+    if (err.message && err.message.includes('UNIQUE constraint')) {
+      return res.status(409).json({ error: 'A template with that name already exists' });
+    }
+    return res.status(500).json({ error: 'Failed to create template' });
+  }
 });
 
 export default router;

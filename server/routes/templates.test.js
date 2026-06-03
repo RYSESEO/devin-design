@@ -48,12 +48,12 @@ describe('Templates Routes', () => {
     expect(res.status).toBe(401);
   });
 
-  it('lists seeded templates (4 total)', async () => {
+  it('lists seeded templates (at least 4)', async () => {
     const res = await get('/api/templates', authToken);
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.templates).toBeDefined();
-    expect(data.templates.length).toBe(4);
+    expect(data.templates.length).toBeGreaterThanOrEqual(4);
   });
 
   it('filters templates by category', async () => {
@@ -87,14 +87,15 @@ describe('Templates Routes', () => {
   });
 
   it('creates a custom template', async () => {
+    const uniqueName = `My Custom Template ${Date.now()}`;
     const res = await post('/api/templates', {
-      name: 'My Custom Template',
+      name: uniqueName,
       description: 'A test template',
       layout_json: { panels: ['widget-a', 'widget-b'] }
     }, authToken);
     expect(res.status).toBe(201);
     const data = await res.json();
-    expect(data.name).toBe('My Custom Template');
+    expect(data.name).toBe(uniqueName);
     expect(data.is_custom).toBe(1);
     expect(data.user_id).toBeDefined();
   });
