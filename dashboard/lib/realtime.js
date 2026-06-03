@@ -4,7 +4,7 @@ const INITIAL_RECONNECT_DELAY = 1000;
 import { API_BASE_URL, WS_BASE_URL } from './config.js';
 
 export class RealtimeClient {
-  constructor() {
+  constructor(options = {}) {
     this.ws = null;
     this.eventSource = null;
     this.subscriptions = new Map(); // channel -> Set<callback>
@@ -13,6 +13,7 @@ export class RealtimeClient {
     this.mode = null; // 'ws' or 'sse'
     this.state = 'disconnected'; // 'connected', 'reconnecting', 'disconnected'
     this.stateListeners = new Set();
+    this.getToken = options.getToken || null;
   }
 
   connect() {
@@ -27,6 +28,11 @@ export class RealtimeClient {
       } else {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         url = `${protocol}//${window.location.host}/ws`;
+      }
+      // Append JWT token as query parameter for authentication
+      const token = this.getToken ? this.getToken() : null;
+      if (token) {
+        url += `${url.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`;
       }
       this.ws = new WebSocket(url);
 
@@ -76,7 +82,12 @@ export class RealtimeClient {
     try {
       const channels = Array.from(this.subscriptions.keys());
       const channelsParam = channels.length > 0 ? channels.join(',') : 'kpi,activity,notifications';
-      const url = `${API_BASE_URL}/api/stream?channels=${channelsParam}`;
+      let url = `${API_BASE_URL}/api/stream?channels=${channelsParam}`;
+      // Append JWT token as query parameter since EventSource does not support custom headers
+      const token = this.getToken ? this.getToken() : null;
+      if (token) {
+        url += `&token=${encodeURIComponent(token)}`;
+      }
       this.eventSource = new EventSource(url);
 
       this.eventSource.onopen = () => {

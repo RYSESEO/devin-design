@@ -5,6 +5,8 @@ import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
+// Maximum allowed length for a single chat message content (4 KB)
+const MAX_CHAT_CONTENT_LENGTH = 4096;
 // Maximum allowed size for a single state value (8 KB)
 const MAX_STATE_VALUE_SIZE = 8192;
 // Maximum JSON nesting depth allowed
@@ -160,6 +162,10 @@ router.post('/chat-history', (req, res) => {
 
   if (!['user', 'assistant'].includes(role)) {
     return res.status(400).json({ error: 'role must be user or assistant' });
+  }
+
+  if (content.length > MAX_CHAT_CONTENT_LENGTH) {
+    return res.status(400).json({ error: 'Content too long' });
   }
 
   const stmt = db.prepare(

@@ -287,4 +287,91 @@ describe('State Routes', () => {
       expect(res.status).toBe(401);
     });
   });
+
+  describe('Proxy Routes - SSRF Rejection', () => {
+    // Configure connectors so requests reach the URL validation layer
+    beforeAll(async () => {
+      // Configure GitHub connector
+      await put('/api/state/connectors', {
+        connectorId: 'github',
+        credentials: { token: 'ghp_test_token_123' }
+      }, authToken);
+
+      // Configure Shopify connector
+      await put('/api/state/connectors', {
+        connectorId: 'shopify',
+        credentials: { shopDomain: 'testshop', accessToken: 'shpat_test_123' }
+      }, authToken);
+    });
+
+    it('POST /api/proxy/github rejects absolute URL to external origin', async () => {
+      const res = await post('/api/proxy/github', {
+        endpoint: 'https://evil.com/steal',
+        method: 'GET'
+      }, authToken);
+      expect(res.status).toBe(400);
+
+      const data = await res.json();
+      expect(data.error).toContain('Invalid endpoint');
+    });
+
+    it('POST /api/proxy/github rejects protocol-relative URL to external origin', async () => {
+      const res = await post('/api/proxy/github', {
+        endpoint: '//evil.com/steal-data',
+        method: 'GET'
+      }, authToken);
+      expect(res.status).toBe(400);
+
+      const data = await res.json();
+      expect(data.error).toContain('Invalid endpoint');
+    });
+
+    it('POST /api/proxy/shopify rejects absolute URL to external origin', async () => {
+      const res = await post('/api/proxy/shopify', {
+        endpoint: 'https://attacker.io/exfiltrate',
+        method: 'GET'
+      }, authToken);
+      expect(res.status).toBe(400);
+
+      const data = await res.json();
+      expect(data.error).toContain('Invalid endpoint');
+    });
+
+    it('POST /api/proxy/shopify rejects protocol-relative URL to external origin', async () => {
+      const res = await post('/api/proxy/shopify', {
+        endpoint: '//malicious.net/path',
+        method: 'GET'
+      }, authToken);
+      expect(res.status).toBe(400);
+
+      const data = await res.json();
+      expect(data.error).toContain('Invalid endpoint');
+    });
+  });
+
+  describe('Chat History - Content Length Limit', () => {
+    it('POST /api/state/chat-history rejects content longer than 4096 characters', async () => {
+      const longContent = 'x'.repeat(4097);
+      const res = await post('/api/state/chat-history', {
+        role: 'user',
+        content: longContent
+      }, authToken);
+      expect(res.status).toBe(400);
+
+      const data = await res.json();
+      expect(data.error).toBe('Content too long');
+    });
+
+    it('POST /api/state/chat-history accepts content at exactly 4096 characters', async () => {
+      const maxContent = 'y'.repeat(4096);
+      const res = await post('/api/state/chat-history', {
+        role: 'user',
+        content: maxContent
+      }, authToken);
+      expect(res.status).toBe(201);
+
+      const data = await res.json();
+      expect(data.content).toBe(maxContent);
+    });
+  });
 });

@@ -4,14 +4,14 @@ import Chart from 'chart.js/auto';
 import { RealtimeClient } from './lib/realtime.js';
 import { GridLayout } from './lib/grid-layout.js';
 import { loadLayout } from './lib/layout-store.js';
-import { login, register, logout, isAuthenticated, getUser, restoreSession } from './lib/auth.js';
+import { login, register, logout, isAuthenticated, getUser, getToken, restoreSession } from './lib/auth.js';
 import { loadFromServer, savePreferences, saveConnectorConfig } from './lib/state-sync.js';
 
 window.Chart = Chart;
 
 // Initialize realtime client after DOM is ready
 function initRealtime() {
-  const client = new RealtimeClient();
+  const client = new RealtimeClient({ getToken });
 
   // KPI updates
   client.subscribe('kpi', (data) => {

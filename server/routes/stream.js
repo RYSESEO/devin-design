@@ -1,10 +1,46 @@
 import { Router } from 'express';
 import { KpiStream, ActivityStream, NotificationStream } from '../ws/streams.js';
 import { requireAuth } from '../middleware/auth.js';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
 const router = Router();
 
-router.get('/api/stream', requireAuth, (req, res) => {
+/**
+ * Middleware that accepts auth via Authorization header or ?token= query param.
+ * EventSource does not support custom headers, so token-in-query is the fallback.
+ */
+function requireAuthOrQueryToken(req, res, next) {
+  // Try standard Authorization header first
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.slice(7);
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      req.user = decoded;
+      return next();
+    } catch {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+  }
+
+  // Fallback: accept token from query parameter (for EventSource clients)
+  const queryToken = req.query.token;
+  if (queryToken) {
+    try {
+      const decoded = jwt.verify(queryToken, JWT_SECRET);
+      req.user = decoded;
+      return next();
+    } catch {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+  }
+
+  return res.status(401).json({ error: 'Authentication required' });
+}
+
+router.get('/api/stream', requireAuthOrQueryToken, (req, res) => {
   const channelsParam = req.query.channels || 'kpi,activity,notifications';
   const channels = channelsParam.split(',').map(c => c.trim());
 
