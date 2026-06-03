@@ -422,6 +422,10 @@ const CMD_COMMANDS = [
   { group: 'Actions', label: 'Cycle Theme', hint: 'Next theme in sequence', key: 'T', icon: '\uD83C\uDFA8', action: () => cycleTheme() },
   { group: 'Actions', label: 'Cinematic Mode', hint: 'Fullscreen auto-cycling presentation', key: 'G', icon: '\uD83C\uDFAC', action: () => { if (typeof Cinematic !== 'undefined') Cinematic.start(); } },
   { group: 'Actions', label: 'Start Onboarding Tour', hint: 'Guided walkthrough of all features', key: 'H', icon: '\uD83D\uDCD6', action: () => { if (typeof Onboarding !== 'undefined') Onboarding.start(); } },
+  { group: 'Actions', label: 'AI Chat Assistant', hint: 'Ask questions about your data', key: 'A', icon: '\uD83D\uDCAC', action: () => { if (typeof AIChatAssistant !== 'undefined') AIChatAssistant.toggle(); } },
+  { group: 'Actions', label: 'Voice Control', hint: 'Hands-free voice commands', key: 'V', icon: '\uD83C\uDF99\uFE0F', action: () => { if (typeof VoiceControl !== 'undefined') VoiceControl.toggle(); } },
+  { group: 'Actions', label: 'Competitive Intelligence', hint: 'Competitor tracking & analysis', key: 'R', icon: '\uD83C\uDFAF', action: () => { if (typeof CompetitiveIntel !== 'undefined') CompetitiveIntel.toggle(); } },
+  { group: 'Actions', label: 'Widget Builder', hint: 'Drag-and-drop custom widgets', key: 'W', icon: '\uD83D\uDDBC\uFE0F', action: () => { if (typeof WidgetBuilder !== 'undefined') WidgetBuilder.toggle(); } },
   { group: 'Period', label: 'Set 7 Days', hint: 'Show last 7 days', icon: '\uD83D\uDCC5', action: () => setPeriod('7d') },
   { group: 'Period', label: 'Set 30 Days', hint: 'Show last 30 days', icon: '\uD83D\uDCC5', action: () => setPeriod('30d') },
   { group: 'Period', label: 'Set 90 Days', hint: 'Show last 90 days', icon: '\uD83D\uDCC5', action: () => setPeriod('90d') },
@@ -598,6 +602,10 @@ function initKeyboardShortcuts() {
       if (typeof Intelligence !== 'undefined' && Intelligence.isOpen) { Intelligence.close(); return; }
       if (typeof Toolkit !== 'undefined' && Toolkit.isOpen) { Toolkit.close(); return; }
       if (typeof SettingsPanel !== 'undefined' && SettingsPanel.isOpen) { SettingsPanel.close(); return; }
+      if (typeof AIChatAssistant !== 'undefined' && AIChatAssistant.isOpen) { AIChatAssistant.close(); return; }
+      if (typeof CompetitiveIntel !== 'undefined' && CompetitiveIntel.isOpen) { CompetitiveIntel.close(); return; }
+      if (typeof WidgetBuilder !== 'undefined' && WidgetBuilder.isOpen) { WidgetBuilder.close(); return; }
+      if (typeof VoiceControl !== 'undefined' && VoiceControl.isListening) { VoiceControl.stop(); return; }
       const focusOverlay = document.getElementById('focus-overlay');
       if (!focusOverlay.hidden) { closeFocusMode(); return; }
       if (cmdDialog.open) { closeCommandPalette(); return; }
@@ -625,6 +633,10 @@ function initKeyboardShortcuts() {
       case 'p': case 'P': if (typeof Ecosystem !== 'undefined') Ecosystem.toggle(); break;
       case 'g': case 'G': if (typeof Cinematic !== 'undefined' && !Cinematic.isActive) Cinematic.start(); break;
       case 'h': case 'H': if (typeof Onboarding !== 'undefined' && !Onboarding.isActive) Onboarding.start(); break;
+      case 'a': case 'A': if (typeof AIChatAssistant !== 'undefined') AIChatAssistant.toggle(); break;
+      case 'v': case 'V': if (typeof VoiceControl !== 'undefined') VoiceControl.toggle(); break;
+      case 'r': case 'R': if (typeof CompetitiveIntel !== 'undefined') CompetitiveIntel.toggle(); break;
+      case 'w': case 'W': if (typeof WidgetBuilder !== 'undefined') WidgetBuilder.toggle(); break;
       case '?': openShortcuts(); break;
       case 'f': case 'F':
         if (hoveredWidget) openFocusMode(hoveredWidget);
@@ -944,6 +956,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof initCrossPost === 'function') initCrossPost();
   if (typeof initCinematic === 'function') initCinematic();
   if (typeof initOnboarding === 'function') initOnboarding();
+  if (typeof initAIChat === 'function') initAIChat();
+  if (typeof initVoiceControl === 'function') initVoiceControl();
+  if (typeof initCompetitiveIntel === 'function') initCompetitiveIntel();
+  if (typeof initWidgetBuilder === 'function') initWidgetBuilder();
 
   /* ─── Performance: debounced resize handler ─── */
   window.addEventListener('resize', debounce(function() {

@@ -17,6 +17,10 @@
   <script src="cross-post.js"></script>
   <script src="onboarding.js"></script>
   <script src="cinematic.js"></script>
+  <script src="ai-chat.js"></script>
+  <script src="voice-control.js"></script>
+  <script src="competitive.js"></script>
+  <script src="widget-builder.js"></script>
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#a855f7" />
@@ -86,6 +90,19 @@
       </button>
       <button class="toolkit-btn" id="toolkit-btn" title="Designer & Dev Toolkit (D)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="ai-chat-btn" title="AI Chat Assistant (A)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="voice-btn" title="Voice Control (V)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        <span class="voice-indicator" id="voice-indicator" hidden></span>
+      </button>
+      <button class="topbar-icon-btn" id="ci-btn" title="Competitive Intelligence (R)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="wb-btn" title="Widget Builder (W)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       </button>
       <button class="settings-btn" id="settings-btn" title="Data Connections (S)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -496,6 +513,10 @@
           <div class="shortcut-row"><kbd>P</kbd><span>Ecosystem panel</span></div>
           <div class="shortcut-row"><kbd>G</kbd><span>Cinematic mode</span></div>
           <div class="shortcut-row"><kbd>H</kbd><span>Onboarding tour</span></div>
+          <div class="shortcut-row"><kbd>A</kbd><span>AI Chat Assistant</span></div>
+          <div class="shortcut-row"><kbd>V</kbd><span>Voice Control</span></div>
+          <div class="shortcut-row"><kbd>R</kbd><span>Competitive Intelligence</span></div>
+          <div class="shortcut-row"><kbd>W</kbd><span>Widget Builder</span></div>
           <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
           <div class="shortcut-row"><kbd>Escape</kbd><span>Close any overlay</span></div>
         </div>
@@ -983,6 +1004,90 @@
             <p class="ch-section-desc">View all scheduled and recent posts across platforms. Compose new posts in Content Hub (C).</p>
             <div id="social-scheduled"></div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ AI Chat Assistant Panel ═══ -->
+  <div class="ai-chat-panel" id="ai-chat-panel">
+    <div class="ai-chat-drawer">
+      <div class="ai-chat-header">
+        <div class="ai-chat-title-row">
+          <h3>AI Assistant</h3>
+          <button class="ai-chat-close-btn" id="ai-chat-close">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <p class="ai-chat-subtitle">Ask about your metrics, get insights & recommendations</p>
+      </div>
+      <div class="ai-chat-messages" id="ai-chat-messages"></div>
+      <div class="ai-chat-quick" id="ai-chat-quick"></div>
+      <div class="ai-chat-input-wrap">
+        <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="Ask about revenue, leads, agents..." />
+        <button class="ai-chat-send-btn" id="ai-chat-send">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Competitive Intelligence Panel ═══ -->
+  <div class="ci-overlay" id="ci-panel">
+    <div class="ci-drawer">
+      <div class="ci-header">
+        <div class="ci-title-row">
+          <h3>Competitive Intelligence</h3>
+          <button class="ci-close-btn" id="ci-close">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="ci-tabs">
+          <button class="ci-tab active" data-citab="overview">Overview</button>
+          <button class="ci-tab" data-citab="keywords">Keyword Gaps</button>
+          <button class="ci-tab" data-citab="content">Content Gaps</button>
+          <button class="ci-tab" data-citab="market">Market Share</button>
+        </div>
+      </div>
+      <div class="ci-body">
+        <div class="ci-pane active" data-cipane="overview"><div id="ci-overview"></div></div>
+        <div class="ci-pane" data-cipane="keywords"><div id="ci-keywords"></div></div>
+        <div class="ci-pane" data-cipane="content"><div id="ci-content-gaps"></div></div>
+        <div class="ci-pane" data-cipane="market"><div id="ci-market"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ No-Code Widget Builder Panel ═══ -->
+  <div class="wb-overlay" id="wb-panel">
+    <div class="wb-drawer">
+      <div class="wb-header">
+        <div class="wb-title-row">
+          <h3>Widget Builder</h3>
+          <div class="wb-header-actions">
+            <button class="wb-clear-btn" id="wb-clear" title="Clear canvas">Clear</button>
+            <button class="wb-close-btn" id="wb-close">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="wb-tabs">
+          <button class="wb-tab active" data-wbtab="canvas">Canvas</button>
+          <button class="wb-tab" data-wbtab="palette">Palette</button>
+          <button class="wb-tab" data-wbtab="templates">Templates</button>
+        </div>
+      </div>
+      <div class="wb-body">
+        <div class="wb-pane active" data-wbpane="canvas">
+          <div class="wb-canvas" id="wb-canvas"></div>
+        </div>
+        <div class="wb-pane" data-wbpane="palette">
+          <p class="wb-pane-desc">Click or drag a widget type to add it to your canvas.</p>
+          <div class="wb-palette" id="wb-palette"></div>
+        </div>
+        <div class="wb-pane" data-wbpane="templates">
+          <p class="wb-pane-desc">Start with a pre-built layout.</p>
+          <div class="wb-templates" id="wb-templates"></div>
         </div>
       </div>
     </div>
