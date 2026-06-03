@@ -1,6 +1,6 @@
 // Vite entry point
-// Import Chart.js from npm and expose it globally for backward compatibility
-import Chart from 'chart.js/auto';
+// Chart.js is provided by CDN <script> tag in index.html - no npm import needed.
+// Using a single Chart.js instance avoids dual-registry conflicts with theme rebuilds.
 import { RealtimeClient } from './lib/realtime.js';
 import { GridLayout } from './lib/grid-layout.js';
 import { loadLayout } from './lib/layout-store.js';
@@ -8,10 +8,6 @@ import { login, register, logout, isAuthenticated, getUser, getToken, restoreSes
 import { loadFromServer, savePreferences, saveConnectorConfig } from './lib/state-sync.js';
 import { initMobileNav } from './lib/mobile-nav.js';
 import { registerPanel, initLazyPanels } from './lib/lazy-panels.js';
-
-if (!window.Chart) {
-  window.Chart = Chart;
-}
 window.saveConnectorConfig = saveConnectorConfig;
 window.getToken = getToken;
 
