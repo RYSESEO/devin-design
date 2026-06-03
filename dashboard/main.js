@@ -9,7 +9,11 @@ import { loadFromServer, savePreferences, saveConnectorConfig } from './lib/stat
 import { initMobileNav } from './lib/mobile-nav.js';
 import { registerPanel, initLazyPanels } from './lib/lazy-panels.js';
 
-window.Chart = Chart;
+if (!window.Chart) {
+  window.Chart = Chart;
+}
+window.saveConnectorConfig = saveConnectorConfig;
+window.getToken = getToken;
 
 // Initialize realtime client after DOM is ready
 function initRealtime() {

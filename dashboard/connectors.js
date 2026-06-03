@@ -91,6 +91,14 @@ const CredentialVault = (() => {
   };
 })();
 
+/* ─── Auth Headers Helper ─────────────────────────────────── */
+function getAuthHeaders() {
+  const token = (typeof window.getToken === 'function') ? window.getToken() : null;
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
+}
+
 /* ─── Data Store (normalized) ─────────────────────────────── */
 const DataStore = {
   _data: {},
@@ -139,6 +147,14 @@ class BaseConnector {
     ConnectorManager.notify();
     try {
       await CredentialVault.save(this.id, credentials);
+
+      // Save to server for proxy access
+      if (typeof window.saveConnectorConfig === 'function') {
+        const serverCreds = this._mapCredentialsForServer(credentials);
+        const serverId = this._getServerConnectorId();
+        window.saveConnectorConfig(serverId, serverCreds);
+      }
+
       const ok = await this.testConnection(credentials);
       if (ok) {
         this.status = 'connected';
@@ -166,6 +182,14 @@ class BaseConnector {
   async testConnection(_credentials) { return true; }
   async fetchData(_credentials) {}
 
+  _mapCredentialsForServer(credentials) {
+    return credentials; // default: pass through
+  }
+
+  _getServerConnectorId() {
+    return this.id; // default: use connector id
+  }
+
   async tryRestore() {
     const creds = await CredentialVault.load(this.id);
     if (creds) {
@@ -186,8 +210,11 @@ class ShopifyConnector extends BaseConnector {
   async testConnection(creds) {
     if (!creds.store || !creds.token) return false;
     try {
-      const url = `https://${creds.store}/admin/api/2024-01/shop.json`;
-      const resp = await fetch(url, { headers: { 'X-Shopify-Access-Token': creds.token } });
+      const resp = await fetch('/api/proxy/shopify', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ endpoint: '/shop.json', method: 'GET' })
+      });
       return resp.ok;
     } catch {
       return false;
@@ -196,12 +223,17 @@ class ShopifyConnector extends BaseConnector {
 
   async fetchData(creds) {
     try {
-      const base = `https://${creds.store}/admin/api/2024-01`;
-      const headers = { 'X-Shopify-Access-Token': creds.token };
+      const headers = getAuthHeaders();
 
       const [ordersResp, productsResp] = await Promise.all([
-        fetch(`${base}/orders.json?status=any&limit=50`, { headers }).catch(() => null),
-        fetch(`${base}/products.json?limit=20`, { headers }).catch(() => null),
+        fetch('/api/proxy/shopify', {
+          method: 'POST', headers,
+          body: JSON.stringify({ endpoint: '/orders.json', method: 'GET', params: { status: 'any', limit: '50' } })
+        }).catch(() => null),
+        fetch('/api/proxy/shopify', {
+          method: 'POST', headers,
+          body: JSON.stringify({ endpoint: '/products.json', method: 'GET', params: { limit: '20' } })
+        }).catch(() => null),
       ]);
 
       if (ordersResp?.ok) {
@@ -228,6 +260,10 @@ class ShopifyConnector extends BaseConnector {
     } catch (e) {
       this.lastError = e.message;
     }
+  }
+
+  _mapCredentialsForServer(creds) {
+    return { shopDomain: (creds.store || '').replace('.myshopify.com', ''), accessToken: creds.token };
   }
 
   _aggregateDaily(items, dateField) {
@@ -275,8 +311,10 @@ class GitHubConnector extends BaseConnector {
   async testConnection(creds) {
     if (!creds.token) return false;
     try {
-      const resp = await fetch('https://api.github.com/user', {
-        headers: { Authorization: `Bearer ${creds.token}`, Accept: 'application/vnd.github+json' },
+      const resp = await fetch('/api/proxy/github', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ endpoint: '/user', method: 'GET' })
       });
       return resp.ok;
     } catch {
@@ -286,14 +324,18 @@ class GitHubConnector extends BaseConnector {
 
   async fetchData(creds) {
     try {
-      const headers = { Authorization: `Bearer ${creds.token}`, Accept: 'application/vnd.github+json' };
+      const headers = getAuthHeaders();
       const owner = creds.owner || '';
 
       const [userResp, eventsResp] = await Promise.all([
-        fetch('https://api.github.com/user', { headers }),
-        owner
-          ? fetch(`https://api.github.com/users/${owner}/events?per_page=30`, { headers }).catch(() => null)
-          : fetch('https://api.github.com/events?per_page=30', { headers }).catch(() => null),
+        fetch('/api/proxy/github', {
+          method: 'POST', headers,
+          body: JSON.stringify({ endpoint: '/user', method: 'GET' })
+        }),
+        fetch('/api/proxy/github', {
+          method: 'POST', headers,
+          body: JSON.stringify({ endpoint: owner ? `/users/${owner}/events?per_page=30` : '/events?per_page=30', method: 'GET' })
+        }).catch(() => null),
       ]);
 
       if (userResp.ok) {
@@ -340,14 +382,17 @@ class GA4Connector extends BaseConnector {
   async testConnection(creds) {
     if (!creds.propertyId || !creds.apiKey) return false;
     try {
-      const url = `https://analyticsdata.googleapis.com/v1beta/properties/${creds.propertyId}:runReport?key=${creds.apiKey}`;
-      const resp = await fetch(url, {
+      const resp = await fetch('/api/proxy/analytics', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
-          dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
-          metrics: [{ name: 'activeUsers' }],
-        }),
+          endpoint: ':runReport',
+          method: 'POST',
+          params: {
+            dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
+            metrics: [{ name: 'activeUsers' }],
+          }
+        })
       });
       return resp.ok || resp.status === 403;
     } catch {
@@ -357,29 +402,35 @@ class GA4Connector extends BaseConnector {
 
   async fetchData(creds) {
     try {
-      const url = `https://analyticsdata.googleapis.com/v1beta/properties/${creds.propertyId}:runReport?key=${creds.apiKey}`;
+      const headers = getAuthHeaders();
 
       const [usersResp, pagesResp] = await Promise.all([
-        fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        fetch('/api/proxy/analytics', {
+          method: 'POST', headers,
           body: JSON.stringify({
-            dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
-            dimensions: [{ name: 'date' }],
-            metrics: [{ name: 'activeUsers' }, { name: 'screenPageViews' }, { name: 'engagedSessions' }],
-            orderBys: [{ dimension: { dimensionName: 'date' } }],
-          }),
+            endpoint: ':runReport',
+            method: 'POST',
+            params: {
+              dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
+              dimensions: [{ name: 'date' }],
+              metrics: [{ name: 'activeUsers' }, { name: 'screenPageViews' }, { name: 'engagedSessions' }],
+              orderBys: [{ dimension: { dimensionName: 'date' } }],
+            }
+          })
         }).catch(() => null),
-        fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        fetch('/api/proxy/analytics', {
+          method: 'POST', headers,
           body: JSON.stringify({
-            dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
-            dimensions: [{ name: 'sessionSource' }],
-            metrics: [{ name: 'sessions' }],
-            orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
-            limit: 5,
-          }),
+            endpoint: ':runReport',
+            method: 'POST',
+            params: {
+              dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
+              dimensions: [{ name: 'sessionSource' }],
+              metrics: [{ name: 'sessions' }],
+              orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+              limit: 5,
+            }
+          })
         }).catch(() => null),
       ]);
 
@@ -412,6 +463,10 @@ class GA4Connector extends BaseConnector {
       this.lastError = e.message;
     }
   }
+
+  _mapCredentialsForServer(creds) {
+    return { propertyId: creds.propertyId, accessToken: creds.apiKey };
+  }
 }
 
 /* ─── Google Search Console Connector ─────────────────────── */
@@ -426,8 +481,11 @@ class SearchConsoleConnector extends BaseConnector {
   async testConnection(creds) {
     if (!creds.siteUrl || !creds.apiKey) return false;
     try {
-      const url = `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(creds.siteUrl)}?key=${creds.apiKey}`;
-      const resp = await fetch(url);
+      const resp = await fetch('/api/proxy/search-console', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ endpoint: '/sites', method: 'GET' })
+      });
       return resp.ok || resp.status === 403;
     } catch {
       return false;
@@ -436,19 +494,22 @@ class SearchConsoleConnector extends BaseConnector {
 
   async fetchData(creds) {
     try {
-      const url = `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(creds.siteUrl)}/searchAnalytics/query?key=${creds.apiKey}`;
       const endDate = new Date().toISOString().split('T')[0];
       const startDate = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
 
-      const resp = await fetch(url, {
+      const resp = await fetch('/api/proxy/search-console', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
-          startDate,
-          endDate,
-          dimensions: ['date'],
-          rowLimit: 7,
-        }),
+          endpoint: '/searchAnalytics/query',
+          method: 'POST',
+          params: {
+            startDate,
+            endDate,
+            dimensions: ['date'],
+            rowLimit: 7,
+          }
+        })
       });
 
       if (resp.ok) {
@@ -466,6 +527,14 @@ class SearchConsoleConnector extends BaseConnector {
       this.lastError = e.message;
     }
   }
+
+  _mapCredentialsForServer(creds) {
+    return { siteUrl: creds.siteUrl, accessToken: creds.apiKey };
+  }
+
+  _getServerConnectorId() {
+    return 'search-console';
+  }
 }
 
 /* ─── Stripe Connector ────────────────────────────────────── */
@@ -479,8 +548,10 @@ class StripeConnector extends BaseConnector {
   async testConnection(creds) {
     if (!creds.secretKey) return false;
     try {
-      const resp = await fetch('https://api.stripe.com/v1/balance', {
-        headers: { Authorization: `Bearer ${creds.secretKey}` },
+      const resp = await fetch('/api/proxy/stripe', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ endpoint: '/v1/balance', method: 'GET' })
       });
       return resp.ok;
     } catch {
@@ -490,12 +561,18 @@ class StripeConnector extends BaseConnector {
 
   async fetchData(creds) {
     try {
-      const headers = { Authorization: `Bearer ${creds.secretKey}` };
+      const headers = getAuthHeaders();
       const since = Math.floor((Date.now() - 7 * 86400000) / 1000);
 
       const [balanceResp, chargesResp] = await Promise.all([
-        fetch('https://api.stripe.com/v1/balance', { headers }).catch(() => null),
-        fetch(`https://api.stripe.com/v1/charges?limit=50&created[gte]=${since}`, { headers }).catch(() => null),
+        fetch('/api/proxy/stripe', {
+          method: 'POST', headers,
+          body: JSON.stringify({ endpoint: '/v1/balance', method: 'GET' })
+        }).catch(() => null),
+        fetch('/api/proxy/stripe', {
+          method: 'POST', headers,
+          body: JSON.stringify({ endpoint: `/v1/charges?limit=50&created[gte]=${since}`, method: 'GET' })
+        }).catch(() => null),
       ]);
 
       if (balanceResp?.ok) {
