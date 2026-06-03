@@ -16,6 +16,10 @@ import proxyRouter from './routes/proxy.js';
 import oauthRouter from './routes/oauth.js';
 import intelligenceRouter from './routes/intelligence.js';
 import automationsRouter from './routes/automations.js';
+import storesRouter from './routes/stores.js';
+import workspacesRouter from './routes/workspaces.js';
+import reportsRouter from './routes/reports.js';
+import billingRouter from './routes/billing.js';
 import { optionalAuth } from './middleware/auth.js';
 import db from './db/index.js';
 
@@ -129,6 +133,18 @@ app.use('/api/intelligence', intelligenceRouter);
 
 // Automations routes (require auth - handled inside router)
 app.use('/api/automations', automationsRouter);
+
+// Stores routes (require auth - handled inside router)
+app.use('/api/stores', storesRouter);
+
+// Workspaces routes (require auth - handled inside router)
+app.use('/api/workspaces', workspacesRouter);
+
+// Reports routes (require auth - handled inside router)
+app.use('/api/reports', reportsRouter);
+
+// Billing routes (require auth - handled inside router)
+app.use('/api/billing', billingRouter);
 
 // Optional auth for other routes
 app.use(optionalAuth);
