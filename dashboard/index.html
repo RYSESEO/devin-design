@@ -11,7 +11,10 @@
   <script src="connectors.js"></script>
   <script src="toolkit.js"></script>
   <script src="intelligence.js"></script>
+  <script src="ecosystem.js"></script>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#a855f7" />
 </head>
 <body>
   <!-- Ambient background -->
@@ -64,6 +67,9 @@
         </label>
       </div>
       <div class="live-indicator"><span class="live-dot"></span> Live</div>
+      <button class="eco-btn" id="eco-btn" title="Ecosystem & Distribution (P)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+      </button>
       <button class="intel-btn" id="intel-btn" title="Intelligence & Business (I)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="10" y1="21" x2="14" y2="21"/></svg>
       </button>
@@ -107,6 +113,32 @@
       </div>
     </div>
   </header>
+
+  <!-- Dashboard Tabs -->
+  <nav class="dash-tabs-bar" id="dash-tabs-bar">
+    <button class="dash-tab active" data-dtab="all">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      All Metrics
+    </button>
+    <button class="dash-tab" data-dtab="marketing">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      Marketing
+    </button>
+    <button class="dash-tab" data-dtab="engineering">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Engineering
+    </button>
+    <button class="dash-tab" data-dtab="executive">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/></svg>
+      Executive
+    </button>
+    <div class="dash-tabs-right">
+      <button class="share-btn" id="share-btn" title="Share this dashboard">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>
+    </div>
+  </nav>
 
   <!-- Main grid -->
   <main class="dashboard">
@@ -448,6 +480,7 @@
           <div class="shortcut-row"><kbd>S</kbd><span>Data connections</span></div>
           <div class="shortcut-row"><kbd>D</kbd><span>Designer & Dev toolkit</span></div>
           <div class="shortcut-row"><kbd>I</kbd><span>Intelligence panel</span></div>
+          <div class="shortcut-row"><kbd>P</kbd><span>Ecosystem panel</span></div>
           <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
           <div class="shortcut-row"><kbd>Escape</kbd><span>Close any overlay</span></div>
         </div>
@@ -633,6 +666,138 @@
       </div>
     </div>
   </div>
+
+  <!-- ═══ Ecosystem Panel ═══ -->
+  <div class="eco-overlay" id="eco-panel">
+    <div class="eco-drawer">
+      <div class="eco-header">
+        <div class="eco-title-row">
+          <h3>Ecosystem</h3>
+          <button class="eco-close-btn" id="eco-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="eco-tabs">
+          <button class="eco-tab active" data-etab="marketplace">Marketplace</button>
+          <button class="eco-tab" data-etab="collaborate">Collaborate</button>
+          <button class="eco-tab" data-etab="webhooks">Webhooks</button>
+          <button class="eco-tab" data-etab="whitelabel">White-Label</button>
+          <button class="eco-tab" data-etab="pwa">PWA</button>
+        </div>
+      </div>
+      <div class="eco-body">
+        <!-- Marketplace Pane -->
+        <div class="eco-pane active" data-epane="marketplace">
+          <div class="eco-section">
+            <h4 class="eco-section-title">Widget Marketplace</h4>
+            <p class="eco-section-desc">Browse and install community-contributed widgets.</p>
+            <div class="mp-cats">
+              <button class="mp-cat-btn active" data-mpcat="All">All</button>
+              <button class="mp-cat-btn" data-mpcat="Marketing">Marketing</button>
+              <button class="mp-cat-btn" data-mpcat="Engineering">Engineering</button>
+              <button class="mp-cat-btn" data-mpcat="Business">Business</button>
+            </div>
+            <div class="mp-grid" id="mp-grid"></div>
+          </div>
+        </div>
+        <!-- Collaborate Pane -->
+        <div class="eco-pane" data-epane="collaborate">
+          <div class="eco-section">
+            <h4 class="eco-section-title">Team Comments</h4>
+            <p class="eco-section-desc">Discuss metrics with your team. Use @mentions to notify members.</p>
+            <div class="collab-input-wrap">
+              <input type="text" class="collab-input" id="collab-input" placeholder="Add a comment... use @ to mention" />
+              <button class="collab-add-btn" id="collab-add-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+              <div class="collab-mention-suggest" id="collab-mention-suggest" style="display:none"></div>
+            </div>
+            <div class="collab-comments" id="collab-comments"></div>
+          </div>
+          <div class="eco-section">
+            <h4 class="eco-section-title">Shared Dashboards</h4>
+            <p class="eco-section-desc">Dashboards shared with your team.</p>
+            <div id="collab-shared"></div>
+          </div>
+        </div>
+        <!-- Webhooks Pane -->
+        <div class="eco-pane" data-epane="webhooks">
+          <div class="eco-section">
+            <h4 class="eco-section-title">Webhook Receiver</h4>
+            <p class="eco-section-desc">Accept data from Zapier, n8n, or custom scripts.</p>
+            <div id="wh-list"></div>
+            <div id="wh-events"></div>
+          </div>
+        </div>
+        <!-- White-Label Pane -->
+        <div class="eco-pane" data-epane="whitelabel">
+          <div class="eco-section">
+            <h4 class="eco-section-title">White-Label Mode</h4>
+            <p class="eco-section-desc">Customize branding for your agency or clients.</p>
+            <div class="wl-form">
+              <label class="wl-row">
+                <span>Enable White-Label</span>
+                <input type="checkbox" id="wl-toggle" />
+              </label>
+              <label class="wl-row">
+                <span>Brand Name</span>
+                <input type="text" id="wl-brand-name" class="wl-input" placeholder="Your Brand" />
+              </label>
+              <label class="wl-row">
+                <span>Primary Color</span>
+                <div class="wl-color-wrap">
+                  <input type="color" id="wl-primary-color" value="#a855f7" />
+                  <span class="wl-color-hex" id="wl-primary-hex">#a855f7</span>
+                </div>
+              </label>
+              <label class="wl-row">
+                <span>Accent Color</span>
+                <div class="wl-color-wrap">
+                  <input type="color" id="wl-accent-color" value="#6366f1" />
+                  <span class="wl-color-hex" id="wl-accent-hex">#6366f1</span>
+                </div>
+              </label>
+              <label class="wl-row">
+                <span>Logo URL</span>
+                <input type="text" id="wl-logo-url" class="wl-input" placeholder="https://your-logo.svg" />
+              </label>
+              <label class="wl-row">
+                <span>Hide "Powered by RYSE"</span>
+                <input type="checkbox" id="wl-hide-powered" />
+              </label>
+              <button class="eco-action-btn wl-reset-btn" id="wl-reset">Reset to Default</button>
+            </div>
+          </div>
+        </div>
+        <!-- PWA Pane -->
+        <div class="eco-pane" data-epane="pwa">
+          <div class="eco-section">
+            <h4 class="eco-section-title">Progressive Web App</h4>
+            <p class="eco-section-desc">Install the dashboard as a native app with offline access.</p>
+            <div id="pwa-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SVG icon defs for marketplace -->
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <symbol id="icon-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+      <symbol id="icon-git-branch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 01-9 9"/></symbol>
+      <symbol id="icon-git-commit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></symbol>
+      <symbol id="icon-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
+      <symbol id="icon-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+      <symbol id="icon-user-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/></symbol>
+      <symbol id="icon-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+      <symbol id="icon-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></symbol>
+      <symbol id="icon-dollar-sign" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></symbol>
+      <symbol id="icon-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+      <symbol id="icon-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+    </defs>
+  </svg>
 
   <script src="app.js"></script>
 </body>
