@@ -14,7 +14,81 @@ function calculateLeadScore(lead) {
   const purchases = lead.purchases || 0;
   const daysSinceLastActivity = lead.days_since_last_activity || 0;
 
-  return pageVisits * 2 + emailOpens * 5 + purchases * 20 + daysSinceLastActivity * -1;
+  const raw = pageVisits * 2 + emailOpens * 5 + purchases * 20 + daysSinceLastActivity * -1;
+  return Math.max(0, raw);
+}
+
+// --- Helper: validate webhook URL against SSRF ---
+function isPrivateUrl(urlString) {
+  let parsed;
+  try {
+    parsed = new URL(urlString);
+  } catch {
+    return true; // Invalid URLs are rejected
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+
+  // Reject loopback
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+    return true;
+  }
+
+  // Reject private/internal IP ranges
+  const ipv4Match = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (ipv4Match) {
+    const [, a, b, c, d] = ipv4Match.map(Number);
+    // 10.0.0.0/8
+    if (a === 10) return true;
+    // 172.16.0.0/12
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    // 192.168.0.0/16
+    if (a === 192 && b === 168) return true;
+    // 127.0.0.0/8
+    if (a === 127) return true;
+    // 169.254.0.0/16 (link-local)
+    if (a === 169 && b === 254) return true;
+    // 0.0.0.0
+    if (a === 0 && b === 0 && c === 0 && d === 0) return true;
+  }
+
+  // Reject IPv6 private ranges (fc00::/7, ::1)
+  if (hostname.startsWith('[fc') || hostname.startsWith('[fd') || hostname === '[::1]') {
+    return true;
+  }
+
+  return false;
+}
+
+function validateWebhookUrl(urlString) {
+  if (!urlString || typeof urlString !== 'string') {
+    return { valid: false, error: 'webhook_url is required and must be a string' };
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(urlString);
+  } catch {
+    return { valid: false, error: 'webhook_url is not a valid URL' };
+  }
+
+  // In production, require HTTPS
+  const isProduction = process.env.NODE_ENV === 'production';
+  if (isProduction && parsed.protocol !== 'https:') {
+    return { valid: false, error: 'webhook_url must use HTTPS' };
+  }
+
+  // In all environments, reject non-http(s) protocols
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return { valid: false, error: 'webhook_url must use HTTP or HTTPS' };
+  }
+
+  // Reject private/internal addresses
+  if (isPrivateUrl(urlString)) {
+    return { valid: false, error: 'webhook_url must not point to a private or internal address' };
+  }
+
+  return { valid: true };
 }
 
 // --- Helper: determine priority from score ---
@@ -342,6 +416,14 @@ router.post('/notifications', (req, res) => {
     return res.status(400).json({ error: 'config is required' });
   }
 
+  // Validate webhook_url for slack/discord channels
+  if ((channel_type === 'slack' || channel_type === 'discord') && config.webhook_url) {
+    const validation = validateWebhookUrl(config.webhook_url);
+    if (!validation.valid) {
+      return res.status(400).json({ error: validation.error });
+    }
+  }
+
   const stmt = db.prepare(
     'INSERT INTO notification_channels (user_id, channel_type, config) VALUES (?, ?, ?)'
   );
@@ -427,6 +509,12 @@ router.post('/notifications/test', async (req, res) => {
   const webhookUrl = config.webhook_url;
   if (!webhookUrl) {
     return res.status(400).json({ error: 'No webhook_url configured for this channel' });
+  }
+
+  // SSRF protection: validate URL is not targeting private/internal addresses
+  const validation = validateWebhookUrl(webhookUrl);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.error });
   }
 
   try {

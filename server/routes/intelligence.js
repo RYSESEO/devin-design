@@ -221,6 +221,7 @@ router.get('/attribution', (req, res) => {
   const { start_date, end_date } = req.query;
 
   let attribution;
+  let period;
 
   if (start_date && end_date) {
     attribution = db.prepare(
@@ -228,16 +229,26 @@ router.get('/attribution', (req, res) => {
        FROM revenue_attribution
        WHERE user_id = ? AND created_at >= ? AND created_at <= ?
        GROUP BY source, channel
-       ORDER BY revenue DESC`
+       ORDER BY revenue DESC
+       LIMIT 1000`
     ).all(userId, start_date, end_date);
+    period = { start_date, end_date };
   } else {
+    // Default to last 90 days when no date params provided
+    const defaultStart = new Date();
+    defaultStart.setDate(defaultStart.getDate() - 90);
+    const defaultStartStr = defaultStart.toISOString().split('T')[0];
+    const defaultEndStr = new Date().toISOString().split('T')[0];
+
     attribution = db.prepare(
       `SELECT source, channel, SUM(revenue) as revenue, COUNT(*) as orders
        FROM revenue_attribution
-       WHERE user_id = ?
+       WHERE user_id = ? AND created_at >= ?
        GROUP BY source, channel
-       ORDER BY revenue DESC`
-    ).all(userId);
+       ORDER BY revenue DESC
+       LIMIT 1000`
+    ).all(userId, defaultStartStr);
+    period = { start_date: defaultStartStr, end_date: defaultEndStr, default_window: '90 days' };
   }
 
   // If no real data, return demo data
@@ -245,7 +256,7 @@ router.get('/attribution', (req, res) => {
     attribution = generateDemoAttribution();
   }
 
-  res.json({ attribution });
+  res.json({ attribution, period });
 });
 
 // GET /api/intelligence/digest
@@ -308,6 +319,18 @@ router.post('/alerts/:id/trigger', (req, res) => {
   ).run(now, alertId, userId);
 
   const updated = db.prepare('SELECT * FROM intelligence_alerts WHERE id = ?').get(alertId);
+
+  // Broadcast alert trigger to WebSocket clients
+  const broadcast = req.app.locals.broadcast;
+  if (broadcast) {
+    broadcast('alerts', {
+      alertId: updated.id,
+      metric: updated.metric,
+      condition: updated.condition,
+      threshold: updated.threshold,
+      triggered_at: now
+    });
+  }
 
   res.json({ alert: updated, triggered: true });
 });

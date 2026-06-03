@@ -264,8 +264,8 @@ describe('Automations Routes', () => {
 
       expect(res.status).toBe(201);
       const data = await res.json();
-      // Score = 2*2 + 1*5 + 0*20 + 30*(-1) = 4 + 5 + 0 - 30 = -21
-      expect(data.lead.score).toBe(-21);
+      // Score = 2*2 + 1*5 + 0*20 + 30*(-1) = 4 + 5 + 0 - 30 = -21, clamped to 0
+      expect(data.lead.score).toBe(0);
       expect(data.lead.priority).toBe('cold');
     });
 

@@ -3,6 +3,12 @@
    Workflows, Templates, Lead Scoring, Notification Channels
    ═══════════════════════════════════════════════════════════════ */
 
+/* ─── Helper: escape HTML to prevent XSS ──────────────────── */
+function _autoEscapeHtml(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 /* ─── Helper: fetch with auth ─────────────────────────────── */
 function _autoFetch(url) {
   var token = typeof window.getToken === 'function' ? window.getToken() : null;
@@ -131,14 +137,14 @@ var WorkflowBuilder = {
           '<div class="workflow-card-header">' +
             '<span class="workflow-trigger-icon">' + triggerIcon + '</span>' +
             '<div class="workflow-card-info">' +
-              '<span class="workflow-name">' + (w.name || 'Untitled') + '</span>' +
-              '<span class="workflow-trigger-type">' + (w.trigger_type || '').replace(/_/g, ' ') + '</span>' +
+              '<span class="workflow-name">' + _autoEscapeHtml(w.name || 'Untitled') + '</span>' +
+              '<span class="workflow-trigger-type">' + _autoEscapeHtml((w.trigger_type || '').replace(/_/g, ' ')) + '</span>' +
             '</div>' +
             '<label class="auto-toggle"><input type="checkbox" class="wf-enable-toggle" data-wf-id="' + w.id + '"' + (w.enabled ? ' checked' : '') + '/><span class="auto-toggle-track"><span class="auto-toggle-thumb"></span></span></label>' +
           '</div>' +
           '<div class="workflow-card-body">' +
-            '<div class="workflow-summary-row"><span class="workflow-label">Conditions:</span><span class="workflow-val">' + condSummary + '</span></div>' +
-            '<div class="workflow-summary-row"><span class="workflow-label">Actions:</span><span class="workflow-val">' + actionSummary + '</span></div>' +
+            '<div class="workflow-summary-row"><span class="workflow-label">Conditions:</span><span class="workflow-val">' + _autoEscapeHtml(condSummary) + '</span></div>' +
+            '<div class="workflow-summary-row"><span class="workflow-label">Actions:</span><span class="workflow-val">' + _autoEscapeHtml(actionSummary) + '</span></div>' +
           '</div>' +
           '<div class="workflow-card-footer">' +
             '<span class="workflow-stat">Runs: ' + (w.run_count || 0) + '</span>' +
@@ -423,9 +429,9 @@ var TemplateGallery = {
       html += '<div class="template-card">' +
         '<div class="template-icon">' + catIcon + '</div>' +
         '<div class="template-body">' +
-          '<span class="template-name">' + (t.name || 'Template') + '</span>' +
-          '<p class="template-desc">' + (t.description || '') + '</p>' +
-          '<span class="template-badge">' + (t.category || 'general') + '</span>' +
+          '<span class="template-name">' + _autoEscapeHtml(t.name || 'Template') + '</span>' +
+          '<p class="template-desc">' + _autoEscapeHtml(t.description || '') + '</p>' +
+          '<span class="template-badge">' + _autoEscapeHtml(t.category || 'general') + '</span>' +
         '</div>' +
         '<button class="template-activate-btn" data-tpl-id="' + t.id + '">Activate</button>' +
       '</div>';
@@ -510,11 +516,11 @@ var LeadScoring = {
         var barColor = score > 80 ? '#22c55e' : score >= 40 ? '#f59e0b' : '#ef4444';
 
         html += '<div class="lead-row">' +
-          '<span class="lead-col lead-col-name">' + (lead.name || 'Unknown') + '</span>' +
-          '<span class="lead-col lead-col-email">' + (lead.email || '') + '</span>' +
+          '<span class="lead-col lead-col-name">' + _autoEscapeHtml(lead.name || 'Unknown') + '</span>' +
+          '<span class="lead-col lead-col-email">' + _autoEscapeHtml(lead.email || '') + '</span>' +
           '<span class="lead-col lead-col-score"><span class="lead-score-badge ' + scoreClass + '">' + score + '</span><div class="lead-score-bar"><div class="lead-score-fill" style="width:' + barWidth + '%;background:' + barColor + '"></div></div></span>' +
           '<span class="lead-col lead-col-priority"><span class="priority-badge priority-' + priority + '">' + priorityEmoji + ' ' + priority + '</span></span>' +
-          '<span class="lead-col lead-col-source">' + (lead.source || 'direct') + '</span>' +
+          '<span class="lead-col lead-col-source">' + _autoEscapeHtml(lead.source || 'direct') + '</span>' +
           '<span class="lead-col lead-col-activity">' + lastActivity + '</span>' +
         '</div>';
       });
@@ -609,8 +615,8 @@ var NotificationChannels = {
           '<div class="channel-card-left">' +
             '<span class="channel-icon">' + icon + '</span>' +
             '<div class="channel-info">' +
-              '<span class="channel-type-label">' + (ch.channel_type || 'unknown') + '</span>' +
-              '<span class="channel-config-label">' + configDisplay + '</span>' +
+              '<span class="channel-type-label">' + _autoEscapeHtml(ch.channel_type || 'unknown') + '</span>' +
+              '<span class="channel-config-label">' + _autoEscapeHtml(configDisplay) + '</span>' +
             '</div>' +
           '</div>' +
           '<div class="channel-card-right">' +

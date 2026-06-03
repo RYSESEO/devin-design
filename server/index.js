@@ -154,6 +154,9 @@ const server = createServer(app);
 // WebSocket server setup
 const { wss, broadcast, stopHeartbeat } = createWebSocketServer();
 
+// Expose broadcast for use in route handlers (e.g., alert triggering)
+app.locals.broadcast = broadcast;
+
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
 server.on('upgrade', (request, socket, head) => {

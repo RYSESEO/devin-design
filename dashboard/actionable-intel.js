@@ -4,6 +4,12 @@
    Goal Setting with Forecasting, Daily Digest
    ═══════════════════════════════════════════════════════════════ */
 
+/* ─── Helper: escape HTML to prevent XSS ──────────────────── */
+function _aiEscapeHtml(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 /* ─── Helper: fetch with auth ─────────────────────────────── */
 function _aiFetch(url) {
   var token = typeof window.getToken === 'function' ? window.getToken() : null;
@@ -57,13 +63,13 @@ var ActionableRecommendations = {
       return '<div class="rec-card">' +
         '<div class="rec-icon">' + (r.icon || '&#x1F4A1;') + '</div>' +
         '<div class="rec-body">' +
-          '<p class="rec-text">' + r.text + '</p>' +
+          '<p class="rec-text">' + _aiEscapeHtml(r.text) + '</p>' +
           '<div class="rec-meta">' +
-            '<span class="rec-metric">' + (r.metric || 'General') + '</span>' +
+            '<span class="rec-metric">' + _aiEscapeHtml(r.metric || 'General') + '</span>' +
             '<span class="rec-conf ' + confClass + '">' + (r.confidence || 70) + '% confidence</span>' +
           '</div>' +
         '</div>' +
-        '<button class="rec-action-btn ' + actionClass + '" data-rec-id="' + r.id + '">' + (r.action || 'Act') + '</button>' +
+        '<button class="rec-action-btn ' + actionClass + '" data-rec-id="' + r.id + '">' + _aiEscapeHtml(r.action || 'Act') + '</button>' +
       '</div>';
     }).join('');
 
@@ -122,9 +128,9 @@ var RevenueAttribution = {
         '<table class="attribution-table">' +
           '<thead><tr><th>Source</th><th>Medium</th><th>Campaign</th><th>Revenue</th><th>Orders</th></tr></thead>' +
           '<tbody>' + breakdown.map(function(row) {
-            return '<tr><td>' + (row.utm_source || row.source || '-') + '</td>' +
-              '<td>' + (row.utm_medium || row.medium || '-') + '</td>' +
-              '<td>' + (row.utm_campaign || row.campaign || '-') + '</td>' +
+            return '<tr><td>' + _aiEscapeHtml(row.utm_source || row.source || '-') + '</td>' +
+              '<td>' + _aiEscapeHtml(row.utm_medium || row.medium || '-') + '</td>' +
+              '<td>' + _aiEscapeHtml(row.utm_campaign || row.campaign || '-') + '</td>' +
               '<td>$' + (row.revenue || 0).toLocaleString() + '</td>' +
               '<td>' + (row.orders || 0) + '</td></tr>';
           }).join('') +
@@ -246,12 +252,12 @@ var AlertManager = {
     var statusLabel = a.triggered_at ? 'Triggered' : a.enabled ? 'Active' : 'Disabled';
     return '<div class="alert-card ' + statusClass + '">' +
       '<div class="alert-card-header">' +
-        '<span class="alert-card-metric">' + (a.metric || 'unknown').replace(/_/g, ' ') + '</span>' +
+        '<span class="alert-card-metric">' + _aiEscapeHtml((a.metric || 'unknown').replace(/_/g, ' ')) + '</span>' +
         '<span class="alert-status-badge ' + statusClass + '">' + statusLabel + '</span>' +
       '</div>' +
       '<div class="alert-card-body">' +
         '<span class="alert-card-rule">' + (a.condition === 'above' ? 'Rises above' : 'Falls below') + ' <strong>' + a.threshold + '</strong></span>' +
-        '<span class="alert-card-action">Action: ' + (a.action_type || 'notify').replace(/_/g, ' ') + '</span>' +
+        '<span class="alert-card-action">Action: ' + _aiEscapeHtml((a.action_type || 'notify').replace(/_/g, ' ')) + '</span>' +
       '</div>' +
       (a.triggered_at ? '<div class="alert-card-actions"><button class="alert-trigger-btn" data-alert-id="' + a.id + '">Execute Action</button></div>' : '') +
     '</div>';
@@ -353,7 +359,7 @@ var GoalSetting = {
     var deadlineStr = g.deadline ? new Date(g.deadline).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No deadline';
     return '<div class="goal-card ' + statusClass + '">' +
       '<div class="goal-card-header">' +
-        '<span class="goal-card-label">' + (g.label || g.metric) + '</span>' +
+        '<span class="goal-card-label">' + _aiEscapeHtml(g.label || g.metric) + '</span>' +
         '<span class="goal-card-deadline">Due: ' + deadlineStr + '</span>' +
       '</div>' +
       '<div class="goal-card-progress">' +
@@ -484,12 +490,12 @@ var DailyDigest = {
         '<div class="digest-stat"><span class="digest-stat-val">' + (summary.conversion_rate || 0) + '%</span><span class="digest-stat-label">Conv. Rate</span></div>' +
       '</div>' +
       (recs.length > 0 ? '<div class="digest-section"><h6 class="digest-section-title">Top Recommendations</h6><ul class="digest-recs">' +
-        recs.map(function(r) { return '<li class="digest-rec-item">' + (typeof r === 'string' ? r : r.text || '') + '</li>'; }).join('') +
+        recs.map(function(r) { return '<li class="digest-rec-item">' + _aiEscapeHtml(typeof r === 'string' ? r : r.text || '') + '</li>'; }).join('') +
       '</ul></div>' : '') +
       (goals.length > 0 ? '<div class="digest-section"><h6 class="digest-section-title">Goal Progress</h6><div class="digest-goals">' +
         goals.map(function(g) {
           var pct = g.pct || g.progress || 0;
-          return '<div class="digest-goal-row"><span class="digest-goal-label">' + (g.label || g.metric || '') + '</span><div class="digest-goal-bar"><div class="digest-goal-fill" style="width:' + pct + '%"></div></div><span class="digest-goal-pct">' + pct + '%</span></div>';
+          return '<div class="digest-goal-row"><span class="digest-goal-label">' + _aiEscapeHtml(g.label || g.metric || '') + '</span><div class="digest-goal-bar"><div class="digest-goal-fill" style="width:' + pct + '%"></div></div><span class="digest-goal-pct">' + pct + '%</span></div>';
         }).join('') +
       '</div></div>' : '') +
       (alertCount > 0 ? '<div class="digest-alert-note">&#x1F6A8; ' + alertCount + ' alert' + (alertCount > 1 ? 's' : '') + ' triggered in the last 24h</div>' : '') +
