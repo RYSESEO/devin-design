@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Command Center — RYSE Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Space+Mono:wght@400;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Ambient background -->
+  <div class="ambient-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="url(#logo-grad)"/><path d="M8 14l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="logo-grad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#a855f7"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs></svg>
+        <span class="logo-text">RYSE</span>
+        <span class="logo-divider">/</span>
+        <span class="logo-sub">Command Center</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="theme-switcher">
+        <button class="theme-btn active" data-theme="default" title="Default">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
+          <span>Default</span>
+        </button>
+        <button class="theme-btn" data-theme="glass" title="Liquid Glass">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <span>Glass</span>
+        </button>
+        <button class="theme-btn" data-theme="brutalist" title="Brutalist">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          <span>Brutal</span>
+        </button>
+        <button class="theme-btn" data-theme="cyberpunk" title="Cyberpunk">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Cyber</span>
+        </button>
+      </div>
+      <div class="topbar-sep"></div>
+      <div class="live-indicator"><span class="live-dot"></span> Live</div>
+      <button class="period-btn active" data-period="7d">7 D</button>
+      <button class="period-btn" data-period="30d">30 D</button>
+      <button class="period-btn" data-period="90d">90 D</button>
+    </div>
+  </header>
+
+  <!-- Main grid -->
+  <main class="dashboard">
+
+    <!-- Row 1: KPI cards -->
+    <section class="kpi-row">
+      <article class="kpi-card kpi-agents">
+        <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/></svg></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Agent Sessions</span>
+          <span class="kpi-value" data-count="1284">0</span>
+          <span class="kpi-delta positive">+18.4%</span>
+        </div>
+        <div class="kpi-spark" id="spark-agents"></div>
+      </article>
+
+      <article class="kpi-card kpi-revenue">
+        <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Shopify Revenue</span>
+          <span class="kpi-value" data-count="47832" data-prefix="$">$0</span>
+          <span class="kpi-delta positive">+24.1%</span>
+        </div>
+        <div class="kpi-spark" id="spark-revenue"></div>
+      </article>
+
+      <article class="kpi-card kpi-leads">
+        <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <div class="kpi-body">
+          <span class="kpi-label">New Leads</span>
+          <span class="kpi-value" data-count="362">0</span>
+          <span class="kpi-delta positive">+9.7%</span>
+        </div>
+        <div class="kpi-spark" id="spark-leads"></div>
+      </article>
+
+      <article class="kpi-card kpi-content">
+        <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Content Views</span>
+          <span class="kpi-value" data-count="89420">0</span>
+          <span class="kpi-delta positive">+31.2%</span>
+        </div>
+        <div class="kpi-spark" id="spark-content"></div>
+      </article>
+    </section>
+
+    <!-- Row 2: Main charts -->
+    <section class="charts-row">
+      <article class="chart-card chart-wide">
+        <div class="card-header">
+          <h3>Agent Usage Over Time</h3>
+          <div class="chart-legend" id="agent-legend"></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-agent-usage"></canvas></div>
+      </article>
+
+      <article class="chart-card">
+        <div class="card-header">
+          <h3>Lead Sources</h3>
+        </div>
+        <div class="chart-wrap chart-wrap-donut"><canvas id="chart-lead-sources"></canvas></div>
+        <ul class="donut-legend" id="lead-legend"></ul>
+      </article>
+    </section>
+
+    <!-- Row 3: Shopify + Content -->
+    <section class="charts-row">
+      <article class="chart-card">
+        <div class="card-header">
+          <h3>Shopify Orders & Revenue</h3>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-shopify"></canvas></div>
+      </article>
+
+      <article class="chart-card">
+        <div class="card-header">
+          <h3>Content Performance</h3>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-content"></canvas></div>
+      </article>
+    </section>
+
+    <!-- Row 4: Tables + Activity -->
+    <section class="bottom-row">
+      <!-- Agent Activity Feed -->
+      <article class="feed-card">
+        <div class="card-header">
+          <h3>Agent Activity</h3>
+          <span class="badge">Live</span>
+        </div>
+        <ul class="activity-feed" id="agent-feed">
+          <li class="feed-item">
+            <span class="feed-dot dot-green"></span>
+            <div class="feed-body">
+              <strong>Devin</strong> completed PR review on <code>dev-work#22</code>
+              <time>2 min ago</time>
+            </div>
+          </li>
+          <li class="feed-item">
+            <span class="feed-dot dot-purple"></span>
+            <div class="feed-body">
+              <strong>Devin</strong> deployed taste-skill to <code>devin-design</code>
+              <time>8 min ago</time>
+            </div>
+          </li>
+          <li class="feed-item">
+            <span class="feed-dot dot-blue"></span>
+            <div class="feed-body">
+              <strong>Devin</strong> ran CI pipeline - all checks passed
+              <time>14 min ago</time>
+            </div>
+          </li>
+          <li class="feed-item">
+            <span class="feed-dot dot-amber"></span>
+            <div class="feed-body">
+              <strong>Devin</strong> started session for audit task
+              <time>22 min ago</time>
+            </div>
+          </li>
+          <li class="feed-item">
+            <span class="feed-dot dot-green"></span>
+            <div class="feed-body">
+              <strong>Devin</strong> merged license webhook PR
+              <time>35 min ago</time>
+            </div>
+          </li>
+          <li class="feed-item">
+            <span class="feed-dot dot-purple"></span>
+            <div class="feed-body">
+              <strong>Devin</strong> generated 3 service pages
+              <time>48 min ago</time>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <!-- Shopify Top Products -->
+      <article class="table-card">
+        <div class="card-header">
+          <h3>Top Products</h3>
+          <span class="badge badge-shopify">Shopify</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Product</th><th>Units</th><th>Revenue</th><th>Conv.</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="product-dot" style="--dot:#a855f7"></span>SEO Audit Pro</td><td>184</td><td>$12,880</td><td><span class="conv-bar" style="--w:78%">78%</span></td></tr>
+            <tr><td><span class="product-dot" style="--dot:#6366f1"></span>Content Engine</td><td>142</td><td>$9,940</td><td><span class="conv-bar" style="--w:65%">65%</span></td></tr>
+            <tr><td><span class="product-dot" style="--dot:#ec4899"></span>Link Builder Kit</td><td>98</td><td>$6,860</td><td><span class="conv-bar" style="--w:52%">52%</span></td></tr>
+            <tr><td><span class="product-dot" style="--dot:#14b8a6"></span>Keyword Tracker</td><td>87</td><td>$5,220</td><td><span class="conv-bar" style="--w:47%">47%</span></td></tr>
+            <tr><td><span class="product-dot" style="--dot:#f59e0b"></span>Site Speed Boost</td><td>63</td><td>$4,410</td><td><span class="conv-bar" style="--w:38%">38%</span></td></tr>
+          </tbody>
+        </table>
+      </article>
+
+      <!-- Lead Pipeline -->
+      <article class="pipeline-card">
+        <div class="card-header">
+          <h3>Lead Pipeline</h3>
+        </div>
+        <div class="funnel">
+          <div class="funnel-stage" style="--width:100%">
+            <span class="funnel-label">Visitors</span>
+            <span class="funnel-val">12,480</span>
+          </div>
+          <div class="funnel-stage" style="--width:72%">
+            <span class="funnel-label">Leads</span>
+            <span class="funnel-val">362</span>
+          </div>
+          <div class="funnel-stage" style="--width:41%">
+            <span class="funnel-label">Qualified</span>
+            <span class="funnel-val">148</span>
+          </div>
+          <div class="funnel-stage" style="--width:22%">
+            <span class="funnel-label">Proposals</span>
+            <span class="funnel-val">54</span>
+          </div>
+          <div class="funnel-stage" style="--width:12%">
+            <span class="funnel-label">Closed Won</span>
+            <span class="funnel-val">28</span>
+          </div>
+        </div>
+        <div class="pipeline-stats">
+          <div class="pipe-stat">
+            <span class="pipe-stat-val">7.7%</span>
+            <span class="pipe-stat-label">Lead-to-Close</span>
+          </div>
+          <div class="pipe-stat">
+            <span class="pipe-stat-val">$1,708</span>
+            <span class="pipe-stat-label">Avg Deal Size</span>
+          </div>
+          <div class="pipe-stat">
+            <span class="pipe-stat-val">12 days</span>
+            <span class="pipe-stat-label">Avg Cycle</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Row 5: Content breakdown -->
+    <section class="content-row">
+      <article class="chart-card">
+        <div class="card-header">
+          <h3>Content by Channel</h3>
+        </div>
+        <div class="channel-bars">
+          <div class="channel">
+            <div class="channel-info"><span class="channel-name">Blog</span><span class="channel-val">34,200</span></div>
+            <div class="bar-track"><div class="bar-fill" style="--w:82%;--color:#a855f7" data-animate></div></div>
+          </div>
+          <div class="channel">
+            <div class="channel-info"><span class="channel-name">YouTube</span><span class="channel-val">22,100</span></div>
+            <div class="bar-track"><div class="bar-fill" style="--w:53%;--color:#ef4444" data-animate></div></div>
+          </div>
+          <div class="channel">
+            <div class="channel-info"><span class="channel-name">Social</span><span class="channel-val">18,600</span></div>
+            <div class="bar-track"><div class="bar-fill" style="--w:45%;--color:#3b82f6" data-animate></div></div>
+          </div>
+          <div class="channel">
+            <div class="channel-info"><span class="channel-name">Newsletter</span><span class="channel-val">9,400</span></div>
+            <div class="bar-track"><div class="bar-fill" style="--w:23%;--color:#14b8a6" data-animate></div></div>
+          </div>
+          <div class="channel">
+            <div class="channel-info"><span class="channel-name">Podcast</span><span class="channel-val">5,120</span></div>
+            <div class="bar-track"><div class="bar-fill" style="--w:12%;--color:#f59e0b" data-animate></div></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="chart-card">
+        <div class="card-header">
+          <h3>Token Usage by Model</h3>
+        </div>
+        <div class="chart-wrap chart-wrap-donut"><canvas id="chart-tokens"></canvas></div>
+        <ul class="donut-legend" id="token-legend"></ul>
+      </article>
+
+      <article class="stats-card">
+        <div class="card-header">
+          <h3>Quick Stats</h3>
+        </div>
+        <div class="quick-stats">
+          <div class="qs">
+            <span class="qs-val">4.2s</span>
+            <span class="qs-label">Avg Response Time</span>
+          </div>
+          <div class="qs">
+            <span class="qs-val">99.7%</span>
+            <span class="qs-label">Agent Uptime</span>
+          </div>
+          <div class="qs">
+            <span class="qs-val">$2,140</span>
+            <span class="qs-label">Token Spend (7d)</span>
+          </div>
+          <div class="qs">
+            <span class="qs-val">23</span>
+            <span class="qs-label">PRs Merged (7d)</span>
+          </div>
+          <div class="qs">
+            <span class="qs-val">156</span>
+            <span class="qs-label">Tasks Completed</span>
+          </div>
+          <div class="qs">
+            <span class="qs-val">8.4</span>
+            <span class="qs-label">Satisfaction Score</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
