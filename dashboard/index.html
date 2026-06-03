@@ -27,6 +27,11 @@
         <span class="logo-divider">/</span>
         <span class="logo-sub">Command Center</span>
       </div>
+      <button class="cmd-trigger" id="cmd-trigger" title="Command Palette (Ctrl+K)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Search commands...</span>
+        <kbd>Ctrl K</kbd>
+      </button>
     </div>
     <div class="topbar-right">
       <div class="theme-switcher">
@@ -49,9 +54,38 @@
       </div>
       <div class="topbar-sep"></div>
       <div class="live-indicator"><span class="live-dot"></span> Live</div>
-      <button class="period-btn active" data-period="7d">7 D</button>
-      <button class="period-btn" data-period="30d">30 D</button>
-      <button class="period-btn" data-period="90d">90 D</button>
+      <div class="notif-wrap" id="notif-wrap">
+        <button class="notif-bell" id="notif-bell" title="Notifications (N)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="notif-badge" id="notif-badge">5</span>
+        </button>
+        <div class="notif-panel" id="notif-panel" hidden>
+          <div class="notif-header"><h4>Notifications</h4><button class="notif-clear" id="notif-clear">Clear all</button></div>
+          <ul class="notif-list" id="notif-list"></ul>
+          <div class="notif-empty" id="notif-empty" hidden>No new notifications</div>
+        </div>
+      </div>
+      <div class="topbar-sep"></div>
+      <div class="date-controls">
+        <button class="period-btn active" data-period="7d">7 D</button>
+        <button class="period-btn" data-period="30d">30 D</button>
+        <button class="period-btn" data-period="90d">90 D</button>
+        <div class="custom-range-wrap" id="custom-range-wrap">
+          <button class="period-btn" data-period="custom" id="custom-range-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Custom
+          </button>
+          <div class="custom-range-dropdown" id="custom-range-dropdown" hidden>
+            <div class="range-field"><label>From</label><input type="date" id="date-from" /></div>
+            <div class="range-field"><label>To</label><input type="date" id="date-to" /></div>
+            <button class="range-apply" id="range-apply">Apply</button>
+          </div>
+        </div>
+        <button class="compare-btn" id="compare-toggle" title="Compare with previous period">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          vs Prev
+        </button>
+      </div>
     </div>
   </header>
 
@@ -59,8 +93,8 @@
   <main class="dashboard">
 
     <!-- Row 1: KPI cards -->
-    <section class="kpi-row">
-      <article class="kpi-card kpi-agents">
+    <section class="kpi-row" id="section-kpi">
+      <article class="kpi-card kpi-agents" data-widget="agents">
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/></svg></div>
         <div class="kpi-body">
           <span class="kpi-label">Agent Sessions</span>
@@ -70,7 +104,7 @@
         <div class="kpi-spark" id="spark-agents"></div>
       </article>
 
-      <article class="kpi-card kpi-revenue">
+      <article class="kpi-card kpi-revenue" data-widget="revenue">
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
         <div class="kpi-body">
           <span class="kpi-label">Shopify Revenue</span>
@@ -80,7 +114,7 @@
         <div class="kpi-spark" id="spark-revenue"></div>
       </article>
 
-      <article class="kpi-card kpi-leads">
+      <article class="kpi-card kpi-leads" data-widget="leads-kpi">
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
         <div class="kpi-body">
           <span class="kpi-label">New Leads</span>
@@ -90,7 +124,7 @@
         <div class="kpi-spark" id="spark-leads"></div>
       </article>
 
-      <article class="kpi-card kpi-content">
+      <article class="kpi-card kpi-content" data-widget="content-kpi">
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
         <div class="kpi-body">
           <span class="kpi-label">Content Views</span>
@@ -102,18 +136,22 @@
     </section>
 
     <!-- Row 2: Main charts -->
-    <section class="charts-row">
-      <article class="chart-card chart-wide">
+    <section class="charts-row" id="section-agent-usage">
+      <article class="chart-card chart-wide" data-widget="agent-usage">
         <div class="card-header">
           <h3>Agent Usage Over Time</h3>
-          <div class="chart-legend" id="agent-legend"></div>
+          <div class="card-header-right">
+            <div class="chart-legend" id="agent-legend"></div>
+            <button class="expand-btn" data-expand="agent-usage" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
+          </div>
         </div>
         <div class="chart-wrap"><canvas id="chart-agent-usage"></canvas></div>
       </article>
 
-      <article class="chart-card">
+      <article class="chart-card" data-widget="lead-sources">
         <div class="card-header">
           <h3>Lead Sources</h3>
+          <button class="expand-btn" data-expand="lead-sources" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="chart-wrap chart-wrap-donut"><canvas id="chart-lead-sources"></canvas></div>
         <ul class="donut-legend" id="lead-legend"></ul>
@@ -121,29 +159,34 @@
     </section>
 
     <!-- Row 3: Shopify + Content -->
-    <section class="charts-row">
-      <article class="chart-card">
+    <section class="charts-row" id="section-shopify">
+      <article class="chart-card" data-widget="shopify">
         <div class="card-header">
           <h3>Shopify Orders & Revenue</h3>
+          <button class="expand-btn" data-expand="shopify" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="chart-wrap"><canvas id="chart-shopify"></canvas></div>
       </article>
 
-      <article class="chart-card">
+      <article class="chart-card" data-widget="content-perf">
         <div class="card-header">
           <h3>Content Performance</h3>
+          <button class="expand-btn" data-expand="content-perf" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="chart-wrap"><canvas id="chart-content"></canvas></div>
       </article>
     </section>
 
     <!-- Row 4: Tables + Activity -->
-    <section class="bottom-row">
+    <section class="bottom-row" id="section-activity">
       <!-- Agent Activity Feed -->
-      <article class="feed-card">
+      <article class="feed-card" data-widget="agent-feed">
         <div class="card-header">
           <h3>Agent Activity</h3>
-          <span class="badge">Live</span>
+          <div class="card-header-right">
+            <span class="badge">Live</span>
+            <button class="expand-btn" data-expand="agent-feed" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
+          </div>
         </div>
         <ul class="activity-feed" id="agent-feed">
           <li class="feed-item">
@@ -192,10 +235,13 @@
       </article>
 
       <!-- Shopify Top Products -->
-      <article class="table-card">
+      <article class="table-card" data-widget="top-products">
         <div class="card-header">
           <h3>Top Products</h3>
-          <span class="badge badge-shopify">Shopify</span>
+          <div class="card-header-right">
+            <span class="badge badge-shopify">Shopify</span>
+            <button class="expand-btn" data-expand="top-products" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
+          </div>
         </div>
         <table class="data-table">
           <thead>
@@ -212,9 +258,10 @@
       </article>
 
       <!-- Lead Pipeline -->
-      <article class="pipeline-card">
+      <article class="pipeline-card" data-widget="pipeline">
         <div class="card-header">
           <h3>Lead Pipeline</h3>
+          <button class="expand-btn" data-expand="pipeline" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="funnel">
           <div class="funnel-stage" style="--width:100%">
@@ -256,10 +303,11 @@
     </section>
 
     <!-- Row 5: Content breakdown -->
-    <section class="content-row">
-      <article class="chart-card">
+    <section class="content-row" id="section-content">
+      <article class="chart-card" data-widget="channels">
         <div class="card-header">
           <h3>Content by Channel</h3>
+          <button class="expand-btn" data-expand="channels" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="channel-bars">
           <div class="channel">
@@ -285,17 +333,19 @@
         </div>
       </article>
 
-      <article class="chart-card">
+      <article class="chart-card" data-widget="tokens">
         <div class="card-header">
           <h3>Token Usage by Model</h3>
+          <button class="expand-btn" data-expand="tokens" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="chart-wrap chart-wrap-donut"><canvas id="chart-tokens"></canvas></div>
         <ul class="donut-legend" id="token-legend"></ul>
       </article>
 
-      <article class="stats-card">
+      <article class="stats-card" data-widget="quick-stats">
         <div class="card-header">
           <h3>Quick Stats</h3>
+          <button class="expand-btn" data-expand="quick-stats" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="quick-stats">
           <div class="qs">
@@ -327,6 +377,65 @@
     </section>
 
   </main>
+
+  <!-- ═══ Command Palette ═══ -->
+  <dialog class="cmd-dialog" id="cmd-dialog">
+    <div class="cmd-inner">
+      <div class="cmd-search-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="cmd-input" id="cmd-input" placeholder="Type a command or search..." />
+        <kbd>ESC</kbd>
+      </div>
+      <ul class="cmd-results" id="cmd-results"></ul>
+      <div class="cmd-footer">
+        <span><kbd>&uarr;&darr;</kbd> navigate</span>
+        <span><kbd>&crarr;</kbd> select</span>
+        <span><kbd>esc</kbd> close</span>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ═══ Keyboard Shortcuts Overlay ═══ -->
+  <dialog class="shortcuts-dialog" id="shortcuts-dialog">
+    <div class="shortcuts-inner">
+      <div class="shortcuts-header">
+        <h3>Keyboard Shortcuts</h3>
+        <button class="shortcuts-close" id="shortcuts-close">&times;</button>
+      </div>
+      <div class="shortcuts-grid">
+        <div class="shortcut-group">
+          <h4>Navigation</h4>
+          <div class="shortcut-row"><kbd>Ctrl K</kbd><span>Open command palette</span></div>
+          <div class="shortcut-row"><kbd>1</kbd><span>Jump to KPIs</span></div>
+          <div class="shortcut-row"><kbd>2</kbd><span>Jump to Agent Usage</span></div>
+          <div class="shortcut-row"><kbd>3</kbd><span>Jump to Shopify</span></div>
+          <div class="shortcut-row"><kbd>4</kbd><span>Jump to Activity</span></div>
+          <div class="shortcut-row"><kbd>5</kbd><span>Jump to Content</span></div>
+        </div>
+        <div class="shortcut-group">
+          <h4>Actions</h4>
+          <div class="shortcut-row"><kbd>T</kbd><span>Cycle themes</span></div>
+          <div class="shortcut-row"><kbd>F</kbd><span>Focus hovered widget</span></div>
+          <div class="shortcut-row"><kbd>N</kbd><span>Toggle notifications</span></div>
+          <div class="shortcut-row"><kbd>E</kbd><span>Export as PNG</span></div>
+          <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
+          <div class="shortcut-row"><kbd>Escape</kbd><span>Close any overlay</span></div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ═══ Focus Mode Overlay ═══ -->
+  <div class="focus-overlay" id="focus-overlay" hidden>
+    <div class="focus-toolbar">
+      <h2 id="focus-title"></h2>
+      <button class="focus-close" id="focus-close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <kbd>ESC</kbd>
+      </button>
+    </div>
+    <div class="focus-body" id="focus-body"></div>
+  </div>
 
   <script src="app.js"></script>
 </body>
