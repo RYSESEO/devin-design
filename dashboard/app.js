@@ -579,6 +579,7 @@ function initKeyboardShortcuts() {
     }
 
     if (e.key === 'Escape') {
+      if (typeof Intelligence !== 'undefined' && Intelligence.isOpen) { Intelligence.close(); return; }
       if (typeof Toolkit !== 'undefined' && Toolkit.isOpen) { Toolkit.close(); return; }
       if (typeof SettingsPanel !== 'undefined' && SettingsPanel.isOpen) { SettingsPanel.close(); return; }
       const focusOverlay = document.getElementById('focus-overlay');
@@ -602,6 +603,7 @@ function initKeyboardShortcuts() {
       case 'e': case 'E': exportDashboard(); break;
       case 's': case 'S': if (typeof SettingsPanel !== 'undefined') SettingsPanel.toggle(); break;
       case 'd': case 'D': if (typeof Toolkit !== 'undefined') Toolkit.toggle(); break;
+      case 'i': case 'I': if (typeof Intelligence !== 'undefined') Intelligence.toggle(); break;
       case '?': openShortcuts(); break;
       case 'f': case 'F':
         if (hoveredWidget) openFocusMode(hoveredWidget);
@@ -914,4 +916,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initAutoDetect();
   if (typeof initConnectors === 'function') initConnectors();
   if (typeof initToolkit === 'function') initToolkit();
+  if (typeof initIntelligence === 'function') initIntelligence();
 });

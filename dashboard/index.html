@@ -10,6 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="connectors.js"></script>
   <script src="toolkit.js"></script>
+  <script src="intelligence.js"></script>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -63,6 +64,9 @@
         </label>
       </div>
       <div class="live-indicator"><span class="live-dot"></span> Live</div>
+      <button class="intel-btn" id="intel-btn" title="Intelligence & Business (I)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="10" y1="21" x2="14" y2="21"/></svg>
+      </button>
       <button class="toolkit-btn" id="toolkit-btn" title="Designer & Dev Toolkit (D)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
       </button>
@@ -443,6 +447,7 @@
           <div class="shortcut-row"><kbd>E</kbd><span>Export as PNG</span></div>
           <div class="shortcut-row"><kbd>S</kbd><span>Data connections</span></div>
           <div class="shortcut-row"><kbd>D</kbd><span>Designer & Dev toolkit</span></div>
+          <div class="shortcut-row"><kbd>I</kbd><span>Intelligence panel</span></div>
           <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
           <div class="shortcut-row"><kbd>Escape</kbd><span>Close any overlay</span></div>
         </div>
@@ -527,6 +532,81 @@
             <h4 class="tk-section-title">JSON Data Editor</h4>
             <p class="tk-section-desc">Edit dashboard data with live preview.</p>
             <div id="tk-json"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Intelligence Panel ═══ -->
+  <div class="intel-overlay" id="intel-panel">
+    <div class="intel-drawer">
+      <div class="intel-header">
+        <div class="intel-title-row">
+          <h3>Intelligence</h3>
+          <button class="intel-close-btn" id="intel-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="intel-tabs">
+          <button class="intel-tab active" data-tab="insights">Insights</button>
+          <button class="intel-tab" data-tab="business">Business</button>
+          <button class="intel-tab" data-tab="reports">Reports</button>
+        </div>
+      </div>
+      <div class="intel-body">
+        <!-- Insights Pane -->
+        <div class="intel-pane active" data-pane="insights">
+          <div class="intel-section">
+            <h4 class="intel-section-title">AI Insights</h4>
+            <p class="intel-section-desc">Auto-generated natural language analysis of your metrics.</p>
+            <div id="intel-insights"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Anomaly Detection</h4>
+            <p class="intel-section-desc">Statistical outlier detection across all metrics.</p>
+            <div id="intel-anomalies"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Revenue Forecast</h4>
+            <p class="intel-section-desc">Trend-based projections with confidence bands.</p>
+            <div id="intel-forecast"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Goal Tracking</h4>
+            <p class="intel-section-desc">Progress toward quarterly targets.</p>
+            <div id="intel-goals"></div>
+          </div>
+        </div>
+        <!-- Business Pane -->
+        <div class="intel-pane" data-pane="business">
+          <div class="intel-section">
+            <h4 class="intel-section-title">ROI Calculator</h4>
+            <p class="intel-section-desc">Product ROI breakdown with custom calculator.</p>
+            <div id="intel-roi"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Cohort Analysis</h4>
+            <p class="intel-section-desc">Customer retention by monthly cohort.</p>
+            <div id="intel-cohorts"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Period Comparison</h4>
+            <p class="intel-section-desc">Side-by-side revenue comparison between periods.</p>
+            <div id="intel-comparison"></div>
+          </div>
+        </div>
+        <!-- Reports Pane -->
+        <div class="intel-pane" data-pane="reports">
+          <div class="intel-section">
+            <h4 class="intel-section-title">Report Generator</h4>
+            <p class="intel-section-desc">Export your dashboard as PDF or CSV.</p>
+            <div id="intel-pdf"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Data Annotations</h4>
+            <p class="intel-section-desc">Mark important events on your data timeline.</p>
+            <div id="intel-annotations"></div>
           </div>
         </div>
       </div>
