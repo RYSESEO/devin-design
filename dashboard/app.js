@@ -611,6 +611,7 @@ function initKeyboardShortcuts() {
       if (typeof AIChatAssistant !== 'undefined' && AIChatAssistant.isOpen) { AIChatAssistant.close(); return; }
       if (typeof CompetitiveIntel !== 'undefined' && CompetitiveIntel.isOpen) { CompetitiveIntel.close(); return; }
       if (typeof WidgetBuilder !== 'undefined' && WidgetBuilder.isOpen) { WidgetBuilder.close(); return; }
+      if (typeof AutomationHub !== 'undefined' && AutomationHub.isOpen) { AutomationHub.close(); return; }
       if (typeof VoiceControl !== 'undefined' && VoiceControl.isListening) { VoiceControl.stop(); return; }
       const focusOverlay = document.getElementById('focus-overlay');
       if (!focusOverlay.hidden) { closeFocusMode(); return; }
@@ -643,6 +644,7 @@ function initKeyboardShortcuts() {
       case 'v': case 'V': if (typeof VoiceControl !== 'undefined') VoiceControl.toggle(); break;
       case 'r': case 'R': if (typeof CompetitiveIntel !== 'undefined') CompetitiveIntel.toggle(); break;
       case 'w': case 'W': if (typeof WidgetBuilder !== 'undefined') WidgetBuilder.toggle(); break;
+      case 'u': case 'U': if (typeof AutomationHub !== 'undefined') AutomationHub.toggle(); break;
       case '?': openShortcuts(); break;
       case 'f': case 'F':
         if (hoveredWidget) openFocusMode(hoveredWidget);
