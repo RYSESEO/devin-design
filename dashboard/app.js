@@ -130,6 +130,8 @@ function initAgentChart() {
 /* ─── Lead Sources Donut ──────────────────────────────────── */
 function initLeadSources() {
   const ctx = document.getElementById('chart-lead-sources').getContext('2d');
+  const theme = document.documentElement.getAttribute('data-theme') || 'default';
+  const donutBorder = (THEME_CHART_COLORS[theme] || THEME_CHART_COLORS.default).donutBorder;
   const data = [
     { label: 'Organic Search', value: 142, color: COLORS.accent },
     { label: 'Paid Ads', value: 78, color: COLORS.blue },
@@ -144,7 +146,7 @@ function initLeadSources() {
       datasets: [{
         data: data.map(d => d.value),
         backgroundColor: data.map(d => d.color),
-        borderColor: '#09090b',
+        borderColor: donutBorder,
         borderWidth: 3,
         hoverOffset: 6,
       }],
@@ -253,6 +255,8 @@ function initContentChart() {
 /* ─── Token Usage Donut ───────────────────────────────────── */
 function initTokenChart() {
   const ctx = document.getElementById('chart-tokens').getContext('2d');
+  const theme = document.documentElement.getAttribute('data-theme') || 'default';
+  const donutBorder = (THEME_CHART_COLORS[theme] || THEME_CHART_COLORS.default).donutBorder;
   const data = [
     { label: 'Claude 3.5', value: 840000, color: COLORS.accent },
     { label: 'GPT-4o', value: 520000, color: COLORS.green },
@@ -266,7 +270,7 @@ function initTokenChart() {
       datasets: [{
         data: data.map(d => d.value),
         backgroundColor: data.map(d => d.color),
-        borderColor: '#09090b',
+        borderColor: donutBorder,
         borderWidth: 3,
         hoverOffset: 6,
       }],
@@ -310,6 +314,93 @@ function initPeriodButtons() {
   });
 }
 
+/* ─── Theme Switcher ──────────────────────────────────────── */
+const THEME_CHART_COLORS = {
+  default: {
+    gridColor: 'rgba(255,255,255,0.04)',
+    tickColor: '#71717a',
+    tooltipBg: 'rgba(9,9,11,0.92)',
+    tooltipBorder: 'rgba(255,255,255,0.1)',
+    donutBorder: '#09090b',
+  },
+  glass: {
+    gridColor: 'rgba(0,0,0,0.06)',
+    tickColor: '#6a6a8a',
+    tooltipBg: 'rgba(255,255,255,0.85)',
+    tooltipBorder: 'rgba(0,0,0,0.08)',
+    donutBorder: '#e8ecf4',
+  },
+  brutalist: {
+    gridColor: 'rgba(0,0,0,0.08)',
+    tickColor: '#333333',
+    tooltipBg: '#ffffff',
+    tooltipBorder: '#000000',
+    donutBorder: '#ffffff',
+  },
+  cyberpunk: {
+    gridColor: 'rgba(0,255,200,0.06)',
+    tickColor: '#406050',
+    tooltipBg: 'rgba(10,10,15,0.95)',
+    tooltipBorder: 'rgba(0,255,200,0.2)',
+    donutBorder: '#0a0a0f',
+  },
+};
+
+function applyTheme(theme) {
+  const html = document.documentElement;
+  if (theme === 'default') {
+    html.removeAttribute('data-theme');
+  } else {
+    html.setAttribute('data-theme', theme);
+  }
+
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.theme-btn[data-theme="${theme}"]`)?.classList.add('active');
+
+  const tc = THEME_CHART_COLORS[theme] || THEME_CHART_COLORS.default;
+  Chart.defaults.color = tc.tickColor;
+  Chart.defaults.borderColor = tc.gridColor;
+  Chart.defaults.plugins.tooltip.backgroundColor = tc.tooltipBg;
+  Chart.defaults.plugins.tooltip.borderColor = tc.tooltipBorder;
+
+  if (theme === 'glass' || theme === 'brutalist') {
+    Chart.defaults.plugins.tooltip.titleColor = '#1a1a2e';
+    Chart.defaults.plugins.tooltip.bodyColor = '#333';
+  } else if (theme === 'cyberpunk') {
+    Chart.defaults.plugins.tooltip.titleColor = '#00ffc8';
+    Chart.defaults.plugins.tooltip.bodyColor = '#80c0a0';
+  } else {
+    Chart.defaults.plugins.tooltip.titleColor = '#fafafa';
+    Chart.defaults.plugins.tooltip.bodyColor = '#a1a1aa';
+  }
+
+  rebuildCharts(tc);
+  localStorage.setItem('ryse-theme', theme);
+}
+
+function rebuildCharts(tc) {
+  Chart.helpers.each(Chart.instances, chart => chart.destroy());
+
+  initAgentChart();
+  initLeadSources();
+  initShopifyChart();
+  initContentChart();
+  initTokenChart();
+}
+
+function initThemeSwitcher() {
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyTheme(btn.dataset.theme);
+    });
+  });
+
+  const saved = localStorage.getItem('ryse-theme');
+  if (saved && saved !== 'default') {
+    applyTheme(saved);
+  }
+}
+
 /* ─── Boot ────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   animateCounters();
@@ -320,4 +411,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initTokenChart();
   initBarAnimations();
   initPeriodButtons();
+  initThemeSwitcher();
 });
