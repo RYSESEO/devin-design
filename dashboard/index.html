@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Space+Mono:wght@400;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="connectors.js"></script>
+  <script src="toolkit.js"></script>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -62,6 +63,9 @@
         </label>
       </div>
       <div class="live-indicator"><span class="live-dot"></span> Live</div>
+      <button class="toolkit-btn" id="toolkit-btn" title="Designer & Dev Toolkit (D)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+      </button>
       <button class="settings-btn" id="settings-btn" title="Data Connections (S)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       </button>
@@ -438,6 +442,7 @@
           <div class="shortcut-row"><kbd>N</kbd><span>Toggle notifications</span></div>
           <div class="shortcut-row"><kbd>E</kbd><span>Export as PNG</span></div>
           <div class="shortcut-row"><kbd>S</kbd><span>Data connections</span></div>
+          <div class="shortcut-row"><kbd>D</kbd><span>Designer & Dev toolkit</span></div>
           <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
           <div class="shortcut-row"><kbd>Escape</kbd><span>Close any overlay</span></div>
         </div>
@@ -455,6 +460,77 @@
       </button>
     </div>
     <div class="focus-body" id="focus-body"></div>
+  </div>
+
+  <!-- ═══ Toolkit Panel ═══ -->
+  <div class="toolkit-overlay" id="toolkit-panel">
+    <div class="toolkit-drawer">
+      <div class="toolkit-header">
+        <div class="toolkit-title-row">
+          <h3>Toolkit</h3>
+          <button class="toolkit-close-btn" id="toolkit-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="tk-tabs">
+          <button class="tk-tab active" data-tab="design">Design</button>
+          <button class="tk-tab" data-tab="dev">Dev</button>
+        </div>
+      </div>
+      <div class="toolkit-body">
+        <!-- Design Pane -->
+        <div class="tk-pane active" data-pane="design">
+          <div class="tk-section">
+            <h4 class="tk-section-title">Design Tokens</h4>
+            <p class="tk-section-desc">Live-edit CSS custom properties. Changes apply instantly.</p>
+            <div id="tk-tokens"></div>
+          </div>
+          <div class="tk-section">
+            <h4 class="tk-section-title">Color Palette</h4>
+            <p class="tk-section-desc">Theme colors with shade generation and export.</p>
+            <div id="tk-palette"></div>
+          </div>
+          <div class="tk-section">
+            <h4 class="tk-section-title">Typography Scale</h4>
+            <p class="tk-section-desc">Type scale preview for the current theme.</p>
+            <div id="tk-typography"></div>
+          </div>
+          <div class="tk-section">
+            <h4 class="tk-section-title">Contrast Checker</h4>
+            <p class="tk-section-desc">WCAG 2.1 contrast ratios for theme color pairs.</p>
+            <div id="tk-contrast"></div>
+          </div>
+        </div>
+        <!-- Dev Pane -->
+        <div class="tk-pane" data-pane="dev">
+          <div class="tk-section">
+            <h4 class="tk-section-title">GitHub Activity</h4>
+            <p class="tk-section-desc">Contribution heatmap (last 26 weeks).</p>
+            <div id="tk-heatmap"></div>
+          </div>
+          <div class="tk-section">
+            <h4 class="tk-section-title">CI/CD Status</h4>
+            <p class="tk-section-desc">Recent build and deployment status.</p>
+            <div id="tk-cicd"></div>
+          </div>
+          <div class="tk-section">
+            <h4 class="tk-section-title">Web Vitals</h4>
+            <p class="tk-section-desc">Core Web Vitals performance metrics.</p>
+            <div id="tk-vitals"></div>
+          </div>
+          <div class="tk-section">
+            <h4 class="tk-section-title">Widget SDK</h4>
+            <p class="tk-section-desc">Create custom widgets with the RYSE API.</p>
+            <div id="tk-sdk"></div>
+          </div>
+          <div class="tk-section">
+            <h4 class="tk-section-title">JSON Data Editor</h4>
+            <p class="tk-section-desc">Edit dashboard data with live preview.</p>
+            <div id="tk-json"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ═══ Settings Panel ═══ -->
