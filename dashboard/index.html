@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Space+Mono:wght@400;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="connectors.js"></script>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -53,7 +54,17 @@
         </button>
       </div>
       <div class="topbar-sep"></div>
+      <div class="demo-mode-wrap">
+        <label class="demo-toggle-label">
+          <input type="checkbox" id="demo-mode-toggle" checked />
+          <span class="demo-toggle-track"><span class="demo-toggle-thumb"></span></span>
+          <span id="demo-mode-label" class="demo-label demo">Demo Data</span>
+        </label>
+      </div>
       <div class="live-indicator"><span class="live-dot"></span> Live</div>
+      <button class="settings-btn" id="settings-btn" title="Data Connections (S)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
       <div class="notif-wrap" id="notif-wrap">
         <button class="notif-bell" id="notif-bell" title="Notifications (N)">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
@@ -95,6 +106,7 @@
     <!-- Row 1: KPI cards -->
     <section class="kpi-row" id="section-kpi">
       <article class="kpi-card kpi-agents" data-widget="agents">
+        <span class="source-badge source-demo" data-source-badge="agents">Demo</span>
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/></svg></div>
         <div class="kpi-body">
           <span class="kpi-label">Agent Sessions</span>
@@ -105,6 +117,7 @@
       </article>
 
       <article class="kpi-card kpi-revenue" data-widget="revenue">
+        <span class="source-badge source-demo" data-source-badge="revenue">Demo</span>
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
         <div class="kpi-body">
           <span class="kpi-label">Shopify Revenue</span>
@@ -115,6 +128,7 @@
       </article>
 
       <article class="kpi-card kpi-leads" data-widget="leads-kpi">
+        <span class="source-badge source-demo" data-source-badge="leads-kpi">Demo</span>
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
         <div class="kpi-body">
           <span class="kpi-label">New Leads</span>
@@ -125,6 +139,7 @@
       </article>
 
       <article class="kpi-card kpi-content" data-widget="content-kpi">
+        <span class="source-badge source-demo" data-source-badge="content-kpi">Demo</span>
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
         <div class="kpi-body">
           <span class="kpi-label">Content Views</span>
@@ -140,6 +155,7 @@
       <article class="chart-card chart-wide" data-widget="agent-usage">
         <div class="card-header">
           <h3>Agent Usage Over Time</h3>
+          <span class="source-badge source-demo" data-source-badge="agent-usage">Demo</span>
           <div class="card-header-right">
             <div class="chart-legend" id="agent-legend"></div>
             <button class="expand-btn" data-expand="agent-usage" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
@@ -151,6 +167,7 @@
       <article class="chart-card" data-widget="lead-sources">
         <div class="card-header">
           <h3>Lead Sources</h3>
+          <span class="source-badge source-demo" data-source-badge="lead-sources">Demo</span>
           <button class="expand-btn" data-expand="lead-sources" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="chart-wrap chart-wrap-donut"><canvas id="chart-lead-sources"></canvas></div>
@@ -163,6 +180,7 @@
       <article class="chart-card" data-widget="shopify">
         <div class="card-header">
           <h3>Shopify Orders & Revenue</h3>
+          <span class="source-badge source-demo" data-source-badge="shopify">Demo</span>
           <button class="expand-btn" data-expand="shopify" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="chart-wrap"><canvas id="chart-shopify"></canvas></div>
@@ -171,6 +189,7 @@
       <article class="chart-card" data-widget="content-perf">
         <div class="card-header">
           <h3>Content Performance</h3>
+          <span class="source-badge source-demo" data-source-badge="content-perf">Demo</span>
           <button class="expand-btn" data-expand="content-perf" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="chart-wrap"><canvas id="chart-content"></canvas></div>
@@ -418,6 +437,7 @@
           <div class="shortcut-row"><kbd>F</kbd><span>Focus hovered widget</span></div>
           <div class="shortcut-row"><kbd>N</kbd><span>Toggle notifications</span></div>
           <div class="shortcut-row"><kbd>E</kbd><span>Export as PNG</span></div>
+          <div class="shortcut-row"><kbd>S</kbd><span>Data connections</span></div>
           <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
           <div class="shortcut-row"><kbd>Escape</kbd><span>Close any overlay</span></div>
         </div>
@@ -435,6 +455,27 @@
       </button>
     </div>
     <div class="focus-body" id="focus-body"></div>
+  </div>
+
+  <!-- ═══ Settings Panel ═══ -->
+  <div class="settings-overlay" id="settings-panel" hidden>
+    <div class="settings-drawer">
+      <div class="settings-header">
+        <h3>Data Connections</h3>
+        <p class="settings-subtitle">Connect live data sources to replace demo data</p>
+        <button class="settings-close-btn" id="settings-close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="settings-status-bar">
+        <span id="connected-count">0</span> of <span id="total-connectors">5</span> connected
+        <div class="settings-status-dots" id="settings-status-dots"></div>
+      </div>
+      <div class="settings-body" id="settings-connections"></div>
+      <div class="settings-footer">
+        <p>API keys are encrypted and stored locally in your browser. They are never sent to any server.</p>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
