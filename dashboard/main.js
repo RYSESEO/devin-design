@@ -426,6 +426,10 @@ async function initApp() {
   registerPanel('intel-btn', () => { if (window.initIntelligence) { window.initIntelligence(); return true; } return false; });
   registerPanel('auto-btn', () => { if (window.initAutomations) { window.initAutomations(); return true; } return false; });
   registerPanel('toolkit-btn', () => { if (window.initToolkit) { window.initToolkit(); return true; } return false; });
+  registerPanel('store-btn', () => { if (window.initMultiStore) { window.initMultiStore(); return true; } return false; });
+  registerPanel('ws-btn', () => { if (window.initWorkspaces) { window.initWorkspaces(); return true; } return false; });
+  registerPanel('reports-btn', () => { if (window.initReports) { window.initReports(); return true; } return false; });
+  registerPanel('billing-btn', () => { if (window.initBilling) { window.initBilling(); return true; } return false; });
   initLazyPanels();
 
   // Global Escape key handler for overlays

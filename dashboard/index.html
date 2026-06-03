@@ -24,6 +24,10 @@
   <script src="voice-control.js"></script>
   <script src="competitive.js"></script>
   <script src="widget-builder.js"></script>
+  <script src="multi-store.js"></script>
+  <script src="workspaces.js"></script>
+  <script src="reports.js"></script>
+  <script src="billing.js"></script>
   <link rel="stylesheet" href="styles.css" />
   <link rel="modulepreload" href="./main.js">
   <link rel="manifest" href="manifest.json" />
@@ -146,6 +150,18 @@
       </button>
       <button class="topbar-icon-btn" id="wb-btn" title="Widget Builder (W)" aria-label="Widget Builder">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="store-btn" title="Stores" aria-label="Stores">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="ws-btn" title="Workspaces" aria-label="Workspaces">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="reports-btn" title="Reports" aria-label="Reports">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="billing-btn" title="Billing" aria-label="Billing">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
       </button>
       <button class="settings-btn" id="settings-btn" title="Data Connections (S)" aria-label="Settings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -1176,6 +1192,136 @@
         <div class="wb-pane" data-wbpane="templates">
           <p class="wb-pane-desc">Start with a pre-built layout.</p>
           <div class="wb-templates" id="wb-templates"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Multi-Store Panel ═══ -->
+  <div class="ms-overlay" id="multi-store-panel">
+    <div class="ms-drawer">
+      <div class="ms-header">
+        <div class="ms-title-row">
+          <h3>Multi-Store Management</h3>
+          <button class="ms-close-btn" id="ms-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="ms-body">
+        <div class="ms-section">
+          <h4 class="ms-section-title">Store Switcher</h4>
+          <div id="ms-switcher"></div>
+        </div>
+        <div class="ms-section">
+          <h4 class="ms-section-title">Aggregate Metrics</h4>
+          <div id="ms-aggregate"></div>
+        </div>
+        <div class="ms-section">
+          <h4 class="ms-section-title">Your Stores</h4>
+          <div id="ms-store-list"></div>
+        </div>
+        <div class="ms-section">
+          <h4 class="ms-section-title">Add Store</h4>
+          <form class="ms-form" id="ms-add-form">
+            <input type="text" class="ms-input" id="ms-store-name" placeholder="Store Name" required />
+            <input type="text" class="ms-input" id="ms-shop-domain" placeholder="shop-domain.myshopify.com" required />
+            <button type="submit" class="ms-btn ms-btn-add">Add Store</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Workspaces Panel ═══ -->
+  <div class="ws-overlay" id="workspaces-panel">
+    <div class="ws-drawer">
+      <div class="ws-header">
+        <div class="ws-title-row">
+          <h3>Workspaces</h3>
+          <button class="ws-close-btn" id="ws-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="ws-body">
+        <div class="ws-section">
+          <h4 class="ws-section-title">Create Workspace</h4>
+          <form class="ws-form" id="ws-create-form">
+            <input type="text" class="ws-input" id="ws-name-input" placeholder="Workspace name" required />
+            <button type="submit" class="ws-btn ws-btn-create">Create</button>
+          </form>
+        </div>
+        <div class="ws-section">
+          <h4 class="ws-section-title">Your Workspaces</h4>
+          <div id="ws-list"></div>
+        </div>
+        <div class="ws-section" id="ws-member-section" style="display:none">
+          <h4 class="ws-section-title">Members</h4>
+          <div id="ws-members-list"></div>
+          <form class="ws-form" id="ws-member-form">
+            <input type="email" class="ws-input" id="ws-member-email" placeholder="member@email.com" required />
+            <select class="ws-select" id="ws-member-role">
+              <option value="viewer">Viewer</option>
+              <option value="admin">Admin</option>
+              <option value="owner">Owner</option>
+            </select>
+            <button type="submit" class="ws-btn ws-btn-add">Add Member</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Reports Panel ═══ -->
+  <div class="rpt-overlay" id="reports-panel">
+    <div class="rpt-drawer">
+      <div class="rpt-header">
+        <div class="rpt-title-row">
+          <h3>Reports</h3>
+          <button class="rpt-close-btn" id="rpt-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="rpt-body">
+        <div class="rpt-section">
+          <h4 class="rpt-section-title">Generate Report</h4>
+          <div class="rpt-gen-form">
+            <input type="text" class="rpt-input" id="rpt-title-input" placeholder="Report title" />
+            <button class="rpt-btn rpt-btn-generate" id="rpt-generate-btn">Generate Report</button>
+          </div>
+        </div>
+        <div class="rpt-section">
+          <h4 class="rpt-section-title">Past Reports</h4>
+          <div id="rpt-list"></div>
+        </div>
+        <div class="rpt-section">
+          <div id="rpt-viewer" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Billing Panel ═══ -->
+  <div class="bill-overlay" id="billing-panel">
+    <div class="bill-drawer">
+      <div class="bill-header">
+        <div class="bill-title-row">
+          <h3>Billing</h3>
+          <button class="bill-close-btn" id="bill-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="bill-body">
+        <div class="bill-section">
+          <h4 class="bill-section-title">Current Plan</h4>
+          <div id="bill-status"></div>
+        </div>
+        <div class="bill-section">
+          <h4 class="bill-section-title">Available Plans</h4>
+          <div id="bill-plans" class="bill-plans-grid"></div>
         </div>
       </div>
     </div>
