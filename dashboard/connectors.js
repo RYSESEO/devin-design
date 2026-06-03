@@ -895,7 +895,7 @@ async function initConnectors() {
 
 /* ─── OAuth Integration ───────────────────────────────────── */
 function checkOAuthStatus() {
-  const token = sessionStorage.getItem('ryse-auth-token') || localStorage.getItem('ryse-auth-token');
+  const token = (typeof window.getToken === 'function') ? window.getToken() : null;
   if (!token) return;
 
   fetch('/api/oauth/status', {
@@ -959,18 +959,20 @@ function handleOAuthRedirect() {
 function initiateShopifyOAuth() {
   const shop = prompt('Enter your Shopify store subdomain (e.g., my-store):');
   if (shop && shop.trim()) {
-    const token = sessionStorage.getItem('ryse-auth-token') || localStorage.getItem('ryse-auth-token');
-    window.location.href = `/api/oauth/shopify/install?shop=${encodeURIComponent(shop.trim())}&token=${encodeURIComponent(token || '')}`;
+    const token = (typeof window.getToken === 'function') ? window.getToken() : null;
+    if (!token) { alert('Please sign in first'); return; }
+    window.location.href = `/api/oauth/shopify/install?shop=${encodeURIComponent(shop.trim())}&token=${encodeURIComponent(token)}`;
   }
 }
 
 function initiateGitHubOAuth() {
-  const token = sessionStorage.getItem('ryse-auth-token') || localStorage.getItem('ryse-auth-token');
-  window.location.href = `/api/oauth/github/authorize?token=${encodeURIComponent(token || '')}`;
+  const token = (typeof window.getToken === 'function') ? window.getToken() : null;
+  if (!token) { alert('Please sign in first'); return; }
+  window.location.href = `/api/oauth/github/authorize?token=${encodeURIComponent(token)}`;
 }
 
 function disconnectOAuth(provider) {
-  const token = sessionStorage.getItem('ryse-auth-token') || localStorage.getItem('ryse-auth-token');
+  const token = (typeof window.getToken === 'function') ? window.getToken() : null;
   if (!token) return;
 
   fetch(`/api/oauth/${provider}/disconnect`, {
