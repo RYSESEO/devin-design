@@ -145,4 +145,21 @@ export class NotificationStream {
   }
 }
 
+export class AlertStream {
+  constructor(broadcast) {
+    this.broadcast = broadcast;
+  }
+
+  notify(alert) {
+    this.broadcast('alerts', {
+      id: alert.id,
+      metric: alert.metric,
+      condition: alert.condition,
+      threshold: alert.threshold,
+      triggered_at: alert.triggered_at,
+      action_type: alert.action_type
+    });
+  }
+}
+
 export { ACTIVITY_TEMPLATES, NOTIFICATION_TEMPLATES };
