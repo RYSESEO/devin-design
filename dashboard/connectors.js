@@ -93,7 +93,7 @@ const CredentialVault = (() => {
 
 /* ─── Auth Headers Helper ─────────────────────────────────── */
 function getAuthHeaders() {
-  const token = sessionStorage.getItem('ryse-auth-token') || localStorage.getItem('ryse-auth-token');
+  const token = (typeof window.getToken === 'function') ? window.getToken() : null;
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;

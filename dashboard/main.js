@@ -13,6 +13,7 @@ if (!window.Chart) {
   window.Chart = Chart;
 }
 window.saveConnectorConfig = saveConnectorConfig;
+window.getToken = getToken;
 
 // Initialize realtime client after DOM is ready
 function initRealtime() {
