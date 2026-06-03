@@ -13,6 +13,7 @@ import streamRouter from './routes/stream.js';
 import authRouter from './routes/auth.js';
 import stateRouter from './routes/state.js';
 import proxyRouter from './routes/proxy.js';
+import oauthRouter from './routes/oauth.js';
 import { optionalAuth } from './middleware/auth.js';
 import db from './db/index.js';
 
@@ -84,6 +85,7 @@ app.use(helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:"],
       connectSrc: ["'self'", "ws:", "wss:"],
+      formAction: ["'self'", "https://*.myshopify.com", "https://github.com"],
     }
   }
 }));
@@ -105,6 +107,9 @@ app.use('/api/state', stateRouter);
 
 // Proxy routes (require auth - handled inside router)
 app.use('/api/proxy', proxyRouter);
+
+// OAuth routes (require auth - handled inside router)
+app.use('/api/oauth', oauthRouter);
 
 // Optional auth for other routes
 app.use(optionalAuth);

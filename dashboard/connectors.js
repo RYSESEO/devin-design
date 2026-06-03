@@ -621,6 +621,14 @@ const SettingsPanel = {
         ${c.lastError ? `<div class="connector-error">${c.lastError}</div>` : ''}
         ${c.lastSync ? `<div class="connector-sync-time">Last synced: ${new Date(c.lastSync).toLocaleTimeString()}</div>` : ''}
         <div class="connector-form" id="form-${c.id}" hidden>
+          ${(c.id === 'shopify' || c.id === 'github') ? `
+            <div class="conn-oauth-section">
+              <button class="conn-btn conn-btn-oauth" data-action="oauth" data-id="${c.id}">
+                Connect with OAuth
+              </button>
+              <span class="conn-oauth-divider">or enter credentials manually:</span>
+            </div>
+          ` : ''}
           ${c.fields.map(f => `
             <div class="conn-field">
               <label>${f.label}</label>
@@ -646,6 +654,17 @@ const SettingsPanel = {
         const id = btn.dataset.id;
         const form = document.getElementById(`form-${id}`);
         form.hidden = !form.hidden;
+      });
+    });
+
+    document.querySelectorAll('[data-action="oauth"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        if (id === 'shopify') {
+          initiateShopifyOAuth();
+        } else if (id === 'github') {
+          initiateGitHubOAuth();
+        }
       });
     });
 
@@ -793,4 +812,106 @@ async function initConnectors() {
   initDemoModeToggle();
   await ConnectorManager.restoreAll();
   updateDataSourceBadges();
+  checkOAuthStatus();
+  handleOAuthRedirect();
+}
+
+/* ─── OAuth Integration ───────────────────────────────────── */
+function checkOAuthStatus() {
+  const token = sessionStorage.getItem('ryse-auth-token') || localStorage.getItem('ryse-auth-token');
+  if (!token) return;
+
+  fetch('/api/oauth/status', {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (!data) return;
+      if (data.shopify && data.shopify.connected) {
+        const shopify = ConnectorManager.get('shopify');
+        if (shopify && shopify.status !== 'connected') {
+          shopify.status = 'connected';
+          shopify.lastSync = Date.now();
+          ConnectorManager.notify();
+        }
+      }
+      if (data.github && data.github.connected) {
+        const github = ConnectorManager.get('github');
+        if (github && github.status !== 'connected') {
+          github.status = 'connected';
+          github.lastSync = Date.now();
+          ConnectorManager.notify();
+        }
+      }
+      updateDataSourceBadges();
+    })
+    .catch(() => {});
+}
+
+function handleOAuthRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const oauth = params.get('oauth');
+  const status = params.get('status');
+
+  if (oauth && status === 'success') {
+    if (oauth === 'shopify') {
+      const shopify = ConnectorManager.get('shopify');
+      if (shopify) {
+        shopify.status = 'connected';
+        shopify.lastSync = Date.now();
+        ConnectorManager.notify();
+      }
+    } else if (oauth === 'github') {
+      const github = ConnectorManager.get('github');
+      if (github) {
+        github.status = 'connected';
+        github.lastSync = Date.now();
+        ConnectorManager.notify();
+      }
+    }
+    updateDataSourceBadges();
+    // Clean up URL params
+    const url = new URL(window.location);
+    url.searchParams.delete('oauth');
+    url.searchParams.delete('status');
+    url.searchParams.delete('message');
+    window.history.replaceState({}, '', url.pathname);
+  }
+}
+
+function initiateShopifyOAuth() {
+  const shop = prompt('Enter your Shopify store subdomain (e.g., my-store):');
+  if (shop && shop.trim()) {
+    const token = sessionStorage.getItem('ryse-auth-token') || localStorage.getItem('ryse-auth-token');
+    window.location.href = `/api/oauth/shopify/install?shop=${encodeURIComponent(shop.trim())}&token=${encodeURIComponent(token || '')}`;
+  }
+}
+
+function initiateGitHubOAuth() {
+  const token = sessionStorage.getItem('ryse-auth-token') || localStorage.getItem('ryse-auth-token');
+  window.location.href = `/api/oauth/github/authorize?token=${encodeURIComponent(token || '')}`;
+}
+
+function disconnectOAuth(provider) {
+  const token = sessionStorage.getItem('ryse-auth-token') || localStorage.getItem('ryse-auth-token');
+  if (!token) return;
+
+  fetch(`/api/oauth/${provider}/disconnect`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  })
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (data && data.success) {
+        const connector = ConnectorManager.get(provider);
+        if (connector) {
+          connector.status = 'disconnected';
+          connector.lastSync = null;
+          ConnectorManager.notify();
+        }
+        updateDataSourceBadges();
+        SettingsPanel.render();
+      }
+    })
+    .catch(() => {});
 }

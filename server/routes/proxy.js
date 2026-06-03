@@ -28,6 +28,26 @@ function getCredentials(userId, connectorId) {
 }
 
 /**
+ * Get OAuth credentials for a provider if the user has connected via OAuth.
+ * Returns the decrypted access token or null.
+ */
+function getOAuthCredentials(userId, provider) {
+  const tokenKey = `oauth_${provider}_token`;
+  const row = db.prepare(
+    'SELECT value FROM user_state WHERE user_id = ? AND key = ?'
+  ).get(userId, tokenKey);
+
+  if (!row) return null;
+
+  try {
+    const encrypted = JSON.parse(row.value);
+    return decrypt(encrypted);
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Validate that the resolved URL stays within the expected origin.
  * Prevents SSRF by rejecting absolute URLs in the endpoint parameter
  * that would override the base URL.
@@ -43,13 +63,27 @@ function validateProxyUrl(endpoint, baseUrl) {
 
 // POST /api/proxy/shopify - Forward to Shopify Admin API
 router.post('/shopify', async (req, res) => {
-  const credentials = getCredentials(req.user.id, 'shopify');
-  if (!credentials) {
-    return res.status(400).json({ error: 'Connector not configured' });
+  // Check for OAuth token first, then fall back to manual connector credentials
+  let shopDomain, accessToken;
+  const oauthToken = getOAuthCredentials(req.user.id, 'shopify');
+  if (oauthToken) {
+    const shopRow = db.prepare(
+      'SELECT value FROM user_state WHERE user_id = ? AND key = ?'
+    ).get(req.user.id, 'oauth_shopify_shop');
+    shopDomain = shopRow ? shopRow.value : null;
+    accessToken = oauthToken;
+  }
+
+  if (!accessToken || !shopDomain) {
+    const credentials = getCredentials(req.user.id, 'shopify');
+    if (!credentials) {
+      return res.status(400).json({ error: 'Connector not configured' });
+    }
+    shopDomain = credentials.shopDomain;
+    accessToken = credentials.accessToken;
   }
 
   const { endpoint, method = 'GET', params } = req.body;
-  const { shopDomain, accessToken } = credentials;
 
   try {
     const baseUrl = `https://${shopDomain}.myshopify.com/admin/api/2024-01`;
@@ -82,13 +116,22 @@ router.post('/shopify', async (req, res) => {
 
 // POST /api/proxy/github - Forward to GitHub API
 router.post('/github', async (req, res) => {
-  const credentials = getCredentials(req.user.id, 'github');
-  if (!credentials) {
-    return res.status(400).json({ error: 'Connector not configured' });
+  // Check for OAuth token first, then fall back to manual connector credentials
+  let token;
+  const oauthToken = getOAuthCredentials(req.user.id, 'github');
+  if (oauthToken) {
+    token = oauthToken;
+  }
+
+  if (!token) {
+    const credentials = getCredentials(req.user.id, 'github');
+    if (!credentials) {
+      return res.status(400).json({ error: 'Connector not configured' });
+    }
+    token = credentials.token;
   }
 
   const { endpoint, method = 'GET', params } = req.body;
-  const { token } = credentials;
 
   try {
     const baseUrl = 'https://api.github.com';
