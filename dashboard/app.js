@@ -1,3 +1,12 @@
+/* ─── Performance Utilities ───────────────────────────────── */
+function debounce(fn, ms) {
+  let t;
+  return function() {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, arguments), ms);
+  };
+}
+
 /* ─── Chart.js Global Config ──────────────────────────────── */
 Chart.defaults.color = '#71717a';
 Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
@@ -411,6 +420,8 @@ const CMD_COMMANDS = [
   { group: 'Actions', label: 'Export as PNG', hint: 'Capture dashboard screenshot', key: 'E', icon: '\uD83D\uDCE5', action: () => exportDashboard() },
   { group: 'Actions', label: 'Keyboard Shortcuts', hint: 'Show all shortcuts', key: '?', icon: '\u2328', action: () => openShortcuts() },
   { group: 'Actions', label: 'Cycle Theme', hint: 'Next theme in sequence', key: 'T', icon: '\uD83C\uDFA8', action: () => cycleTheme() },
+  { group: 'Actions', label: 'Cinematic Mode', hint: 'Fullscreen auto-cycling presentation', key: 'G', icon: '\uD83C\uDFAC', action: () => { if (typeof Cinematic !== 'undefined') Cinematic.start(); } },
+  { group: 'Actions', label: 'Start Onboarding Tour', hint: 'Guided walkthrough of all features', key: 'H', icon: '\uD83D\uDCD6', action: () => { if (typeof Onboarding !== 'undefined') Onboarding.start(); } },
   { group: 'Period', label: 'Set 7 Days', hint: 'Show last 7 days', icon: '\uD83D\uDCC5', action: () => setPeriod('7d') },
   { group: 'Period', label: 'Set 30 Days', hint: 'Show last 30 days', icon: '\uD83D\uDCC5', action: () => setPeriod('30d') },
   { group: 'Period', label: 'Set 90 Days', hint: 'Show last 90 days', icon: '\uD83D\uDCC5', action: () => setPeriod('90d') },
@@ -579,6 +590,8 @@ function initKeyboardShortcuts() {
     }
 
     if (e.key === 'Escape') {
+      if (typeof Cinematic !== 'undefined' && Cinematic.isActive) { Cinematic.stop(); return; }
+      if (typeof Onboarding !== 'undefined' && Onboarding.isActive) { Onboarding.finish(); return; }
       if (typeof SocialDashboard !== 'undefined' && SocialDashboard.isOpen) { SocialDashboard.close(); return; }
       if (typeof ContentHub !== 'undefined' && ContentHub.isOpen) { ContentHub.close(); return; }
       if (typeof Ecosystem !== 'undefined' && Ecosystem.isOpen) { Ecosystem.close(); return; }
@@ -610,6 +623,8 @@ function initKeyboardShortcuts() {
       case 'm': case 'M': if (typeof SocialDashboard !== 'undefined') SocialDashboard.toggle(); break;
       case 'c': case 'C': if (typeof ContentHub !== 'undefined') ContentHub.toggle(); break;
       case 'p': case 'P': if (typeof Ecosystem !== 'undefined') Ecosystem.toggle(); break;
+      case 'g': case 'G': if (typeof Cinematic !== 'undefined' && !Cinematic.isActive) Cinematic.start(); break;
+      case 'h': case 'H': if (typeof Onboarding !== 'undefined' && !Onboarding.isActive) Onboarding.start(); break;
       case '?': openShortcuts(); break;
       case 'f': case 'F':
         if (hoveredWidget) openFocusMode(hoveredWidget);
@@ -927,4 +942,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof initContentHub === 'function') initContentHub();
   if (typeof initSocialDashboard === 'function') initSocialDashboard();
   if (typeof initCrossPost === 'function') initCrossPost();
+  if (typeof initCinematic === 'function') initCinematic();
+  if (typeof initOnboarding === 'function') initOnboarding();
+
+  /* ─── Performance: debounced resize handler ─── */
+  window.addEventListener('resize', debounce(function() {
+    Chart.helpers.each(Chart.instances, function(chart) { chart.resize(); });
+  }, 250));
 });
