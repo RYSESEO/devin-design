@@ -926,4 +926,5 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof initEcosystem === 'function') initEcosystem();
   if (typeof initContentHub === 'function') initContentHub();
   if (typeof initSocialDashboard === 'function') initSocialDashboard();
+  if (typeof initCrossPost === 'function') initCrossPost();
 });

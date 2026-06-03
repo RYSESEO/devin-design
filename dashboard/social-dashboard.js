@@ -255,6 +255,7 @@ const SocialDashboard = {
       case 'growth': this.renderGrowth(); break;
       case 'posts': this.renderTopPosts(); break;
       case 'audience': this.renderAudience(); break;
+      case 'scheduled': if (typeof CrossPost !== 'undefined') CrossPost.renderScheduledInSocial(); break;
     }
   }
 };

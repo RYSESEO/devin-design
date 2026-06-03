@@ -14,6 +14,7 @@
   <script src="ecosystem.js"></script>
   <script src="content-hub.js"></script>
   <script src="social-dashboard.js"></script>
+  <script src="cross-post.js"></script>
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#a855f7" />
@@ -825,6 +826,7 @@
           <button class="ch-tab" data-chtab="performance">Performance</button>
           <button class="ch-tab" data-chtab="headlines">Headlines</button>
           <button class="ch-tab" data-chtab="briefs">Briefs</button>
+          <button class="ch-tab" data-chtab="crosspost">Cross Post</button>
         </div>
       </div>
       <div class="ch-body">
@@ -914,6 +916,17 @@
             <div id="brief-result"></div>
           </div>
         </div>
+        <!-- Cross Post -->
+        <div class="ch-pane" data-chpane="crosspost">
+          <div class="ch-section">
+            <h4 class="ch-section-title">Cross-Channel Posting</h4>
+            <p class="ch-section-desc">Compose once, publish everywhere. Preview how your content looks on each platform.</p>
+            <div id="crosspost-composer"></div>
+          </div>
+          <div class="ch-section">
+            <div id="crosspost-feed"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -931,6 +944,7 @@
           <button class="soc-tab" data-soctab="growth">Growth</button>
           <button class="soc-tab" data-soctab="posts">Top Posts</button>
           <button class="soc-tab" data-soctab="audience">Audience</button>
+          <button class="soc-tab" data-soctab="scheduled">Scheduled</button>
         </div>
       </div>
       <div class="soc-body">
@@ -956,6 +970,14 @@
             <h4 class="ch-section-title">Audience Demographics</h4>
             <p class="ch-section-desc">Understand who your audience is and when they are most active.</p>
             <div id="social-audience"></div>
+          </div>
+        </div>
+        <!-- Scheduled -->
+        <div class="soc-pane" data-socpane="scheduled">
+          <div class="ch-section">
+            <h4 class="ch-section-title">Cross-Channel Schedule</h4>
+            <p class="ch-section-desc">View all scheduled and recent posts across platforms. Compose new posts in Content Hub (C).</p>
+            <div id="social-scheduled"></div>
           </div>
         </div>
       </div>

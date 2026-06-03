@@ -2036,3 +2036,114 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 [data-theme="cyberpunk"] .soc-time-day{color:#a0e8d8}
 [data-theme="cyberpunk"] .soc-time-eng{color:#00ffc8}
 [data-theme="cyberpunk"] .ch-overlay,[data-theme="cyberpunk"] .soc-overlay{background:rgba(0,0,0,.6)}
+
+/* ═══════════════════════════════════════════════════════════════
+   Cross-Channel Posting — Base Styles
+   ═══════════════════════════════════════════════════════════════ */
+.xp-compose-area{margin-bottom:16px}
+.xp-textarea{width:100%;padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e0e0e0;font-size:.88rem;font-family:inherit;outline:none;resize:vertical;min-height:80px;transition:border .15s}
+.xp-textarea:focus{border-color:#a855f7}
+.xp-char-count{font-size:.72rem;color:rgba(255,255,255,.35);text-align:right;margin-top:4px}
+.xp-platform-select{margin-bottom:16px}
+.xp-label{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.5);display:block;margin-bottom:8px}
+.xp-platform-checks{display:flex;flex-wrap:wrap;gap:8px}
+.xp-plat-check{display:flex;align-items:center;gap:6px;padding:6px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;cursor:pointer;transition:all .15s;font-size:.78rem;color:rgba(255,255,255,.5)}
+.xp-plat-check:has(input:checked){background:rgba(168,85,247,.08);border-color:rgba(168,85,247,.2)}
+.xp-plat-cb{display:none}
+.xp-plat-badge{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:800;color:#fff}
+.xp-plat-name{font-size:.75rem;color:rgba(255,255,255,.5)}
+.xp-options-row{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.xp-option{flex:1;min-width:140px}
+.xp-option .ch-input{margin-bottom:0}
+.xp-type-select{width:100%}
+.xp-schedule-input{width:100%;margin-bottom:0}
+.xp-preview-section{margin-bottom:16px}
+.xp-previews{display:grid;gap:10px}
+.xp-preview-empty{text-align:center;padding:20px;color:rgba(255,255,255,.25);font-size:.82rem}
+.xp-preview-card{padding:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);border-radius:8px}
+.xp-preview-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.xp-preview-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:800;color:#fff}
+.xp-preview-name{font-size:.8rem;font-weight:600;color:#d0d0d0;flex:1}
+.xp-preview-chars{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:4px}
+.xp-ok{background:rgba(34,197,94,.1);color:#22c55e}
+.xp-warn{background:rgba(245,158,11,.1);color:#f59e0b}
+.xp-over{background:rgba(239,68,68,.1);color:#ef4444}
+.xp-preview-body{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.5;white-space:pre-wrap}
+.xp-preview-warning{font-size:.72rem;color:#ef4444;margin-top:6px;font-style:italic}
+.xp-actions{display:flex;gap:10px}
+.xp-draft-btn{background:rgba(255,255,255,.06) !important;color:rgba(255,255,255,.6) !important;border:1px solid rgba(255,255,255,.1) !important}
+.xp-draft-btn:hover{background:rgba(255,255,255,.1) !important}
+
+/* — Feed / Queue — */
+.xp-feed-title{font-size:.88rem;font-weight:700;color:#d0d0d0;margin:0 0 12px}
+.xp-feed-card{padding:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:8px;margin-bottom:8px}
+.xp-feed-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.xp-feed-status{font-size:.68rem;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:4px;letter-spacing:.04em}
+.xp-status-scheduled .xp-feed-status{background:rgba(59,130,246,.12);color:#3b82f6}
+.xp-status-draft .xp-feed-status{background:rgba(245,158,11,.12);color:#f59e0b}
+.xp-status-published .xp-feed-status{background:rgba(34,197,94,.12);color:#22c55e}
+.xp-feed-platforms{display:flex;gap:3px;flex:1}
+.xp-feed-plat{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.48rem;font-weight:800;color:#fff}
+.xp-feed-time{font-size:.72rem;color:rgba(255,255,255,.35)}
+.xp-feed-del{background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:.75rem;padding:2px 6px;transition:color .15s}
+.xp-feed-del:hover{color:#ef4444}
+.xp-feed-text{font-size:.82rem;color:rgba(255,255,255,.5);margin:0 0 6px;line-height:1.4}
+.xp-feed-type{font-size:.65rem;font-weight:600;text-transform:uppercase;color:rgba(255,255,255,.25);letter-spacing:.04em}
+
+/* — Scheduled in Social — */
+.xp-sched-section{margin-bottom:20px}
+.xp-sched-title{font-size:.88rem;font-weight:700;color:#d0d0d0;margin:0 0 10px}
+.xp-sched-empty{text-align:center;padding:24px;color:rgba(255,255,255,.25);font-size:.82rem}
+.xp-sched-card{padding:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:8px;margin-bottom:8px}
+.xp-sched-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+
+/* ─── Glass Theme — Cross Post ──────────────────────────────── */
+[data-theme="glass"] .xp-textarea{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#1e293b}
+[data-theme="glass"] .xp-label{color:rgba(30,41,59,.5)}
+[data-theme="glass"] .xp-char-count{color:rgba(30,41,59,.4)}
+[data-theme="glass"] .xp-plat-check{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:rgba(30,41,59,.5)}
+[data-theme="glass"] .xp-plat-check:has(input:checked){background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.2)}
+[data-theme="glass"] .xp-preview-card{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+[data-theme="glass"] .xp-preview-name{color:#334155}
+[data-theme="glass"] .xp-preview-body{color:rgba(30,41,59,.55)}
+[data-theme="glass"] .xp-feed-card,.xp-sched-card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)}
+[data-theme="glass"] .xp-feed-title,.xp-sched-title{color:#334155}
+[data-theme="glass"] .xp-feed-text{color:rgba(30,41,59,.55)}
+[data-theme="glass"] .xp-feed-del:hover{color:#ef4444}
+[data-theme="glass"] .xp-draft-btn{background:rgba(255,255,255,.08) !important;border-color:rgba(255,255,255,.15) !important;color:rgba(30,41,59,.5) !important}
+
+/* ─── Brutalist Theme — Cross Post ──────────────────────────── */
+[data-theme="brutalist"] .xp-textarea{background:#fff;border:2px solid #000;border-radius:0;color:#000;font-family:'Space Mono',monospace}
+[data-theme="brutalist"] .xp-label{color:#333}
+[data-theme="brutalist"] .xp-char-count{color:#666}
+[data-theme="brutalist"] .xp-plat-check{background:#fff;border:1px solid #000;border-radius:0;color:#000}
+[data-theme="brutalist"] .xp-plat-badge{border-radius:0}
+[data-theme="brutalist"] .xp-preview-card{background:#fff;border:2px solid #000;border-radius:0}
+[data-theme="brutalist"] .xp-preview-name{color:#000}
+[data-theme="brutalist"] .xp-preview-body{color:#333}
+[data-theme="brutalist"] .xp-preview-chars{border-radius:0}
+[data-theme="brutalist"] .xp-feed-card,[data-theme="brutalist"] .xp-sched-card{background:#fff;border:1px solid #000;border-radius:0}
+[data-theme="brutalist"] .xp-feed-title,[data-theme="brutalist"] .xp-sched-title{color:#000;font-family:'Space Mono',monospace}
+[data-theme="brutalist"] .xp-feed-text{color:#333}
+[data-theme="brutalist"] .xp-feed-status{border-radius:0}
+[data-theme="brutalist"] .xp-feed-plat{border-radius:0}
+[data-theme="brutalist"] .xp-draft-btn{background:#fff !important;border:2px solid #000 !important;border-radius:0 !important;color:#000 !important}
+
+/* ─── Cyberpunk Theme — Cross Post ──────────────────────────── */
+[data-theme="cyberpunk"] .xp-textarea{background:rgba(0,255,200,.04);border-color:rgba(0,255,200,.12);color:#a0e8d8;border-radius:2px;font-family:'Orbitron',sans-serif;font-size:.75rem}
+[data-theme="cyberpunk"] .xp-textarea:focus{border-color:#00ffc8;box-shadow:0 0 8px rgba(0,255,200,.15)}
+[data-theme="cyberpunk"] .xp-label{color:rgba(0,255,200,.4);font-family:'Orbitron',sans-serif;font-size:.68rem}
+[data-theme="cyberpunk"] .xp-char-count{color:rgba(0,255,200,.3)}
+[data-theme="cyberpunk"] .xp-plat-check{background:rgba(0,255,200,.03);border-color:rgba(0,255,200,.08);border-radius:2px;color:rgba(0,255,200,.5)}
+[data-theme="cyberpunk"] .xp-plat-check:has(input:checked){background:rgba(0,255,200,.06);border-color:rgba(0,255,200,.2)}
+[data-theme="cyberpunk"] .xp-plat-badge{border-radius:2px}
+[data-theme="cyberpunk"] .xp-preview-card{background:rgba(0,255,200,.02);border-color:rgba(0,255,200,.08);border-radius:2px}
+[data-theme="cyberpunk"] .xp-preview-name{color:#00ffc8}
+[data-theme="cyberpunk"] .xp-preview-body{color:rgba(0,255,200,.5)}
+[data-theme="cyberpunk"] .xp-preview-chars{border-radius:2px}
+[data-theme="cyberpunk"] .xp-feed-card,[data-theme="cyberpunk"] .xp-sched-card{background:rgba(0,255,200,.02);border-color:rgba(0,255,200,.06);border-radius:2px}
+[data-theme="cyberpunk"] .xp-feed-title,[data-theme="cyberpunk"] .xp-sched-title{color:#00ffc8;font-family:'Orbitron',sans-serif}
+[data-theme="cyberpunk"] .xp-feed-text{color:rgba(0,255,200,.45)}
+[data-theme="cyberpunk"] .xp-feed-status{border-radius:2px}
+[data-theme="cyberpunk"] .xp-feed-plat{border-radius:2px}
+[data-theme="cyberpunk"] .xp-draft-btn{background:rgba(0,255,200,.04) !important;border:1px solid rgba(0,255,200,.12) !important;border-radius:2px !important;color:#00ffc8 !important}

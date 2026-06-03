@@ -409,6 +409,7 @@ const ContentHub = {
       case 'performance': ContentPerformance.render(); break;
       case 'headlines': HeadlineAnalyzer.render(''); break;
       case 'briefs': BriefGenerator.render('seo audit', 'blog'); break;
+      case 'crosspost': if (typeof CrossPost !== 'undefined') { CrossPost.renderComposer(); CrossPost.renderFeed(); } break;
     }
   }
 };
