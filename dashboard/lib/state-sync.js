@@ -2,6 +2,7 @@
 // Syncs state between browser (localStorage) and server when authenticated
 
 import { getToken, isAuthenticated } from './auth.js';
+import { API_BASE_URL } from './config.js';
 
 const DEBOUNCE_MS = 500;
 const debounceTimers = {};
@@ -27,7 +28,7 @@ export function syncToServer(key, value) {
 
   debounceTimers[key] = setTimeout(async () => {
     try {
-      await fetch(`/api/state/${key}`, {
+      await fetch(`${API_BASE_URL}/api/state/${key}`, {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify(key === 'layout' ? { layout: value } : value)
@@ -47,7 +48,7 @@ export async function loadFromServer() {
   if (!isAuthenticated()) return null;
 
   try {
-    const res = await fetch('/api/state', {
+    const res = await fetch(`${API_BASE_URL}/api/state`, {
       headers: authHeaders()
     });
     if (!res.ok) return null;
@@ -88,7 +89,7 @@ export async function saveConnectorConfig(connectorId, credentials) {
   if (!isAuthenticated()) return;
 
   try {
-    await fetch('/api/state/connectors', {
+    await fetch(`${API_BASE_URL}/api/state/connectors`, {
       method: 'PUT',
       headers: authHeaders(),
       body: JSON.stringify({ connectorId, credentials })
@@ -106,7 +107,7 @@ export async function loadChatHistory() {
   if (!isAuthenticated()) return [];
 
   try {
-    const res = await fetch('/api/state/chat-history', {
+    const res = await fetch(`${API_BASE_URL}/api/state/chat-history`, {
       headers: authHeaders()
     });
     if (!res.ok) return [];
@@ -123,7 +124,7 @@ export async function saveChatMessage(role, content) {
   if (!isAuthenticated()) return;
 
   try {
-    await fetch('/api/state/chat-history', {
+    await fetch(`${API_BASE_URL}/api/state/chat-history`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ role, content })

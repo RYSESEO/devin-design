@@ -1,6 +1,8 @@
 const MAX_RECONNECT_DELAY = 30000;
 const INITIAL_RECONNECT_DELAY = 1000;
 
+import { API_BASE_URL, WS_BASE_URL } from './config.js';
+
 export class RealtimeClient {
   constructor() {
     this.ws = null;
@@ -19,8 +21,13 @@ export class RealtimeClient {
 
   tryWebSocket() {
     try {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const url = `${protocol}//${window.location.host}/ws`;
+      let url;
+      if (WS_BASE_URL) {
+        url = WS_BASE_URL.replace(/\/$/, '') + '/ws';
+      } else {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        url = `${protocol}//${window.location.host}/ws`;
+      }
       this.ws = new WebSocket(url);
 
       this.ws.onopen = () => {
@@ -69,7 +76,7 @@ export class RealtimeClient {
     try {
       const channels = Array.from(this.subscriptions.keys());
       const channelsParam = channels.length > 0 ? channels.join(',') : 'kpi,activity,notifications';
-      const url = `/api/stream?channels=${channelsParam}`;
+      const url = `${API_BASE_URL}/api/stream?channels=${channelsParam}`;
       this.eventSource = new EventSource(url);
 
       this.eventSource.onopen = () => {

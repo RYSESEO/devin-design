@@ -46,7 +46,7 @@ function copyLegacyScripts() {
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   root: 'dashboard',
   server: {
     proxy: {
@@ -62,7 +62,18 @@ export default defineConfig({
   },
   build: {
     outDir: '../dist/client',
-    emptyOutDir: true
+    emptyOutDir: true,
+    sourcemap: mode !== 'production',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'chart': ['chart.js']
+        },
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js'
+      }
+    }
   },
   plugins: [copyLegacyScripts()]
-});
+}));

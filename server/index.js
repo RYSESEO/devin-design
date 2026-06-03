@@ -22,9 +22,56 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Rate limiting for auth endpoints
+const authAttempts = new Map(); // key: IP, value: { count, resetTime }
+
+function rateLimitAuth(req, res, next) {
+  if (process.env.NODE_ENV === 'test') return next();
+  const ip = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  const windowMs = 60000; // 1 minute
+  const maxAttempts = 5;
+
+  const entry = authAttempts.get(ip);
+  if (entry) {
+    if (now > entry.resetTime) {
+      authAttempts.set(ip, { count: 1, resetTime: now + windowMs });
+    } else if (entry.count >= maxAttempts) {
+      return res.status(429).json({ error: 'Too many attempts. Try again later.' });
+    } else {
+      entry.count++;
+    }
+  } else {
+    authAttempts.set(ip, { count: 1, resetTime: now + windowMs });
+  }
+  next();
+}
+
+// Clean up stale rate limit entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of authAttempts) {
+    if (now > entry.resetTime) {
+      authAttempts.delete(ip);
+    }
+  }
+}, 300000);
+
 // Middleware
-app.use(cors());
-app.use(helmet({ contentSecurityPolicy: false }));
+const corsOrigin = process.env.CORS_ORIGIN || '*';
+app.use(cors({ origin: corsOrigin, credentials: corsOrigin !== '*' }));
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'", "ws:", "wss:"],
+    }
+  }
+}));
 app.use(cookieParser());
 app.use(express.json());
 
@@ -33,7 +80,9 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Auth routes
+// Auth routes (with rate limiting on login/register)
+app.use('/api/auth/login', rateLimitAuth);
+app.use('/api/auth/register', rateLimitAuth);
 app.use('/api/auth', authRouter);
 
 // State routes (require auth - handled inside router)
