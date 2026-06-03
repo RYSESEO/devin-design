@@ -15,6 +15,7 @@ import stateRouter from './routes/state.js';
 import proxyRouter from './routes/proxy.js';
 import oauthRouter from './routes/oauth.js';
 import intelligenceRouter from './routes/intelligence.js';
+import automationsRouter from './routes/automations.js';
 import { optionalAuth } from './middleware/auth.js';
 import db from './db/index.js';
 
@@ -125,6 +126,9 @@ app.use('/api/oauth', oauthRouter);
 
 // Intelligence routes (require auth - handled inside router)
 app.use('/api/intelligence', intelligenceRouter);
+
+// Automations routes (require auth - handled inside router)
+app.use('/api/automations', automationsRouter);
 
 // Optional auth for other routes
 app.use(optionalAuth);
