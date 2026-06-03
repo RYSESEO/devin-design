@@ -44,10 +44,10 @@ router.get('/shopify/install', (req, res) => {
 
   const state = generateState();
 
-  // Store state in oauth_states table
+  // Store state in oauth_states table with 10-minute expiry and shop for SSRF protection
   db.prepare(
-    'INSERT INTO oauth_states (user_id, provider, state) VALUES (?, ?, ?)'
-  ).run(req.user.id, 'shopify', state);
+    "INSERT INTO oauth_states (user_id, provider, state, shop, expires_at) VALUES (?, ?, ?, ?, datetime('now', '+10 minutes'))"
+  ).run(req.user.id, 'shopify', state, shop);
 
   const redirectUri = `${APP_URL}/api/oauth/shopify/callback`;
   const authUrl = `https://${shop}.myshopify.com/admin/oauth/authorize?client_id=${SHOPIFY_CLIENT_ID}&scope=${SHOPIFY_SCOPES}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
@@ -72,6 +72,12 @@ router.get('/shopify/callback', async (req, res) => {
     return res.redirect(`${APP_URL}?oauth=shopify&status=error&message=invalid_state`);
   }
 
+  // Check state expiry
+  if (stateRow.expires_at && new Date(stateRow.expires_at) < new Date()) {
+    db.prepare('DELETE FROM oauth_states WHERE id = ?').run(stateRow.id);
+    return res.redirect(`${APP_URL}?oauth=shopify&status=error&message=state_expired`);
+  }
+
   // Delete state nonce (one-time use)
   db.prepare('DELETE FROM oauth_states WHERE id = ?').run(stateRow.id);
 
@@ -81,6 +87,16 @@ router.get('/shopify/callback', async (req, res) => {
 
   if (!shop) {
     return res.redirect(`${APP_URL}?oauth=shopify&status=error&message=missing_shop`);
+  }
+
+  // SSRF protection: verify shop matches the one stored during install
+  if (stateRow.shop && stateRow.shop !== shop) {
+    return res.redirect(`${APP_URL}?oauth=shopify&status=error&message=shop_mismatch`);
+  }
+
+  // Defense-in-depth: validate shop format in callback as well
+  if (!isValidShop(shop)) {
+    return res.redirect(`${APP_URL}?oauth=shopify&status=error&message=invalid_shop`);
   }
 
   try {
@@ -119,7 +135,8 @@ router.get('/shopify/callback', async (req, res) => {
 
     res.redirect(`${APP_URL}?oauth=shopify&status=success`);
   } catch (err) {
-    res.redirect(`${APP_URL}?oauth=shopify&status=error&message=${encodeURIComponent(err.message)}`);
+    console.error('Shopify OAuth callback error:', err.message);
+    res.redirect(`${APP_URL}?oauth=shopify&status=error&message=token_exchange_failed`);
   }
 });
 
@@ -127,9 +144,9 @@ router.get('/shopify/callback', async (req, res) => {
 router.get('/github/authorize', (req, res) => {
   const state = generateState();
 
-  // Store state in oauth_states table
+  // Store state in oauth_states table with 10-minute expiry
   db.prepare(
-    'INSERT INTO oauth_states (user_id, provider, state) VALUES (?, ?, ?)'
+    "INSERT INTO oauth_states (user_id, provider, state, expires_at) VALUES (?, ?, ?, datetime('now', '+10 minutes'))"
   ).run(req.user.id, 'github', state);
 
   const redirectUri = `${APP_URL}/api/oauth/github/callback`;
@@ -153,6 +170,12 @@ router.get('/github/callback', async (req, res) => {
 
   if (!stateRow) {
     return res.redirect(`${APP_URL}?oauth=github&status=error&message=invalid_state`);
+  }
+
+  // Check state expiry
+  if (stateRow.expires_at && new Date(stateRow.expires_at) < new Date()) {
+    db.prepare('DELETE FROM oauth_states WHERE id = ?').run(stateRow.id);
+    return res.redirect(`${APP_URL}?oauth=github&status=error&message=state_expired`);
   }
 
   // Delete state nonce (one-time use)
@@ -196,7 +219,8 @@ router.get('/github/callback', async (req, res) => {
 
     res.redirect(`${APP_URL}?oauth=github&status=success`);
   } catch (err) {
-    res.redirect(`${APP_URL}?oauth=github&status=error&message=${encodeURIComponent(err.message)}`);
+    console.error('GitHub OAuth callback error:', err.message);
+    res.redirect(`${APP_URL}?oauth=github&status=error&message=token_exchange_failed`);
   }
 });
 

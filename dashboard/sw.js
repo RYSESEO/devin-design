@@ -6,7 +6,10 @@ const API_CACHE = `${CACHE_VERSION}-api`;
 const PRECACHE_ASSETS = [
   './',
   'index.html',
-  'styles.css'
+  'styles.css',
+  'main.js'
+  // Note: In production builds, Vite generates hashed filenames.
+  // For full offline support, use vite-plugin-pwa to generate a precache manifest.
 ];
 
 // Install: precache critical assets

@@ -103,7 +103,7 @@ describe('OAuth Routes', () => {
     it('redirects with error when code is missing', async () => {
       // Insert a valid state first
       const state = 'test-state-no-code-' + Date.now();
-      db.prepare('INSERT INTO oauth_states (user_id, provider, state) VALUES (?, ?, ?)').run(userId, 'shopify', state);
+      db.prepare("INSERT INTO oauth_states (user_id, provider, state, shop, expires_at) VALUES (?, ?, ?, ?, datetime('now', '+10 minutes'))").run(userId, 'shopify', state, 'test-store');
 
       const res = await get(`/api/oauth/shopify/callback?shop=test-store&state=${state}`, authToken);
       expect(res.status).toBe(302);
@@ -115,7 +115,7 @@ describe('OAuth Routes', () => {
     it('exchanges code and stores token on valid callback', async () => {
       // Insert a valid state
       const state = 'test-state-valid-' + Date.now();
-      db.prepare('INSERT INTO oauth_states (user_id, provider, state) VALUES (?, ?, ?)').run(userId, 'shopify', state);
+      db.prepare("INSERT INTO oauth_states (user_id, provider, state, shop, expires_at) VALUES (?, ?, ?, ?, datetime('now', '+10 minutes'))").run(userId, 'shopify', state, 'test-store');
 
       // Mock fetch for the token exchange
       const originalFetch = global.fetch;
@@ -192,7 +192,7 @@ describe('OAuth Routes', () => {
     it('exchanges code and stores token on valid callback', async () => {
       // Insert a valid state
       const state = 'test-github-state-' + Date.now();
-      db.prepare('INSERT INTO oauth_states (user_id, provider, state) VALUES (?, ?, ?)').run(userId, 'github', state);
+      db.prepare("INSERT INTO oauth_states (user_id, provider, state, expires_at) VALUES (?, ?, ?, datetime('now', '+10 minutes'))").run(userId, 'github', state);
 
       // Mock fetch for the token exchange
       const originalFetch = global.fetch;

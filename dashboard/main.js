@@ -416,15 +416,15 @@ async function initApp() {
   initMobileNav();
 
   // Register lazy-loaded panels
-  registerPanel('ai-chat-btn', () => { if (window.initAIChat) window.initAIChat(); });
-  registerPanel('voice-btn', () => { if (window.initVoiceControl) window.initVoiceControl(); });
-  registerPanel('ci-btn', () => { if (window.initCompetitiveIntel) window.initCompetitiveIntel(); });
-  registerPanel('wb-btn', () => { if (window.initWidgetBuilder) window.initWidgetBuilder(); });
-  registerPanel('soc-btn', () => { if (window.initSocialDashboard) window.initSocialDashboard(); });
-  registerPanel('ch-btn', () => { if (window.initContentHub) window.initContentHub(); });
-  registerPanel('eco-btn', () => { if (window.initEcosystem) window.initEcosystem(); });
-  registerPanel('intel-btn', () => { if (window.initIntelligence) window.initIntelligence(); });
-  registerPanel('toolkit-btn', () => { if (window.initToolkit) window.initToolkit(); });
+  registerPanel('ai-chat-btn', () => { if (window.initAIChat) { window.initAIChat(); return true; } return false; });
+  registerPanel('voice-btn', () => { if (window.initVoiceControl) { window.initVoiceControl(); return true; } return false; });
+  registerPanel('ci-btn', () => { if (window.initCompetitiveIntel) { window.initCompetitiveIntel(); return true; } return false; });
+  registerPanel('wb-btn', () => { if (window.initWidgetBuilder) { window.initWidgetBuilder(); return true; } return false; });
+  registerPanel('soc-btn', () => { if (window.initSocialDashboard) { window.initSocialDashboard(); return true; } return false; });
+  registerPanel('ch-btn', () => { if (window.initContentHub) { window.initContentHub(); return true; } return false; });
+  registerPanel('eco-btn', () => { if (window.initEcosystem) { window.initEcosystem(); return true; } return false; });
+  registerPanel('intel-btn', () => { if (window.initIntelligence) { window.initIntelligence(); return true; } return false; });
+  registerPanel('toolkit-btn', () => { if (window.initToolkit) { window.initToolkit(); return true; } return false; });
   initLazyPanels();
 
   // Global Escape key handler for overlays

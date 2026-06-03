@@ -24,8 +24,15 @@ export function initLazyPanels() {
 
     btn.addEventListener('click', () => {
       if (!initializedPanels.has(buttonId)) {
-        initializedPanels.add(buttonId);
-        initFn();
+        try {
+          const result = initFn();
+          // If initFn returns false, treat as not initialized (retry on next click)
+          if (result !== false) {
+            initializedPanels.add(buttonId);
+          }
+        } catch {
+          // Don't mark as initialized on error - allow retry
+        }
       }
     }, { once: false }); // Keep listener for toggle behavior
   }

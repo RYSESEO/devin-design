@@ -73,7 +73,18 @@ setInterval(() => {
   }
 }, 3600000);
 
+// Clean up expired OAuth state nonces every 5 minutes
+setInterval(() => {
+  try {
+    db.prepare("DELETE FROM oauth_states WHERE expires_at < datetime('now')").run();
+  } catch { /* ignore */ }
+}, 300000);
+
 // Middleware
+if (process.env.NODE_ENV === 'production' && !process.env.ENCRYPTION_KEY) {
+  console.warn('[SECURITY WARNING] ENCRYPTION_KEY not set. Falling back to JWT_SECRET for encryption. Set a separate ENCRYPTION_KEY in production.');
+}
+
 const corsOrigin = process.env.CORS_ORIGIN || '*';
 app.use(cors({ origin: corsOrigin, credentials: corsOrigin !== '*' }));
 app.use(helmet({

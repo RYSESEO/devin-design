@@ -77,9 +77,26 @@ db.exec(`
     user_id INTEGER NOT NULL,
     provider TEXT NOT NULL,
     state TEXT UNIQUE NOT NULL,
+    shop TEXT,
+    expires_at DATETIME NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
 `);
+
+// Migrate oauth_states table if it exists without the new columns
+try {
+  const cols = db.prepare("PRAGMA table_info(oauth_states)").all().map(c => c.name);
+  if (!cols.includes('expires_at')) {
+    db.exec("ALTER TABLE oauth_states ADD COLUMN expires_at DATETIME");
+    // Backfill existing rows with an already-expired timestamp
+    db.exec("UPDATE oauth_states SET expires_at = datetime('now', '-1 hour') WHERE expires_at IS NULL");
+  }
+  if (!cols.includes('shop')) {
+    db.exec("ALTER TABLE oauth_states ADD COLUMN shop TEXT");
+  }
+} catch {
+  // Table may not exist yet (first run), ignore
+}
 
 export default db;
