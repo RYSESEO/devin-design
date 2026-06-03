@@ -1,6 +1,45 @@
 /* ─── Performance — Reduced Motion ──────────────────────────── */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
+  .orb{animation:none !important;opacity:0.1 !important}
+  .ambient-bg{opacity:0.5}
+  .live-dot{animation:none !important}
+}
+
+/* ─── Skip to Content ──────────────────────────────────────── */
+.skip-to-content{
+  position:absolute;
+  top:-100%;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--accent);
+  color:#fff;
+  padding:12px 24px;
+  border-radius:0 0 var(--radius-sm) var(--radius-sm);
+  font-size:0.82rem;
+  font-weight:600;
+  z-index:9999;
+  transition:top 0.2s;
+  text-decoration:none;
+}
+.skip-to-content:focus{
+  top:0;
+}
+
+/* ─── Focus Indicators ─────────────────────────────────────── */
+:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+:focus:not(:focus-visible){
+  outline:none;
 }
 
 /* ─── Reset & Base ──────────────────────────────────────────── */
@@ -255,19 +294,110 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .conn-field input:focus{border-color:var(--accent)}
 .conn-field input::placeholder{color:var(--text-3)}
 
+/* ─── Mobile Menu Button (hamburger) ──────────────────────── */
+.mobile-menu-btn{display:none;align-items:center;justify-content:center;width:44px;height:44px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-2);cursor:pointer;transition:all .2s;padding:0;flex-shrink:0}
+.mobile-menu-btn:hover{border-color:var(--border-h);color:var(--text)}
+.mobile-menu-btn svg{display:block}
+
 /* ─── Responsive ───────────────────────────────────────────── */
+
+/* Tablet: 768px - 1200px */
 @media(max-width:1200px){
   .kpi-row{grid-template-columns:repeat(2,1fr)}
   .charts-row{grid-template-columns:1fr}
   .bottom-row{grid-template-columns:1fr}
   .content-row{grid-template-columns:1fr}
-}
-@media(max-width:640px){
-  .kpi-row{grid-template-columns:1fr}
-  .topbar{flex-direction:column;gap:10px;padding:12px 16px}
-  .dashboard{padding:16px 14px 40px}
-  .theme-switcher{flex-wrap:wrap;justify-content:center}
+  .topbar{padding:14px 20px}
+  .dashboard{padding:20px 20px 50px}
+  .cmd-trigger span{display:none}
+  .cmd-trigger kbd{display:none}
   .theme-btn span{display:none}
+}
+
+/* Mobile: below 768px */
+@media(max-width:768px){
+  .mobile-menu-btn{display:flex}
+
+  .topbar{flex-wrap:wrap;padding:12px 16px;position:relative}
+  .topbar-left{flex:1}
+  .topbar-right{
+    display:none;
+    position:absolute;
+    top:100%;
+    left:0;
+    right:0;
+    flex-direction:column;
+    align-items:stretch;
+    gap:12px;
+    background:var(--bg);
+    border-bottom:1px solid var(--border);
+    padding:16px;
+    z-index:99;
+    box-shadow:0 8px 24px rgba(0,0,0,.15)
+  }
+  .topbar.mobile-nav-open .topbar-right{display:flex}
+
+  .topbar-right .theme-switcher{width:100%;justify-content:center}
+  .topbar-right .topbar-sep{width:100%;height:1px;margin:4px 0}
+  .topbar-right .date-controls{width:100%;justify-content:center;flex-wrap:wrap;gap:6px}
+  .topbar-right .demo-mode-wrap{width:100%;justify-content:center}
+  .topbar-right .live-indicator{width:100%;justify-content:center}
+  .topbar-right .notif-wrap{width:100%}
+  .topbar-right .notif-bell{width:100%;justify-content:center;border-radius:8px}
+  .topbar-right .user-menu{width:100%}
+
+  .kpi-row{grid-template-columns:1fr}
+  .charts-row{grid-template-columns:1fr}
+  .bottom-row{grid-template-columns:1fr}
+  .content-row{grid-template-columns:1fr}
+  .dashboard{padding:16px 12px 40px}
+
+  .chart-wrap{height:auto;min-height:180px}
+  .chart-wrap-donut{height:auto;min-height:160px}
+
+  .logo-sub{display:none}
+  .logo-divider{display:none}
+  .cmd-trigger{margin-left:8px;padding:6px 10px}
+  .cmd-trigger span{display:none}
+  .cmd-trigger kbd{display:none}
+
+  .kpi-value{font-size:1.35rem}
+
+  /* Touch-friendly tap targets */
+  .period-btn{min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center}
+  .theme-btn{min-height:44px;padding:8px 12px}
+  .settings-btn{width:44px;height:44px}
+  .notif-bell{width:44px;height:44px}
+  .expand-btn{width:44px;height:44px;opacity:1}
+  .soc-btn,.ch-btn,.eco-btn,.intel-btn,.toolkit-btn,.topbar-icon-btn{min-width:44px;min-height:44px}
+  .compare-btn{min-height:44px}
+  .conn-btn{min-height:44px}
+
+  /* Notification panel full-width on mobile */
+  .notif-panel{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;max-height:70vh;border-radius:var(--radius) var(--radius) 0 0}
+
+  /* Settings drawer full-width on mobile */
+  .settings-drawer{width:100%;max-width:100vw}
+  .toolkit-drawer{width:100%;max-width:100vw}
+
+  /* Collapsible panels as full-width bottom sheets */
+  .settings-overlay{align-items:flex-end}
+  .toolkit-overlay.tk-open{align-items:flex-end}
+}
+
+/* Small mobile: below 480px */
+@media(max-width:480px){
+  .topbar-left .logo-text{font-size:.95rem}
+  .kpi-card{padding:14px 16px;gap:10px}
+  .kpi-icon{width:36px;height:36px}
+  .kpi-value{font-size:1.2rem}
+  .chart-card{padding:16px}
+  .feed-card,.table-card,.pipeline-card{padding:16px}
+  .card-header h3{font-size:.82rem}
+  .data-table{font-size:.74rem}
+  .data-table th,.data-table td{padding:6px 6px}
+  .pipeline-stats{flex-direction:column;gap:10px;align-items:stretch}
+  .pipe-stat{flex-direction:row;justify-content:space-between;align-items:center}
 }
 
 /* ─── Command Trigger Button ───────────────────────────────── */

@@ -13,6 +13,7 @@ import streamRouter from './routes/stream.js';
 import authRouter from './routes/auth.js';
 import stateRouter from './routes/state.js';
 import proxyRouter from './routes/proxy.js';
+import oauthRouter from './routes/oauth.js';
 import { optionalAuth } from './middleware/auth.js';
 import db from './db/index.js';
 
@@ -72,7 +73,18 @@ setInterval(() => {
   }
 }, 3600000);
 
+// Clean up expired OAuth state nonces every 5 minutes
+setInterval(() => {
+  try {
+    db.prepare("DELETE FROM oauth_states WHERE expires_at < datetime('now')").run();
+  } catch { /* ignore */ }
+}, 300000);
+
 // Middleware
+if (process.env.NODE_ENV === 'production' && !process.env.ENCRYPTION_KEY) {
+  console.warn('[SECURITY WARNING] ENCRYPTION_KEY not set. Falling back to JWT_SECRET for encryption. Set a separate ENCRYPTION_KEY in production.');
+}
+
 const corsOrigin = process.env.CORS_ORIGIN || '*';
 app.use(cors({ origin: corsOrigin, credentials: corsOrigin !== '*' }));
 app.use(helmet({
@@ -84,6 +96,7 @@ app.use(helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:"],
       connectSrc: ["'self'", "ws:", "wss:"],
+      formAction: ["'self'", "https://*.myshopify.com", "https://github.com"],
     }
   }
 }));
@@ -105,6 +118,9 @@ app.use('/api/state', stateRouter);
 
 // Proxy routes (require auth - handled inside router)
 app.use('/api/proxy', proxyRouter);
+
+// OAuth routes (require auth - handled inside router)
+app.use('/api/oauth', oauthRouter);
 
 // Optional auth for other routes
 app.use(optionalAuth);

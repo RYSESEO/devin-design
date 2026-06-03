@@ -22,12 +22,15 @@
   <script src="competitive.js"></script>
   <script src="widget-builder.js"></script>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="modulepreload" href="./main.js">
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#a855f7" />
+  <meta name="description" content="RYSE Command Center - Real-time analytics dashboard for Shopify, GitHub, and marketing automation">
 </head>
 <body>
+  <a href="#main-dashboard" class="skip-to-content">Skip to main content</a>
   <!-- Auth Overlay -->
-  <div class="auth-overlay" id="auth-overlay">
+  <div class="auth-overlay" id="auth-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-title">
     <div class="auth-card">
       <div class="auth-logo">
         <svg width="40" height="40" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="url(#auth-logo-grad)"/><path d="M8 14l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="auth-logo-grad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#a855f7"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs></svg>
@@ -65,7 +68,7 @@
   </div>
 
   <!-- Top bar -->
-  <header class="topbar">
+  <header class="topbar" role="banner">
     <div class="topbar-left">
       <div class="logo">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="url(#logo-grad)"/><path d="M8 14l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="logo-grad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#a855f7"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs></svg>
@@ -78,8 +81,11 @@
         <span>Search commands...</span>
         <kbd>Ctrl K</kbd>
       </button>
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle navigation">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
     </div>
-    <div class="topbar-right">
+    <div class="topbar-right" role="navigation" aria-label="Main navigation">
       <div class="theme-switcher">
         <button class="theme-btn active" data-theme="default" title="Default">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
@@ -107,35 +113,35 @@
         </label>
       </div>
       <div class="live-indicator"><span class="live-dot"></span> Live</div>
-      <button class="soc-btn" id="soc-btn" title="Social Media Dashboard (M)">
+      <button class="soc-btn" id="soc-btn" title="Social Media Dashboard (M)" aria-label="Social Media Dashboard">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
       </button>
-      <button class="ch-btn" id="ch-btn" title="Content Optimization Hub (C)">
+      <button class="ch-btn" id="ch-btn" title="Content Optimization Hub (C)" aria-label="Content Hub">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       </button>
-      <button class="eco-btn" id="eco-btn" title="Ecosystem & Distribution (P)">
+      <button class="eco-btn" id="eco-btn" title="Ecosystem & Distribution (P)" aria-label="Ecosystem">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
       </button>
-      <button class="intel-btn" id="intel-btn" title="Intelligence & Business (I)">
+      <button class="intel-btn" id="intel-btn" title="Intelligence & Business (I)" aria-label="Intelligence">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="10" y1="21" x2="14" y2="21"/></svg>
       </button>
-      <button class="toolkit-btn" id="toolkit-btn" title="Designer & Dev Toolkit (D)">
+      <button class="toolkit-btn" id="toolkit-btn" title="Designer & Dev Toolkit (D)" aria-label="Toolkit">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
       </button>
-      <button class="topbar-icon-btn" id="ai-chat-btn" title="AI Chat Assistant (A)">
+      <button class="topbar-icon-btn" id="ai-chat-btn" title="AI Chat Assistant (A)" aria-label="AI Chat">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       </button>
-      <button class="topbar-icon-btn" id="voice-btn" title="Voice Control (V)">
+      <button class="topbar-icon-btn" id="voice-btn" title="Voice Control (V)" aria-label="Voice Control">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
         <span class="voice-indicator" id="voice-indicator" hidden></span>
       </button>
-      <button class="topbar-icon-btn" id="ci-btn" title="Competitive Intelligence (R)">
+      <button class="topbar-icon-btn" id="ci-btn" title="Competitive Intelligence (R)" aria-label="Competitive Intelligence">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       </button>
-      <button class="topbar-icon-btn" id="wb-btn" title="Widget Builder (W)">
+      <button class="topbar-icon-btn" id="wb-btn" title="Widget Builder (W)" aria-label="Widget Builder">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       </button>
-      <button class="settings-btn" id="settings-btn" title="Data Connections (S)">
+      <button class="settings-btn" id="settings-btn" title="Data Connections (S)" aria-label="Settings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       </button>
       <div class="user-menu" id="user-menu" hidden>
@@ -148,11 +154,11 @@
         </div>
       </div>
       <div class="notif-wrap" id="notif-wrap">
-        <button class="notif-bell" id="notif-bell" title="Notifications (N)">
+        <button class="notif-bell" id="notif-bell" title="Notifications (N)" aria-label="Notifications">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
           <span class="notif-badge" id="notif-badge">5</span>
         </button>
-        <div class="notif-panel" id="notif-panel" hidden>
+        <div class="notif-panel" id="notif-panel" hidden aria-live="polite" aria-atomic="true">
           <div class="notif-header"><h4>Notifications</h4><button class="notif-clear" id="notif-clear">Clear all</button></div>
           <ul class="notif-list" id="notif-list"></ul>
           <div class="notif-empty" id="notif-empty" hidden>No new notifications</div>
@@ -213,7 +219,7 @@
   </nav>
 
   <!-- Main grid -->
-  <main class="dashboard">
+  <main class="dashboard" id="main-dashboard" role="main">
 
     <!-- Row 1: KPI cards -->
     <section class="kpi-row" id="section-kpi" data-grid-id="section-kpi">
