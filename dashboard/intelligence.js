@@ -40,6 +40,7 @@ const Intelligence = {
     if (this.activeTab === 'insights') this.renderInsights();
     else if (this.activeTab === 'business') this.renderBusiness();
     else if (this.activeTab === 'reports') this.renderReports();
+    else if (this.activeTab === 'actions') this.renderActions();
   },
 
   renderInsights() {
@@ -58,6 +59,10 @@ const Intelligence = {
   renderReports() {
     PDFReporter.render();
     DataAnnotations.render();
+  },
+
+  renderActions() {
+    if (typeof window.renderActionsTab === 'function') window.renderActionsTab();
   }
 };
 

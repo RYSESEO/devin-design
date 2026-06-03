@@ -12,6 +12,7 @@
   <script src="connectors.js"></script>
   <script src="toolkit.js"></script>
   <script src="intelligence.js"></script>
+  <script src="actionable-intel.js"></script>
   <script src="ecosystem.js"></script>
   <script src="content-hub.js"></script>
   <script src="social-dashboard.js"></script>
@@ -559,6 +560,7 @@
           <div class="shortcut-row"><kbd>S</kbd><span>Data connections</span></div>
           <div class="shortcut-row"><kbd>D</kbd><span>Designer & Dev toolkit</span></div>
           <div class="shortcut-row"><kbd>I</kbd><span>Intelligence panel</span></div>
+          <div class="shortcut-row"><kbd>Alt+I</kbd><span>Intelligence Actions tab</span></div>
           <div class="shortcut-row"><kbd>M</kbd><span>Social Media Dashboard</span></div>
           <div class="shortcut-row"><kbd>C</kbd><span>Content Hub</span></div>
           <div class="shortcut-row"><kbd>P</kbd><span>Ecosystem panel</span></div>
@@ -673,6 +675,7 @@
           <button class="intel-tab active" data-tab="insights">Insights</button>
           <button class="intel-tab" data-tab="business">Business</button>
           <button class="intel-tab" data-tab="reports">Reports</button>
+          <button class="intel-tab" data-tab="actions">Actions</button>
         </div>
       </div>
       <div class="intel-body">
@@ -728,6 +731,34 @@
             <h4 class="intel-section-title">Data Annotations</h4>
             <p class="intel-section-desc">Mark important events on your data timeline.</p>
             <div id="intel-annotations"></div>
+          </div>
+        </div>
+        <!-- Actions Pane -->
+        <div class="intel-pane" data-pane="actions">
+          <div class="intel-section">
+            <h4 class="intel-section-title">Actionable Recommendations</h4>
+            <p class="intel-section-desc">AI-powered suggestions with one-click actions.</p>
+            <div id="intel-recommendations"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Revenue Attribution</h4>
+            <p class="intel-section-desc">Revenue breakdown by source and UTM campaign.</p>
+            <div id="intel-attribution"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Alert Manager</h4>
+            <p class="intel-section-desc">Create threshold alerts with automated actions.</p>
+            <div id="intel-alert-mgr"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Goal Setting</h4>
+            <p class="intel-section-desc">Set goals with progress tracking and forecasted completion.</p>
+            <div id="intel-goal-setting"></div>
+          </div>
+          <div class="intel-section">
+            <h4 class="intel-section-title">Daily Digest</h4>
+            <p class="intel-section-desc">Your morning briefing with key metrics and insights.</p>
+            <div id="intel-digest"></div>
           </div>
         </div>
       </div>

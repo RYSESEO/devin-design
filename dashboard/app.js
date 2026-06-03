@@ -593,6 +593,12 @@ function initKeyboardShortcuts() {
       return;
     }
 
+    if (e.altKey && (e.key === 'i' || e.key === 'I')) {
+      e.preventDefault();
+      if (typeof Intelligence !== 'undefined') Intelligence.open('actions');
+      return;
+    }
+
     if (e.key === 'Escape') {
       if (typeof Cinematic !== 'undefined' && Cinematic.isActive) { Cinematic.stop(); return; }
       if (typeof Onboarding !== 'undefined' && Onboarding.isActive) { Onboarding.finish(); return; }
