@@ -579,6 +579,8 @@ function initKeyboardShortcuts() {
     }
 
     if (e.key === 'Escape') {
+      if (typeof SocialDashboard !== 'undefined' && SocialDashboard.isOpen) { SocialDashboard.close(); return; }
+      if (typeof ContentHub !== 'undefined' && ContentHub.isOpen) { ContentHub.close(); return; }
       if (typeof Ecosystem !== 'undefined' && Ecosystem.isOpen) { Ecosystem.close(); return; }
       if (typeof Intelligence !== 'undefined' && Intelligence.isOpen) { Intelligence.close(); return; }
       if (typeof Toolkit !== 'undefined' && Toolkit.isOpen) { Toolkit.close(); return; }
@@ -605,6 +607,8 @@ function initKeyboardShortcuts() {
       case 's': case 'S': if (typeof SettingsPanel !== 'undefined') SettingsPanel.toggle(); break;
       case 'd': case 'D': if (typeof Toolkit !== 'undefined') Toolkit.toggle(); break;
       case 'i': case 'I': if (typeof Intelligence !== 'undefined') Intelligence.toggle(); break;
+      case 'm': case 'M': if (typeof SocialDashboard !== 'undefined') SocialDashboard.toggle(); break;
+      case 'c': case 'C': if (typeof ContentHub !== 'undefined') ContentHub.toggle(); break;
       case 'p': case 'P': if (typeof Ecosystem !== 'undefined') Ecosystem.toggle(); break;
       case '?': openShortcuts(); break;
       case 'f': case 'F':
@@ -920,4 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof initToolkit === 'function') initToolkit();
   if (typeof initIntelligence === 'function') initIntelligence();
   if (typeof initEcosystem === 'function') initEcosystem();
+  if (typeof initContentHub === 'function') initContentHub();
+  if (typeof initSocialDashboard === 'function') initSocialDashboard();
+  if (typeof initCrossPost === 'function') initCrossPost();
 });
