@@ -12,6 +12,8 @@
   <script src="toolkit.js"></script>
   <script src="intelligence.js"></script>
   <script src="ecosystem.js"></script>
+  <script src="content-hub.js"></script>
+  <script src="social-dashboard.js"></script>
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#a855f7" />
@@ -67,6 +69,12 @@
         </label>
       </div>
       <div class="live-indicator"><span class="live-dot"></span> Live</div>
+      <button class="soc-btn" id="soc-btn" title="Social Media Dashboard (M)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+      </button>
+      <button class="ch-btn" id="ch-btn" title="Content Optimization Hub (C)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
       <button class="eco-btn" id="eco-btn" title="Ecosystem & Distribution (P)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
       </button>
@@ -480,6 +488,8 @@
           <div class="shortcut-row"><kbd>S</kbd><span>Data connections</span></div>
           <div class="shortcut-row"><kbd>D</kbd><span>Designer & Dev toolkit</span></div>
           <div class="shortcut-row"><kbd>I</kbd><span>Intelligence panel</span></div>
+          <div class="shortcut-row"><kbd>M</kbd><span>Social Media Dashboard</span></div>
+          <div class="shortcut-row"><kbd>C</kbd><span>Content Hub</span></div>
           <div class="shortcut-row"><kbd>P</kbd><span>Ecosystem panel</span></div>
           <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
           <div class="shortcut-row"><kbd>Escape</kbd><span>Close any overlay</span></div>
@@ -798,6 +808,159 @@
       <symbol id="icon-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
     </defs>
   </svg>
+
+  <!-- Content Optimization Hub Panel -->
+  <div class="ch-overlay" id="content-hub-panel">
+    <div class="ch-drawer">
+      <div class="ch-header">
+        <div class="ch-title-row">
+          <h3>Content Hub</h3>
+          <button class="ch-close-btn" id="ch-close-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="ch-tabs">
+          <button class="ch-tab active" data-chtab="seo">SEO</button>
+          <button class="ch-tab" data-chtab="readability">Readability</button>
+          <button class="ch-tab" data-chtab="calendar">Calendar</button>
+          <button class="ch-tab" data-chtab="keywords">Keywords</button>
+          <button class="ch-tab" data-chtab="performance">Performance</button>
+          <button class="ch-tab" data-chtab="headlines">Headlines</button>
+          <button class="ch-tab" data-chtab="briefs">Briefs</button>
+        </div>
+      </div>
+      <div class="ch-body">
+        <!-- SEO Analyzer -->
+        <div class="ch-pane active" data-chpane="seo">
+          <div class="ch-section">
+            <h4 class="ch-section-title">SEO Score Analyzer</h4>
+            <p class="ch-section-desc">Analyze on-page SEO factors for any content piece.</p>
+            <div id="seo-result"></div>
+          </div>
+        </div>
+        <!-- Readability -->
+        <div class="ch-pane" data-chpane="readability">
+          <div class="ch-section">
+            <h4 class="ch-section-title">Readability Analyzer</h4>
+            <p class="ch-section-desc">Flesch-Kincaid scoring, sentence complexity, and grade level analysis.</p>
+            <div id="readability-result"></div>
+          </div>
+        </div>
+        <!-- Calendar -->
+        <div class="ch-pane" data-chpane="calendar">
+          <div class="ch-section">
+            <h4 class="ch-section-title">Content Calendar</h4>
+            <p class="ch-section-desc">Plan and track your content publishing schedule.</p>
+            <div class="cal-nav">
+              <button class="cal-nav-btn" id="cal-prev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+              <span class="cal-month-label" id="cal-month-label"></span>
+              <button class="cal-nav-btn" id="cal-next"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+            </div>
+            <div id="cal-grid"></div>
+            <div class="cal-legend">
+              <span class="cal-legend-item"><span class="cal-leg-dot cal-published"></span>Published</span>
+              <span class="cal-legend-item"><span class="cal-leg-dot cal-scheduled"></span>Scheduled</span>
+              <span class="cal-legend-item"><span class="cal-leg-dot cal-draft"></span>Draft</span>
+            </div>
+          </div>
+        </div>
+        <!-- Keywords -->
+        <div class="ch-pane" data-chpane="keywords">
+          <div class="ch-section">
+            <h4 class="ch-section-title">Keyword Research</h4>
+            <p class="ch-section-desc">Discover keyword opportunities with volume, difficulty, and CPC data.</p>
+            <input type="text" class="ch-input" id="kw-search-input" placeholder="Search keywords..." />
+            <div class="kw-table-header">
+              <span class="kw-col kw-term-col">Keyword</span>
+              <span class="kw-col">Volume</span>
+              <span class="kw-col">KD</span>
+              <span class="kw-col">CPC</span>
+              <span class="kw-col">Trend</span>
+              <span class="kw-col kw-related-col">Related</span>
+            </div>
+            <div id="kw-results"></div>
+          </div>
+        </div>
+        <!-- Performance -->
+        <div class="ch-pane" data-chpane="performance">
+          <div class="ch-section">
+            <h4 class="ch-section-title">Content Performance</h4>
+            <p class="ch-section-desc">Track views, engagement, and conversions for every content piece.</p>
+            <div id="perf-table"></div>
+          </div>
+        </div>
+        <!-- Headlines -->
+        <div class="ch-pane" data-chpane="headlines">
+          <div class="ch-section">
+            <h4 class="ch-section-title">Headline Analyzer</h4>
+            <p class="ch-section-desc">Score your headlines for emotional impact, power words, and CTR potential.</p>
+            <input type="text" class="ch-input" id="hl-input" placeholder="Type a headline to analyze..." />
+            <div id="headline-result"></div>
+          </div>
+        </div>
+        <!-- Briefs -->
+        <div class="ch-pane" data-chpane="briefs">
+          <div class="ch-section">
+            <h4 class="ch-section-title">Content Brief Generator</h4>
+            <p class="ch-section-desc">Auto-generate structured content briefs from a target keyword.</p>
+            <div class="brief-input-row">
+              <input type="text" class="ch-input" id="brief-keyword" placeholder="Target keyword" value="seo audit" />
+              <select class="ch-select" id="brief-type">
+                <option value="blog">Blog Post</option>
+                <option value="landing">Landing Page</option>
+                <option value="email">Email</option>
+                <option value="social">Social Post</option>
+              </select>
+              <button class="ch-action-btn" id="brief-gen-btn">Generate Brief</button>
+            </div>
+            <div id="brief-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social Media Dashboard Panel -->
+  <div class="soc-overlay" id="social-panel">
+    <div class="soc-drawer">
+      <div class="soc-header">
+        <div class="soc-title-row">
+          <h3>Social Media</h3>
+          <button class="soc-close-btn" id="soc-close-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="soc-tabs">
+          <button class="soc-tab active" data-soctab="overview">Overview</button>
+          <button class="soc-tab" data-soctab="growth">Growth</button>
+          <button class="soc-tab" data-soctab="posts">Top Posts</button>
+          <button class="soc-tab" data-soctab="audience">Audience</button>
+        </div>
+      </div>
+      <div class="soc-body">
+        <div class="soc-pane active" data-socpane="overview">
+          <div id="social-overview"></div>
+        </div>
+        <div class="soc-pane" data-socpane="growth">
+          <div class="ch-section">
+            <h4 class="ch-section-title">Follower Growth</h4>
+            <p class="ch-section-desc">Track follower growth across all platforms over the last 7 days.</p>
+            <div id="social-growth" style="height:280px"><canvas id="social-growth-chart" height="280"></canvas></div>
+          </div>
+        </div>
+        <div class="soc-pane" data-socpane="posts">
+          <div class="ch-section">
+            <h4 class="ch-section-title">Top Performing Posts</h4>
+            <p class="ch-section-desc">Your highest-engagement content across all platforms.</p>
+            <div id="social-posts"></div>
+          </div>
+        </div>
+        <div class="soc-pane" data-socpane="audience">
+          <div class="ch-section">
+            <h4 class="ch-section-title">Audience Demographics</h4>
+            <p class="ch-section-desc">Understand who your audience is and when they are most active.</p>
+            <div id="social-audience"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
