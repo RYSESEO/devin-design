@@ -5,6 +5,7 @@ import { RealtimeClient } from './lib/realtime.js';
 import { GridLayout } from './lib/grid-layout.js';
 import { loadLayout } from './lib/layout-store.js';
 import { login, register, logout, isAuthenticated, getUser, restoreSession } from './lib/auth.js';
+import { loadFromServer, savePreferences, saveConnectorConfig } from './lib/state-sync.js';
 
 window.Chart = Chart;
 
@@ -314,6 +315,7 @@ function initAuthUI() {
         }
         hideAuthOverlay();
         showUserMenu(user);
+        await applyServerState();
       } catch (err) {
         if (errorEl) {
           errorEl.textContent = err.message;
@@ -356,6 +358,7 @@ async function initApp() {
   if (restored && isAuthenticated()) {
     hideAuthOverlay();
     showUserMenu(getUser());
+    await applyServerState();
   } else {
     showAuthOverlay();
   }
@@ -363,6 +366,41 @@ async function initApp() {
   // Always initialize dashboard features (they show beneath auth overlay)
   initRealtime();
   initGridLayout();
+
+  // Listen for theme changes to persist preference
+  const themeBtn = document.querySelector('.theme-btn, #theme-btn, [data-action="toggle-theme"]');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        savePreferences({ theme: currentTheme });
+      }, 50);
+    });
+  }
+}
+
+/**
+ * Load server state and apply to dashboard
+ */
+async function applyServerState() {
+  const state = await loadFromServer();
+  if (!state) return;
+
+  // Apply saved layout
+  if (state.layout && window.__gridLayout) {
+    window.__gridLayout.applyLayout(state.layout);
+    try {
+      localStorage.setItem('ryse-layout', JSON.stringify(state.layout));
+    } catch { /* ignore */ }
+  }
+
+  // Apply saved theme preference
+  if (state.preferences && state.preferences.theme) {
+    document.documentElement.setAttribute('data-theme', state.preferences.theme);
+    try {
+      localStorage.setItem('ryse-preferences', JSON.stringify(state.preferences));
+    } catch { /* ignore */ }
+  }
 }
 
 // Start after DOM is loaded

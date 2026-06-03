@@ -1,8 +1,11 @@
-// Layout persistence via localStorage
+// Layout persistence via localStorage + server sync
+import { isAuthenticated } from './auth.js';
+import { syncToServer } from './state-sync.js';
+
 const STORAGE_KEY = 'ryse-layout';
 
 /**
- * Save layout state to localStorage
+ * Save layout state to localStorage and sync to server if authenticated
  * @param {Array<{id: string, section: string, order: number, colSpan: number, rowSpan: number}>} layout
  */
 export function saveLayout(layout) {
@@ -10,6 +13,11 @@ export function saveLayout(layout) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
   } catch (e) {
     // Quota exceeded or private mode - silently fail
+  }
+
+  // Sync to server when authenticated
+  if (isAuthenticated()) {
+    syncToServer('layout', layout);
   }
 }
 

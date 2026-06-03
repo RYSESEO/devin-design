@@ -10,6 +10,8 @@ import { createWebSocketServer } from './ws/index.js';
 import { KpiStream, ActivityStream, NotificationStream } from './ws/streams.js';
 import streamRouter from './routes/stream.js';
 import authRouter from './routes/auth.js';
+import stateRouter from './routes/state.js';
+import proxyRouter from './routes/proxy.js';
 import { optionalAuth } from './middleware/auth.js';
 
 dotenv.config();
@@ -33,6 +35,12 @@ app.get('/api/health', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRouter);
+
+// State routes (require auth - handled inside router)
+app.use('/api/state', stateRouter);
+
+// Proxy routes (require auth - handled inside router)
+app.use('/api/proxy', proxyRouter);
 
 // Optional auth for other routes
 app.use(optionalAuth);
