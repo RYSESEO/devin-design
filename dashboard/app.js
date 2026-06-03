@@ -579,6 +579,7 @@ function initKeyboardShortcuts() {
     }
 
     if (e.key === 'Escape') {
+      if (typeof Toolkit !== 'undefined' && Toolkit.isOpen) { Toolkit.close(); return; }
       if (typeof SettingsPanel !== 'undefined' && SettingsPanel.isOpen) { SettingsPanel.close(); return; }
       const focusOverlay = document.getElementById('focus-overlay');
       if (!focusOverlay.hidden) { closeFocusMode(); return; }
@@ -600,6 +601,7 @@ function initKeyboardShortcuts() {
       case 'n': case 'N': toggleNotifications(); break;
       case 'e': case 'E': exportDashboard(); break;
       case 's': case 'S': if (typeof SettingsPanel !== 'undefined') SettingsPanel.toggle(); break;
+      case 'd': case 'D': if (typeof Toolkit !== 'undefined') Toolkit.toggle(); break;
       case '?': openShortcuts(); break;
       case 'f': case 'F':
         if (hoveredWidget) openFocusMode(hoveredWidget);
@@ -911,4 +913,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initDateControls();
   initAutoDetect();
   if (typeof initConnectors === 'function') initConnectors();
+  if (typeof initToolkit === 'function') initToolkit();
 });
