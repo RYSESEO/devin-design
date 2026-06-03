@@ -2,11 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import { createWebSocketServer } from './ws/index.js';
+import { KpiStream, ActivityStream, NotificationStream } from './ws/streams.js';
+import streamRouter from './routes/stream.js';
 
 dotenv.config();
 
@@ -27,6 +29,9 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// SSE stream route
+app.use(streamRouter);
+
 // Serve static files in production
 const clientPath = path.join(__dirname, '..', 'dist', 'client');
 app.use(express.static(clientPath));
@@ -42,8 +47,8 @@ app.get('*', (req, res, next) => {
 // Create HTTP server
 const server = createServer(app);
 
-// WebSocket upgrade handler
-const wss = new WebSocketServer({ noServer: true });
+// WebSocket server setup
+const { wss, broadcast, stopHeartbeat } = createWebSocketServer();
 
 server.on('upgrade', (request, socket, head) => {
   if (request.url === '/ws') {
@@ -55,11 +60,16 @@ server.on('upgrade', (request, socket, head) => {
   }
 });
 
-wss.on('connection', (ws) => {
-  ws.on('message', (message) => {
-    // Placeholder for WebSocket message handling
-  });
-});
+// Start data streams (only in non-test environment)
+let kpiStream, activityStream, notificationStream;
+if (process.env.NODE_ENV !== 'test') {
+  kpiStream = new KpiStream(broadcast);
+  activityStream = new ActivityStream(broadcast);
+  notificationStream = new NotificationStream(broadcast);
+  kpiStream.start();
+  activityStream.start();
+  notificationStream.start();
+}
 
 // Start server only when not imported for testing
 if (process.env.NODE_ENV !== 'test') {
@@ -68,4 +78,4 @@ if (process.env.NODE_ENV !== 'test') {
   });
 }
 
-export { app, server };
+export { app, server, broadcast, stopHeartbeat };
