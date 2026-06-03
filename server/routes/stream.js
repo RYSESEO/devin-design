@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { KpiStream, ActivityStream, NotificationStream } from '../ws/streams.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-router.get('/api/stream', (req, res) => {
+router.get('/api/stream', requireAuth, (req, res) => {
   const channelsParam = req.query.channels || 'kpi,activity,notifications';
   const channels = channelsParam.split(',').map(c => c.trim());
 

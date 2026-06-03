@@ -5,6 +5,40 @@ import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
+// Maximum allowed size for a single state value (8 KB)
+const MAX_STATE_VALUE_SIZE = 8192;
+// Maximum JSON nesting depth allowed
+const MAX_JSON_DEPTH = 10;
+
+/**
+ * Checks the nesting depth of a JSON value.
+ * Returns true if the depth exceeds the maximum.
+ */
+function exceedsDepth(value, maxDepth, current = 0) {
+  if (current >= maxDepth) return true;
+  if (value && typeof value === 'object') {
+    for (const v of Object.values(value)) {
+      if (exceedsDepth(v, maxDepth, current + 1)) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Validates a state value payload against size and depth limits.
+ * Returns an error message string or null if valid.
+ */
+function validateStatePayload(value) {
+  const serialized = JSON.stringify(value);
+  if (serialized.length > MAX_STATE_VALUE_SIZE) {
+    return `Payload too large (max ${MAX_STATE_VALUE_SIZE} bytes)`;
+  }
+  if (exceedsDepth(value, MAX_JSON_DEPTH)) {
+    return `Payload nesting too deep (max ${MAX_JSON_DEPTH} levels)`;
+  }
+  return null;
+}
+
 // All state routes require authentication
 router.use(requireAuth);
 
@@ -42,6 +76,11 @@ router.put('/layout', (req, res) => {
     return res.status(400).json({ error: 'layout is required' });
   }
 
+  const validationError = validateStatePayload(layout);
+  if (validationError) {
+    return res.status(413).json({ error: validationError });
+  }
+
   const stmt = db.prepare(`
     INSERT INTO user_state (user_id, key, value, updated_at)
     VALUES (?, 'layout', ?, datetime('now'))
@@ -59,6 +98,11 @@ router.put('/preferences', (req, res) => {
 
   if (!prefs || Object.keys(prefs).length === 0) {
     return res.status(400).json({ error: 'Preferences body is required' });
+  }
+
+  const validationError = validateStatePayload(prefs);
+  if (validationError) {
+    return res.status(413).json({ error: validationError });
   }
 
   const stmt = db.prepare(`

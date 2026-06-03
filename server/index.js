@@ -6,6 +6,7 @@ import { createServer } from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 import { createWebSocketServer } from './ws/index.js';
 import { KpiStream, ActivityStream, NotificationStream } from './ws/streams.js';
 import streamRouter from './routes/stream.js';
@@ -13,6 +14,7 @@ import authRouter from './routes/auth.js';
 import stateRouter from './routes/state.js';
 import proxyRouter from './routes/proxy.js';
 import { optionalAuth } from './middleware/auth.js';
+import db from './db/index.js';
 
 dotenv.config();
 
@@ -23,6 +25,10 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Rate limiting for auth endpoints
+// NOTE: This rate limiter is in-process (plain Map) and resets on server restart.
+// It does not persist across deploys or work across multiple instances.
+// This is acceptable for a single-container SQLite deployment. If the app is
+// horizontally scaled, replace with a durable store (e.g., Redis or SQLite-backed).
 const authAttempts = new Map(); // key: IP, value: { count, resetTime }
 
 function rateLimitAuth(req, res, next) {
@@ -57,6 +63,15 @@ setInterval(() => {
   }
 }, 300000);
 
+// Clean up expired refresh tokens every hour (Issue: stale tokens accumulate)
+setInterval(() => {
+  try {
+    db.prepare("DELETE FROM refresh_tokens WHERE expires_at < datetime('now')").run();
+  } catch {
+    // Silently ignore cleanup errors (e.g., during shutdown)
+  }
+}, 3600000);
+
 // Middleware
 const corsOrigin = process.env.CORS_ORIGIN || '*';
 app.use(cors({ origin: corsOrigin, credentials: corsOrigin !== '*' }));
@@ -73,7 +88,7 @@ app.use(helmet({
   }
 }));
 app.use(cookieParser());
-app.use(express.json());
+app.use(express.json({ limit: '16kb' }));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -115,8 +130,33 @@ const server = createServer(app);
 // WebSocket server setup
 const { wss, broadcast, stopHeartbeat } = createWebSocketServer();
 
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+
 server.on('upgrade', (request, socket, head) => {
-  if (request.url === '/ws') {
+  if (request.url && request.url.startsWith('/ws')) {
+    // Verify token from query string: /ws?token=<jwt>
+    let token = null;
+    try {
+      const url = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
+      token = url.searchParams.get('token');
+    } catch {
+      // Malformed URL
+    }
+
+    if (!token) {
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+
+    try {
+      jwt.verify(token, JWT_SECRET);
+    } catch {
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+
     wss.handleUpgrade(request, socket, head, (ws) => {
       wss.emit('connection', ws, request);
     });

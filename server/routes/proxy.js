@@ -27,6 +27,20 @@ function getCredentials(userId, connectorId) {
   }
 }
 
+/**
+ * Validate that the resolved URL stays within the expected origin.
+ * Prevents SSRF by rejecting absolute URLs in the endpoint parameter
+ * that would override the base URL.
+ */
+function validateProxyUrl(endpoint, baseUrl) {
+  const resolved = new URL(endpoint, baseUrl);
+  const base = new URL(baseUrl);
+  if (resolved.origin !== base.origin) {
+    return null;
+  }
+  return resolved;
+}
+
 // POST /api/proxy/shopify - Forward to Shopify Admin API
 router.post('/shopify', async (req, res) => {
   const credentials = getCredentials(req.user.id, 'shopify');
@@ -38,7 +52,11 @@ router.post('/shopify', async (req, res) => {
   const { shopDomain, accessToken } = credentials;
 
   try {
-    const url = new URL(endpoint, `https://${shopDomain}.myshopify.com/admin/api/2024-01`);
+    const baseUrl = `https://${shopDomain}.myshopify.com/admin/api/2024-01`;
+    const url = validateProxyUrl(endpoint, baseUrl);
+    if (!url) {
+      return res.status(400).json({ error: 'Invalid endpoint: URL must stay within the target API origin' });
+    }
     if (params && method === 'GET') {
       Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
     }
@@ -73,7 +91,11 @@ router.post('/github', async (req, res) => {
   const { token } = credentials;
 
   try {
-    const url = new URL(endpoint, 'https://api.github.com');
+    const baseUrl = 'https://api.github.com';
+    const url = validateProxyUrl(endpoint, baseUrl);
+    if (!url) {
+      return res.status(400).json({ error: 'Invalid endpoint: URL must stay within the target API origin' });
+    }
 
     const fetchOpts = {
       method,
@@ -107,7 +129,10 @@ router.post('/analytics', async (req, res) => {
 
   try {
     const baseUrl = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}`;
-    const url = new URL(endpoint || ':runReport', baseUrl);
+    const url = validateProxyUrl(endpoint || ':runReport', baseUrl);
+    if (!url) {
+      return res.status(400).json({ error: 'Invalid endpoint: URL must stay within the target API origin' });
+    }
 
     const fetchOpts = {
       method,
@@ -139,7 +164,11 @@ router.post('/stripe', async (req, res) => {
   const { secretKey } = credentials;
 
   try {
-    const url = new URL(endpoint, 'https://api.stripe.com');
+    const baseUrl = 'https://api.stripe.com';
+    const url = validateProxyUrl(endpoint, baseUrl);
+    if (!url) {
+      return res.status(400).json({ error: 'Invalid endpoint: URL must stay within the target API origin' });
+    }
 
     const fetchOpts = {
       method,
@@ -172,7 +201,10 @@ router.post('/search-console', async (req, res) => {
 
   try {
     const baseUrl = 'https://searchconsole.googleapis.com/webmasters/v3';
-    const url = new URL(endpoint || `/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`, baseUrl);
+    const url = validateProxyUrl(endpoint || `/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`, baseUrl);
+    if (!url) {
+      return res.status(400).json({ error: 'Invalid endpoint: URL must stay within the target API origin' });
+    }
 
     const fetchOpts = {
       method,

@@ -161,7 +161,7 @@ describe('Auth Routes', () => {
   });
 
   describe('POST /api/auth/refresh', () => {
-    it('returns new token with valid refresh token', async () => {
+    it('returns new token and new refresh token with valid refresh token', async () => {
       const res = await post('/api/auth/refresh', {
         refreshToken: refreshTokenVal
       });
@@ -169,8 +169,36 @@ describe('Auth Routes', () => {
 
       const data = await res.json();
       expect(data.token).toBeDefined();
-      // New token should be different from old one (or same, both valid)
+      expect(data.refreshToken).toBeDefined();
+      // Refresh token should be rotated (different from old one)
+      expect(data.refreshToken).not.toBe(refreshTokenVal);
       authToken = data.token;
+      // Update to new refresh token for subsequent tests
+      refreshTokenVal = data.refreshToken;
+    });
+
+    it('returns 401 with the old (rotated) refresh token', async () => {
+      // Use a login to get a fresh refresh token for this test
+      const loginRes = await post('/api/auth/login', {
+        email: testEmail,
+        password: testPassword
+      });
+      const loginData = await loginRes.json();
+      const oldRefresh = loginData.refreshToken;
+
+      // Use it once (rotates it)
+      const refreshRes = await post('/api/auth/refresh', {
+        refreshToken: oldRefresh
+      });
+      expect(refreshRes.status).toBe(200);
+      const refreshData = await refreshRes.json();
+      refreshTokenVal = refreshData.refreshToken;
+
+      // Old token should no longer work
+      const reuse = await post('/api/auth/refresh', {
+        refreshToken: oldRefresh
+      });
+      expect(reuse.status).toBe(401);
     });
 
     it('returns 401 with invalid refresh token', async () => {
@@ -188,8 +216,16 @@ describe('Auth Routes', () => {
 
   describe('POST /api/auth/logout', () => {
     it('returns success and invalidates refresh token', async () => {
+      // Get a fresh refresh token via login
+      const loginRes = await post('/api/auth/login', {
+        email: testEmail,
+        password: testPassword
+      });
+      const loginData = await loginRes.json();
+      const logoutRefresh = loginData.refreshToken;
+
       const res = await post('/api/auth/logout', {
-        refreshToken: refreshTokenVal
+        refreshToken: logoutRefresh
       });
       expect(res.status).toBe(200);
 
@@ -198,7 +234,7 @@ describe('Auth Routes', () => {
 
       // Verify refresh token is invalid now
       const refreshRes = await post('/api/auth/refresh', {
-        refreshToken: refreshTokenVal
+        refreshToken: logoutRefresh
       });
       expect(refreshRes.status).toBe(401);
     });
