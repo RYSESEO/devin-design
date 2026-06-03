@@ -579,6 +579,7 @@ function initKeyboardShortcuts() {
     }
 
     if (e.key === 'Escape') {
+      if (typeof SettingsPanel !== 'undefined' && SettingsPanel.isOpen) { SettingsPanel.close(); return; }
       const focusOverlay = document.getElementById('focus-overlay');
       if (!focusOverlay.hidden) { closeFocusMode(); return; }
       if (cmdDialog.open) { closeCommandPalette(); return; }
@@ -598,6 +599,7 @@ function initKeyboardShortcuts() {
       case '5': scrollToSection('section-content'); break;
       case 'n': case 'N': toggleNotifications(); break;
       case 'e': case 'E': exportDashboard(); break;
+      case 's': case 'S': if (typeof SettingsPanel !== 'undefined') SettingsPanel.toggle(); break;
       case '?': openShortcuts(); break;
       case 'f': case 'F':
         if (hoveredWidget) openFocusMode(hoveredWidget);
@@ -908,4 +910,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initNotifications();
   initDateControls();
   initAutoDetect();
+  if (typeof initConnectors === 'function') initConnectors();
 });
