@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ['server/**/*.test.js', 'dashboard/**/*.test.js']
+    include: ['server/**/*.test.js', 'dashboard/**/*.test.js'],
+    fileParallelism: false
   }
 });

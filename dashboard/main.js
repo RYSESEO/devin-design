@@ -4,6 +4,7 @@ import Chart from 'chart.js/auto';
 import { RealtimeClient } from './lib/realtime.js';
 import { GridLayout } from './lib/grid-layout.js';
 import { loadLayout } from './lib/layout-store.js';
+import { login, register, logout, isAuthenticated, getUser, restoreSession } from './lib/auth.js';
 
 window.Chart = Chart;
 
@@ -232,13 +233,141 @@ function initGridLayout() {
   window.__gridLayout = grid;
 }
 
-// Start after DOM is loaded
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    initRealtime();
-    initGridLayout();
+// ═══ Auth UI Logic ═══
+let authMode = 'login'; // 'login' or 'register'
+
+function showAuthOverlay() {
+  const overlay = document.getElementById('auth-overlay');
+  if (overlay) overlay.style.display = 'flex';
+}
+
+function hideAuthOverlay() {
+  const overlay = document.getElementById('auth-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function showUserMenu(user) {
+  const menu = document.getElementById('user-menu');
+  const avatar = document.getElementById('user-avatar');
+  const nameEl = document.getElementById('user-name');
+  if (!menu) return;
+
+  menu.hidden = false;
+  const displayName = user.name || user.email.split('@')[0];
+  if (avatar) avatar.textContent = displayName.charAt(0).toUpperCase();
+  if (nameEl) nameEl.textContent = displayName;
+}
+
+function initAuthUI() {
+  const form = document.getElementById('auth-form');
+  const switchBtn = document.getElementById('auth-switch-btn');
+  const switchText = document.getElementById('auth-switch-text');
+  const title = document.getElementById('auth-title');
+  const nameField = document.getElementById('auth-name-field');
+  const submitBtn = document.getElementById('auth-submit');
+  const errorEl = document.getElementById('auth-error');
+  const userBtn = document.getElementById('user-btn');
+  const userDropdown = document.getElementById('user-dropdown');
+  const logoutBtn = document.getElementById('user-logout');
+
+  if (switchBtn) {
+    switchBtn.addEventListener('click', () => {
+      authMode = authMode === 'login' ? 'register' : 'login';
+      if (authMode === 'register') {
+        title.textContent = 'Create Account';
+        nameField.style.display = 'block';
+        submitBtn.textContent = 'Create Account';
+        switchText.textContent = 'Already have an account?';
+        switchBtn.textContent = 'Sign in';
+      } else {
+        title.textContent = 'Sign In';
+        nameField.style.display = 'none';
+        submitBtn.textContent = 'Sign In';
+        switchText.textContent = "Don't have an account?";
+        switchBtn.textContent = 'Create one';
+      }
+      if (errorEl) {
+        errorEl.hidden = true;
+        errorEl.textContent = '';
+      }
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const name = document.getElementById('auth-name').value.trim();
+
+      if (errorEl) {
+        errorEl.hidden = true;
+        errorEl.textContent = '';
+      }
+
+      try {
+        let user;
+        if (authMode === 'register') {
+          user = await register(email, password, name);
+        } else {
+          user = await login(email, password);
+        }
+        hideAuthOverlay();
+        showUserMenu(user);
+      } catch (err) {
+        if (errorEl) {
+          errorEl.textContent = err.message;
+          errorEl.hidden = false;
+        }
+      }
+    });
+  }
+
+  // User menu dropdown toggle
+  if (userBtn) {
+    userBtn.addEventListener('click', () => {
+      if (userDropdown) userDropdown.hidden = !userDropdown.hidden;
+    });
+  }
+
+  // Close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (userDropdown && !userDropdown.hidden) {
+      const menu = document.getElementById('user-menu');
+      if (menu && !menu.contains(e.target)) {
+        userDropdown.hidden = true;
+      }
+    }
   });
-} else {
+
+  // Logout
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      logout();
+    });
+  }
+}
+
+async function initApp() {
+  initAuthUI();
+
+  // Try to restore session
+  const restored = await restoreSession();
+  if (restored && isAuthenticated()) {
+    hideAuthOverlay();
+    showUserMenu(getUser());
+  } else {
+    showAuthOverlay();
+  }
+
+  // Always initialize dashboard features (they show beneath auth overlay)
   initRealtime();
   initGridLayout();
+}
+
+// Start after DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
 }

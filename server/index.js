@@ -9,6 +9,8 @@ import dotenv from 'dotenv';
 import { createWebSocketServer } from './ws/index.js';
 import { KpiStream, ActivityStream, NotificationStream } from './ws/streams.js';
 import streamRouter from './routes/stream.js';
+import authRouter from './routes/auth.js';
+import { optionalAuth } from './middleware/auth.js';
 
 dotenv.config();
 
@@ -28,6 +30,12 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
+
+// Auth routes
+app.use('/api/auth', authRouter);
+
+// Optional auth for other routes
+app.use(optionalAuth);
 
 // SSE stream route
 app.use(streamRouter);
