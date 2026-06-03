@@ -430,6 +430,11 @@ async function initApp() {
   registerPanel('ws-btn', () => { if (window.initWorkspaces) { window.initWorkspaces(); return true; } return false; });
   registerPanel('reports-btn', () => { if (window.initReports) { window.initReports(); return true; } return false; });
   registerPanel('billing-btn', () => { if (window.initBilling) { window.initBilling(); return true; } return false; });
+  registerPanel('forecast-btn', () => { if (window.initForecasting) { window.initForecasting(); return true; } return false; });
+  registerPanel('seo-btn', () => { if (window.initSeoRadar) { window.initSeoRadar(); return true; } return false; });
+  registerPanel('price-btn', () => { if (window.initPricing) { window.initPricing(); return true; } return false; });
+  registerPanel('churn-btn', () => { if (window.initChurn) { window.initChurn(); return true; } return false; });
+  registerPanel('comp-btn', () => { if (window.initCompetitorAlerts) { window.initCompetitorAlerts(); return true; } return false; });
   initLazyPanels();
 
   // Global Escape key handler for overlays
