@@ -948,18 +948,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initDateControls();
   initAutoDetect();
   if (typeof initConnectors === 'function') initConnectors();
-  if (typeof initToolkit === 'function') initToolkit();
-  if (typeof initIntelligence === 'function') initIntelligence();
-  if (typeof initEcosystem === 'function') initEcosystem();
-  if (typeof initContentHub === 'function') initContentHub();
-  if (typeof initSocialDashboard === 'function') initSocialDashboard();
   if (typeof initCrossPost === 'function') initCrossPost();
   if (typeof initCinematic === 'function') initCinematic();
   if (typeof initOnboarding === 'function') initOnboarding();
-  if (typeof initAIChat === 'function') initAIChat();
-  if (typeof initVoiceControl === 'function') initVoiceControl();
-  if (typeof initCompetitiveIntel === 'function') initCompetitiveIntel();
-  if (typeof initWidgetBuilder === 'function') initWidgetBuilder();
 
   /* ─── Performance: debounced resize handler ─── */
   window.addEventListener('resize', debounce(function() {
