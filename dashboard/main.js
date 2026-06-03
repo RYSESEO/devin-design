@@ -7,6 +7,7 @@ import { loadLayout } from './lib/layout-store.js';
 import { login, register, logout, isAuthenticated, getUser, getToken, restoreSession } from './lib/auth.js';
 import { loadFromServer, savePreferences, saveConnectorConfig } from './lib/state-sync.js';
 import { initMobileNav } from './lib/mobile-nav.js';
+import { registerPanel, initLazyPanels } from './lib/lazy-panels.js';
 
 window.Chart = Chart;
 
@@ -79,6 +80,11 @@ function updateKpiValue(data) {
 }
 
 function animateValue(el, from, to, prefix) {
+  // Respect reduced motion preference
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = prefix + to.toLocaleString();
+    return;
+  }
   const duration = 400;
   const start = performance.now();
   const diff = to - from;
@@ -235,17 +241,57 @@ function initGridLayout() {
   window.__gridLayout = grid;
 }
 
+// ═══ Focus Trap Utility ═══
+function trapFocus(container) {
+  const focusable = container.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  if (focusable.length === 0) return null;
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+
+  function handler(e) {
+    if (e.key !== 'Tab') return;
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }
+
+  container.addEventListener('keydown', handler);
+  first.focus();
+
+  return () => container.removeEventListener('keydown', handler);
+}
+
 // ═══ Auth UI Logic ═══
 let authMode = 'login'; // 'login' or 'register'
 
+let releaseFocusTrap = null;
+
 function showAuthOverlay() {
   const overlay = document.getElementById('auth-overlay');
-  if (overlay) overlay.style.display = 'flex';
+  if (overlay) {
+    overlay.style.display = 'flex';
+    releaseFocusTrap = trapFocus(overlay);
+  }
 }
 
 function hideAuthOverlay() {
   const overlay = document.getElementById('auth-overlay');
   if (overlay) overlay.style.display = 'none';
+  if (releaseFocusTrap) {
+    releaseFocusTrap();
+    releaseFocusTrap = null;
+  }
 }
 
 function showUserMenu(user) {
@@ -368,6 +414,29 @@ async function initApp() {
   initRealtime();
   initGridLayout();
   initMobileNav();
+
+  // Register lazy-loaded panels
+  registerPanel('ai-chat-btn', () => { if (window.initAIChat) window.initAIChat(); });
+  registerPanel('voice-btn', () => { if (window.initVoiceControl) window.initVoiceControl(); });
+  registerPanel('ci-btn', () => { if (window.initCompetitiveIntel) window.initCompetitiveIntel(); });
+  registerPanel('wb-btn', () => { if (window.initWidgetBuilder) window.initWidgetBuilder(); });
+  registerPanel('soc-btn', () => { if (window.initSocialDashboard) window.initSocialDashboard(); });
+  registerPanel('ch-btn', () => { if (window.initContentHub) window.initContentHub(); });
+  registerPanel('eco-btn', () => { if (window.initEcosystem) window.initEcosystem(); });
+  registerPanel('intel-btn', () => { if (window.initIntelligence) window.initIntelligence(); });
+  registerPanel('toolkit-btn', () => { if (window.initToolkit) window.initToolkit(); });
+  initLazyPanels();
+
+  // Global Escape key handler for overlays
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const settingsPanel = document.getElementById('settings-panel');
+      if (settingsPanel && !settingsPanel.hidden) {
+        settingsPanel.hidden = true;
+        return;
+      }
+    }
+  });
 
   // Listen for theme changes to persist preference
   const themeBtn = document.querySelector('.theme-btn, #theme-btn, [data-action="toggle-theme"]');

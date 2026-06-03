@@ -1,6 +1,45 @@
 /* ─── Performance — Reduced Motion ──────────────────────────── */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
+  .orb{animation:none !important;opacity:0.1 !important}
+  .ambient-bg{opacity:0.5}
+  .live-dot{animation:none !important}
+}
+
+/* ─── Skip to Content ──────────────────────────────────────── */
+.skip-to-content{
+  position:absolute;
+  top:-100%;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--accent);
+  color:#fff;
+  padding:12px 24px;
+  border-radius:0 0 var(--radius-sm) var(--radius-sm);
+  font-size:0.82rem;
+  font-weight:600;
+  z-index:9999;
+  transition:top 0.2s;
+  text-decoration:none;
+}
+.skip-to-content:focus{
+  top:0;
+}
+
+/* ─── Focus Indicators ─────────────────────────────────────── */
+:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+:focus:not(:focus-visible){
+  outline:none;
 }
 
 /* ─── Reset & Base ──────────────────────────────────────────── */
