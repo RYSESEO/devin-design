@@ -229,6 +229,80 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
+
+  CREATE TABLE IF NOT EXISTS order_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    store_id INTEGER,
+    product_id TEXT,
+    product_name TEXT NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    revenue REAL NOT NULL DEFAULT 0,
+    order_date TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS keyword_rankings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    keyword TEXT NOT NULL,
+    position REAL,
+    clicks INTEGER DEFAULT 0,
+    impressions INTEGER DEFAULT 0,
+    url TEXT,
+    recorded_at TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS price_tests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    product_id TEXT,
+    product_name TEXT NOT NULL,
+    original_price REAL NOT NULL,
+    test_price REAL NOT NULL,
+    conversion_original REAL DEFAULT 0,
+    conversion_test REAL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'active',
+    started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ended_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS customer_activity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    customer_email TEXT NOT NULL,
+    last_purchase_date TEXT,
+    purchase_count INTEGER DEFAULT 0,
+    total_spent REAL DEFAULT 0,
+    avg_order_interval_days REAL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS competitors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    domain TEXT,
+    tracked_products TEXT DEFAULT '[]',
+    last_checked DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS competitor_changes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    competitor_id INTEGER NOT NULL,
+    change_type TEXT NOT NULL,
+    details TEXT NOT NULL DEFAULT '{}',
+    detected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (competitor_id) REFERENCES competitors(id) ON DELETE CASCADE
+  );
 `);
 
 // Seed automation_templates with pre-built templates (idempotent)

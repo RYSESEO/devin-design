@@ -20,6 +20,11 @@ import storesRouter from './routes/stores.js';
 import workspacesRouter from './routes/workspaces.js';
 import reportsRouter from './routes/reports.js';
 import billingRouter from './routes/billing.js';
+import forecastingRouter from './routes/forecasting.js';
+import seoRouter from './routes/seo.js';
+import pricingRouter from './routes/pricing.js';
+import churnRouter from './routes/churn.js';
+import competitorsRouter from './routes/competitors.js';
 import { optionalAuth } from './middleware/auth.js';
 import db from './db/index.js';
 
@@ -145,6 +150,21 @@ app.use('/api/reports', reportsRouter);
 
 // Billing routes (require auth - handled inside router)
 app.use('/api/billing', billingRouter);
+
+// Forecasting routes (require auth - handled inside router)
+app.use('/api/forecasting', forecastingRouter);
+
+// SEO routes (require auth - handled inside router)
+app.use('/api/seo', seoRouter);
+
+// Pricing routes (require auth - handled inside router)
+app.use('/api/pricing', pricingRouter);
+
+// Churn routes (require auth - handled inside router)
+app.use('/api/churn', churnRouter);
+
+// Competitors routes (require auth - handled inside router)
+app.use('/api/competitors', competitorsRouter);
 
 // Optional auth for other routes
 app.use(optionalAuth);
