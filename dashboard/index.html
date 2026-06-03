@@ -161,6 +161,10 @@
       Executive
     </button>
     <div class="dash-tabs-right">
+      <button class="layout-btn" id="layout-toggle-btn" title="Customize Layout (L)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Layout
+      </button>
       <button class="share-btn" id="share-btn" title="Share this dashboard">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
         Share
@@ -172,8 +176,8 @@
   <main class="dashboard">
 
     <!-- Row 1: KPI cards -->
-    <section class="kpi-row" id="section-kpi">
-      <article class="kpi-card kpi-agents" data-widget="agents">
+    <section class="kpi-row" id="section-kpi" data-grid-id="section-kpi">
+      <article class="kpi-card kpi-agents" data-widget="agents" data-grid-id="agents">
         <span class="source-badge source-demo" data-source-badge="agents">Demo</span>
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/></svg></div>
         <div class="kpi-body">
@@ -184,7 +188,7 @@
         <div class="kpi-spark" id="spark-agents"></div>
       </article>
 
-      <article class="kpi-card kpi-revenue" data-widget="revenue">
+      <article class="kpi-card kpi-revenue" data-widget="revenue" data-grid-id="revenue">
         <span class="source-badge source-demo" data-source-badge="revenue">Demo</span>
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
         <div class="kpi-body">
@@ -195,7 +199,7 @@
         <div class="kpi-spark" id="spark-revenue"></div>
       </article>
 
-      <article class="kpi-card kpi-leads" data-widget="leads-kpi">
+      <article class="kpi-card kpi-leads" data-widget="leads-kpi" data-grid-id="leads-kpi">
         <span class="source-badge source-demo" data-source-badge="leads-kpi">Demo</span>
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
         <div class="kpi-body">
@@ -206,7 +210,7 @@
         <div class="kpi-spark" id="spark-leads"></div>
       </article>
 
-      <article class="kpi-card kpi-content" data-widget="content-kpi">
+      <article class="kpi-card kpi-content" data-widget="content-kpi" data-grid-id="content-kpi">
         <span class="source-badge source-demo" data-source-badge="content-kpi">Demo</span>
         <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
         <div class="kpi-body">
@@ -219,8 +223,8 @@
     </section>
 
     <!-- Row 2: Main charts -->
-    <section class="charts-row" id="section-agent-usage">
-      <article class="chart-card chart-wide" data-widget="agent-usage">
+    <section class="charts-row" id="section-agent-usage" data-grid-id="section-agent-usage">
+      <article class="chart-card chart-wide" data-widget="agent-usage" data-grid-id="agent-usage">
         <div class="card-header">
           <h3>Agent Usage Over Time</h3>
           <span class="source-badge source-demo" data-source-badge="agent-usage">Demo</span>
@@ -232,7 +236,7 @@
         <div class="chart-wrap"><canvas id="chart-agent-usage"></canvas></div>
       </article>
 
-      <article class="chart-card" data-widget="lead-sources">
+      <article class="chart-card" data-widget="lead-sources" data-grid-id="lead-sources">
         <div class="card-header">
           <h3>Lead Sources</h3>
           <span class="source-badge source-demo" data-source-badge="lead-sources">Demo</span>
@@ -244,8 +248,8 @@
     </section>
 
     <!-- Row 3: Shopify + Content -->
-    <section class="charts-row" id="section-shopify">
-      <article class="chart-card" data-widget="shopify">
+    <section class="charts-row" id="section-shopify" data-grid-id="section-shopify">
+      <article class="chart-card" data-widget="shopify" data-grid-id="shopify">
         <div class="card-header">
           <h3>Shopify Orders & Revenue</h3>
           <span class="source-badge source-demo" data-source-badge="shopify">Demo</span>
@@ -254,7 +258,7 @@
         <div class="chart-wrap"><canvas id="chart-shopify"></canvas></div>
       </article>
 
-      <article class="chart-card" data-widget="content-perf">
+      <article class="chart-card" data-widget="content-perf" data-grid-id="content-perf">
         <div class="card-header">
           <h3>Content Performance</h3>
           <span class="source-badge source-demo" data-source-badge="content-perf">Demo</span>
@@ -265,9 +269,9 @@
     </section>
 
     <!-- Row 4: Tables + Activity -->
-    <section class="bottom-row" id="section-activity">
+    <section class="bottom-row" id="section-activity" data-grid-id="section-activity">
       <!-- Agent Activity Feed -->
-      <article class="feed-card" data-widget="agent-feed">
+      <article class="feed-card" data-widget="agent-feed" data-grid-id="agent-feed">
         <div class="card-header">
           <h3>Agent Activity</h3>
           <div class="card-header-right">
@@ -322,7 +326,7 @@
       </article>
 
       <!-- Shopify Top Products -->
-      <article class="table-card" data-widget="top-products">
+      <article class="table-card" data-widget="top-products" data-grid-id="top-products">
         <div class="card-header">
           <h3>Top Products</h3>
           <div class="card-header-right">
@@ -345,7 +349,7 @@
       </article>
 
       <!-- Lead Pipeline -->
-      <article class="pipeline-card" data-widget="pipeline">
+      <article class="pipeline-card" data-widget="pipeline" data-grid-id="pipeline">
         <div class="card-header">
           <h3>Lead Pipeline</h3>
           <button class="expand-btn" data-expand="pipeline" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
@@ -390,8 +394,8 @@
     </section>
 
     <!-- Row 5: Content breakdown -->
-    <section class="content-row" id="section-content">
-      <article class="chart-card" data-widget="channels">
+    <section class="content-row" id="section-content" data-grid-id="section-content">
+      <article class="chart-card" data-widget="channels" data-grid-id="channels">
         <div class="card-header">
           <h3>Content by Channel</h3>
           <button class="expand-btn" data-expand="channels" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
@@ -420,7 +424,7 @@
         </div>
       </article>
 
-      <article class="chart-card" data-widget="tokens">
+      <article class="chart-card" data-widget="tokens" data-grid-id="tokens">
         <div class="card-header">
           <h3>Token Usage by Model</h3>
           <button class="expand-btn" data-expand="tokens" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
@@ -429,7 +433,7 @@
         <ul class="donut-legend" id="token-legend"></ul>
       </article>
 
-      <article class="stats-card" data-widget="quick-stats">
+      <article class="stats-card" data-widget="quick-stats" data-grid-id="quick-stats">
         <div class="card-header">
           <h3>Quick Stats</h3>
           <button class="expand-btn" data-expand="quick-stats" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
@@ -517,6 +521,7 @@
           <div class="shortcut-row"><kbd>V</kbd><span>Voice Control</span></div>
           <div class="shortcut-row"><kbd>R</kbd><span>Competitive Intelligence</span></div>
           <div class="shortcut-row"><kbd>W</kbd><span>Widget Builder</span></div>
+          <div class="shortcut-row"><kbd>L</kbd><span>Customize Layout</span></div>
           <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
           <div class="shortcut-row"><kbd>Escape</kbd><span>Close any overlay</span></div>
         </div>

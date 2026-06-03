@@ -2,6 +2,8 @@
 // Import Chart.js from npm and expose it globally for backward compatibility
 import Chart from 'chart.js/auto';
 import { RealtimeClient } from './lib/realtime.js';
+import { GridLayout } from './lib/grid-layout.js';
+import { loadLayout } from './lib/layout-store.js';
 
 window.Chart = Chart;
 
@@ -208,9 +210,35 @@ function updateLiveIndicator(state) {
   }
 }
 
+// Initialize layout manager
+function initGridLayout() {
+  const grid = new GridLayout('.dashboard');
+  grid.bindKeyboard();
+
+  // Apply saved layout
+  const savedLayout = loadLayout();
+  if (savedLayout) {
+    grid.applyLayout(savedLayout);
+  }
+
+  // Wire toggle button
+  const toggleBtn = document.getElementById('layout-toggle-btn');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      grid.toggle();
+    });
+  }
+
+  window.__gridLayout = grid;
+}
+
 // Start after DOM is loaded
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initRealtime);
+  document.addEventListener('DOMContentLoaded', () => {
+    initRealtime();
+    initGridLayout();
+  });
 } else {
   initRealtime();
+  initGridLayout();
 }
