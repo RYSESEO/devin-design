@@ -303,6 +303,65 @@ db.exec(`
     detected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (competitor_id) REFERENCES competitors(id) ON DELETE CASCADE
   );
+
+  CREATE TABLE IF NOT EXISTS marketplace_plugins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    author TEXT,
+    version TEXT DEFAULT '1.0.0',
+    category TEXT,
+    config_schema TEXT DEFAULT '{}',
+    install_count INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS installed_plugins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    plugin_id INTEGER NOT NULL,
+    config TEXT DEFAULT '{}',
+    enabled INTEGER DEFAULT 1,
+    installed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (plugin_id) REFERENCES marketplace_plugins(id) ON DELETE CASCADE,
+    UNIQUE(user_id, plugin_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS dashboard_templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    category TEXT,
+    layout_json TEXT NOT NULL DEFAULT '{}',
+    preview_data TEXT DEFAULT '{}',
+    install_count INTEGER DEFAULT 0,
+    is_custom INTEGER DEFAULT 0,
+    user_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS api_keys (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    key_hash TEXT NOT NULL,
+    name TEXT NOT NULL,
+    permissions TEXT DEFAULT '["read"]',
+    last_used DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    revoked_at DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS benchmark_data (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    metric TEXT NOT NULL,
+    value REAL NOT NULL,
+    period TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
 `);
 
 // Seed automation_templates with pre-built templates (idempotent)
@@ -313,6 +372,25 @@ const seedSQL = "INSERT OR IGNORE INTO automation_templates (name, description, 
   + " ('Inventory reorder alert', 'Notify when inventory drops below reorder point', 'inventory', 'inventory_low', '{\"threshold\": 10}', '[{\"field\": \"stock_level\", \"operator\": \"below\", \"value\": 10}]', '[{\"type\": \"notify\", \"config\": {\"channel\": \"slack\", \"message\": \"Inventory low for {{product_name}}\"}}]'),"
   + " ('Revenue milestone celebration', 'Notify team when a revenue milestone is reached', 'revenue', 'revenue_milestone', '{\"milestone\": 10000}', '[{\"field\": \"total_revenue\", \"operator\": \"above\", \"value\": 10000}]', '[{\"type\": \"notify\", \"config\": {\"channel\": \"slack\", \"message\": \"Revenue milestone reached: ${{amount}}\"}}]');";
 db.exec(seedSQL);
+
+// Seed marketplace_plugins with sample plugins (idempotent)
+db.exec(`
+  INSERT OR IGNORE INTO marketplace_plugins (name, description, author, category, config_schema) VALUES
+  ('Analytics Widget', 'Real-time analytics widget with customizable charts', 'RYSE Team', 'analytics', '{"refresh_interval": "number", "chart_type": "string"}'),
+  ('Social Feed', 'Aggregated social media feed from connected platforms', 'RYSE Team', 'social', '{"platforms": "array", "max_posts": "number"}'),
+  ('Inventory Tracker', 'Live inventory monitoring with low-stock alerts', 'RYSE Team', 'commerce', '{"threshold": "number", "notify": "boolean"}'),
+  ('Email Digest', 'Automated daily/weekly email report summaries', 'RYSE Team', 'reporting', '{"frequency": "string", "recipients": "array"}'),
+  ('Custom Charts', 'Build custom chart visualizations from any data source', 'RYSE Team', 'analytics', '{"chart_types": "array", "data_sources": "array"}');
+`);
+
+// Seed dashboard_templates with sample templates (idempotent)
+db.exec(`
+  INSERT OR IGNORE INTO dashboard_templates (name, description, category, layout_json, preview_data) VALUES
+  ('E-commerce Overview', 'Complete e-commerce dashboard with revenue, orders, and product metrics', 'commerce', '{"panels":["kpi","revenue-chart","orders","products"]}', '{"preview":"ecommerce"}'),
+  ('Marketing Command', 'Marketing-focused layout with campaign metrics and social analytics', 'marketing', '{"panels":["campaigns","social","attribution","seo"]}', '{"preview":"marketing"}'),
+  ('Developer Ops', 'Technical dashboard with CI/CD, GitHub, and performance metrics', 'development', '{"panels":["github","ci-cd","performance","errors"]}', '{"preview":"devops"}'),
+  ('Minimal Analytics', 'Clean minimal layout with key metrics only', 'minimal', '{"panels":["kpi","revenue-chart"]}', '{"preview":"minimal"}');
+`);
 
 // Migrate oauth_states table if it exists without the new columns
 try {

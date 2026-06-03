@@ -25,6 +25,11 @@ import seoRouter from './routes/seo.js';
 import pricingRouter from './routes/pricing.js';
 import churnRouter from './routes/churn.js';
 import competitorsRouter from './routes/competitors.js';
+import marketplaceRouter from './routes/marketplace.js';
+import templatesRouter from './routes/templates.js';
+import benchmarksRouter from './routes/benchmarks.js';
+import publicApiRouter from './routes/public-api.js';
+import embedsRouter from './routes/embeds.js';
 import { optionalAuth } from './middleware/auth.js';
 import db from './db/index.js';
 
@@ -165,6 +170,21 @@ app.use('/api/churn', churnRouter);
 
 // Competitors routes (require auth - handled inside router)
 app.use('/api/competitors', competitorsRouter);
+
+// Marketplace routes (require auth - handled inside router)
+app.use('/api/marketplace', marketplaceRouter);
+
+// Templates routes (require auth - handled inside router)
+app.use('/api/templates', templatesRouter);
+
+// Benchmarks routes (require auth - handled inside router)
+app.use('/api/benchmarks', benchmarksRouter);
+
+// Public API key management and v1 routes
+app.use('/api', publicApiRouter);
+
+// Embeds routes (no auth required)
+app.use('/api/embeds', embedsRouter);
 
 // Optional auth for other routes
 app.use(optionalAuth);
