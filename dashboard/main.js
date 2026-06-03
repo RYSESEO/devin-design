@@ -426,6 +426,20 @@ async function initApp() {
   registerPanel('intel-btn', () => { if (window.initIntelligence) { window.initIntelligence(); return true; } return false; });
   registerPanel('auto-btn', () => { if (window.initAutomations) { window.initAutomations(); return true; } return false; });
   registerPanel('toolkit-btn', () => { if (window.initToolkit) { window.initToolkit(); return true; } return false; });
+  registerPanel('store-btn', () => { if (window.initMultiStore) { window.initMultiStore(); return true; } return false; });
+  registerPanel('ws-btn', () => { if (window.initWorkspaces) { window.initWorkspaces(); return true; } return false; });
+  registerPanel('reports-btn', () => { if (window.initReports) { window.initReports(); return true; } return false; });
+  registerPanel('billing-btn', () => { if (window.initBilling) { window.initBilling(); return true; } return false; });
+  registerPanel('forecast-btn', () => { if (window.initForecasting) { window.initForecasting(); return true; } return false; });
+  registerPanel('seo-btn', () => { if (window.initSeoRadar) { window.initSeoRadar(); return true; } return false; });
+  registerPanel('price-btn', () => { if (window.initPricing) { window.initPricing(); return true; } return false; });
+  registerPanel('churn-btn', () => { if (window.initChurn) { window.initChurn(); return true; } return false; });
+  registerPanel('comp-btn', () => { if (window.initCompetitorAlerts) { window.initCompetitorAlerts(); return true; } return false; });
+  registerPanel('market-btn', () => { if (window.initMarketplace) { window.initMarketplace(); return true; } return false; });
+  registerPanel('tmpl-btn', () => { if (window.initTemplates) { window.initTemplates(); return true; } return false; });
+  registerPanel('bench-btn', () => { if (window.initBenchmarks) { window.initBenchmarks(); return true; } return false; });
+  registerPanel('apikey-btn', () => { if (window.initApiKeys) { window.initApiKeys(); return true; } return false; });
+  registerPanel('embed-btn', () => { if (window.initEmbeds) { window.initEmbeds(); return true; } return false; });
   initLazyPanels();
 
   // Global Escape key handler for overlays

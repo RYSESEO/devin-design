@@ -24,6 +24,20 @@
   <script src="voice-control.js"></script>
   <script src="competitive.js"></script>
   <script src="widget-builder.js"></script>
+  <script src="multi-store.js"></script>
+  <script src="workspaces.js"></script>
+  <script src="reports.js"></script>
+  <script src="billing.js"></script>
+  <script src="forecasting.js"></script>
+  <script src="seo-radar.js"></script>
+  <script src="pricing.js"></script>
+  <script src="churn.js"></script>
+  <script src="competitor-alerts.js"></script>
+  <script src="marketplace.js"></script>
+  <script src="templates.js"></script>
+  <script src="benchmarks.js"></script>
+  <script src="api-keys.js"></script>
+  <script src="embeds.js"></script>
   <link rel="stylesheet" href="styles.css" />
   <link rel="modulepreload" href="./main.js">
   <link rel="manifest" href="manifest.json" />
@@ -146,6 +160,48 @@
       </button>
       <button class="topbar-icon-btn" id="wb-btn" title="Widget Builder (W)" aria-label="Widget Builder">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="store-btn" title="Stores" aria-label="Stores">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="ws-btn" title="Workspaces" aria-label="Workspaces">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="reports-btn" title="Reports" aria-label="Reports">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="billing-btn" title="Billing" aria-label="Billing">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="forecast-btn" title="Forecasting" aria-label="Forecasting">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="seo-btn" title="SEO Radar" aria-label="SEO Radar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="price-btn" title="Pricing" aria-label="Pricing">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="churn-btn" title="Churn" aria-label="Churn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="comp-btn" title="Competitors" aria-label="Competitors">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="market-btn" title="Marketplace" aria-label="Marketplace">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 7v11a2 2 0 002 2h14a2 2 0 002-2V7l-3-5z"/><line x1="3" y1="7" x2="21" y2="7"/><path d="M16 11a4 4 0 01-8 0"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="tmpl-btn" title="Templates" aria-label="Templates">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="bench-btn" title="Benchmarks" aria-label="Benchmarks">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="apikey-btn" title="API Keys" aria-label="API Keys">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="embed-btn" title="Embeds" aria-label="Embeds">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       </button>
       <button class="settings-btn" id="settings-btn" title="Data Connections (S)" aria-label="Settings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -1181,8 +1237,281 @@
     </div>
   </div>
 
+  <!-- ═══ Multi-Store Panel ═══ -->
+  <div class="ms-overlay" id="multi-store-panel">
+    <div class="ms-drawer">
+      <div class="ms-header">
+        <div class="ms-title-row">
+          <h3>Multi-Store Management</h3>
+          <button class="ms-close-btn" id="ms-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="ms-body">
+        <div class="ms-section">
+          <h4 class="ms-section-title">Store Switcher</h4>
+          <div id="ms-switcher"></div>
+        </div>
+        <div class="ms-section">
+          <h4 class="ms-section-title">Aggregate Metrics</h4>
+          <div id="ms-aggregate"></div>
+        </div>
+        <div class="ms-section">
+          <h4 class="ms-section-title">Your Stores</h4>
+          <div id="ms-store-list"></div>
+        </div>
+        <div class="ms-section">
+          <h4 class="ms-section-title">Add Store</h4>
+          <form class="ms-form" id="ms-add-form">
+            <input type="text" class="ms-input" id="ms-store-name" placeholder="Store Name" required />
+            <input type="text" class="ms-input" id="ms-shop-domain" placeholder="shop-domain.myshopify.com" required />
+            <button type="submit" class="ms-btn ms-btn-add">Add Store</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Workspaces Panel ═══ -->
+  <div class="ws-overlay" id="workspaces-panel">
+    <div class="ws-drawer">
+      <div class="ws-header">
+        <div class="ws-title-row">
+          <h3>Workspaces</h3>
+          <button class="ws-close-btn" id="ws-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="ws-body">
+        <div class="ws-section">
+          <h4 class="ws-section-title">Create Workspace</h4>
+          <form class="ws-form" id="ws-create-form">
+            <input type="text" class="ws-input" id="ws-name-input" placeholder="Workspace name" required />
+            <button type="submit" class="ws-btn ws-btn-create">Create</button>
+          </form>
+        </div>
+        <div class="ws-section">
+          <h4 class="ws-section-title">Your Workspaces</h4>
+          <div id="ws-list"></div>
+        </div>
+        <div class="ws-section" id="ws-member-section" style="display:none">
+          <h4 class="ws-section-title">Members</h4>
+          <div id="ws-members-list"></div>
+          <form class="ws-form" id="ws-member-form">
+            <input type="email" class="ws-input" id="ws-member-email" placeholder="member@email.com" required />
+            <select class="ws-select" id="ws-member-role">
+              <option value="viewer">Viewer</option>
+              <option value="admin">Admin</option>
+              <option value="owner">Owner</option>
+            </select>
+            <button type="submit" class="ws-btn ws-btn-add">Add Member</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Reports Panel ═══ -->
+  <div class="rpt-overlay" id="reports-panel">
+    <div class="rpt-drawer">
+      <div class="rpt-header">
+        <div class="rpt-title-row">
+          <h3>Reports</h3>
+          <button class="rpt-close-btn" id="rpt-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="rpt-body">
+        <div class="rpt-section">
+          <h4 class="rpt-section-title">Generate Report</h4>
+          <div class="rpt-gen-form">
+            <input type="text" class="rpt-input" id="rpt-title-input" placeholder="Report title" />
+            <button class="rpt-btn rpt-btn-generate" id="rpt-generate-btn">Generate Report</button>
+          </div>
+        </div>
+        <div class="rpt-section">
+          <h4 class="rpt-section-title">Past Reports</h4>
+          <div id="rpt-list"></div>
+        </div>
+        <div class="rpt-section">
+          <div id="rpt-viewer" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Billing Panel ═══ -->
+  <div class="bill-overlay" id="billing-panel">
+    <div class="bill-drawer">
+      <div class="bill-header">
+        <div class="bill-title-row">
+          <h3>Billing</h3>
+          <button class="bill-close-btn" id="bill-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="bill-body">
+        <div class="bill-section">
+          <h4 class="bill-section-title">Current Plan</h4>
+          <div id="bill-status"></div>
+        </div>
+        <div class="bill-section">
+          <h4 class="bill-section-title">Available Plans</h4>
+          <div id="bill-plans" class="bill-plans-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ Automation Hub Panel ═══ -->
   <div class="auto-overlay" id="automation-panel">
+
+  <!-- ═══ Forecasting Panel ═══ -->
+  <div class="fc-overlay" id="forecasting-panel">
+    <div class="fc-drawer">
+      <div class="fc-header">
+        <div class="fc-title-row">
+          <h3>Demand Forecasting</h3>
+          <button class="fc-close-btn" id="fc-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="fc-body">
+        <div class="fc-section">
+          <h4 class="fc-section-title">Demand Prediction</h4>
+          <div id="fc-chart-wrap" class="fc-chart-wrap"></div>
+        </div>
+        <div class="fc-section">
+          <h4 class="fc-section-title">Trend Direction</h4>
+          <div id="fc-trend"></div>
+        </div>
+        <div class="fc-section">
+          <h4 class="fc-section-title">Seasonality (Day of Week)</h4>
+          <div id="fc-seasonality"></div>
+        </div>
+        <div class="fc-section">
+          <button class="fc-btn" id="fc-seed-btn">Load Demo Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SEO Radar Panel ═══ -->
+  <div class="seo-overlay" id="seo-radar-panel">
+    <div class="seo-drawer">
+      <div class="seo-header">
+        <div class="seo-title-row">
+          <h3>SEO Radar</h3>
+          <button class="seo-close-btn" id="seo-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="seo-body">
+        <div class="seo-section">
+          <h4 class="seo-section-title">Keyword Opportunities</h4>
+          <div id="seo-table-wrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Pricing Panel ═══ -->
+  <div class="pr-overlay" id="pricing-panel">
+    <div class="pr-drawer">
+      <div class="pr-header">
+        <div class="pr-title-row">
+          <h3>Price Optimization</h3>
+          <button class="pr-close-btn" id="pr-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="pr-body">
+        <div class="pr-section">
+          <h4 class="pr-section-title">Active Price Tests</h4>
+          <div id="pr-tests-list"></div>
+        </div>
+        <div class="pr-section">
+          <h4 class="pr-section-title">Create Test</h4>
+          <form class="pr-form" id="pr-create-form">
+            <input type="text" class="pr-input" id="pr-product-name" placeholder="Product name" required />
+            <input type="number" class="pr-input" id="pr-original-price" placeholder="Original price" step="0.01" required />
+            <input type="number" class="pr-input" id="pr-test-price" placeholder="Test price" step="0.01" required />
+            <button type="submit" class="pr-btn pr-btn-create">Create Test</button>
+          </form>
+        </div>
+        <div class="pr-section">
+          <h4 class="pr-section-title">Recommendations</h4>
+          <div id="pr-recommendations"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Churn Prediction Panel ═══ -->
+  <div class="churn-overlay" id="churn-panel">
+    <div class="churn-drawer">
+      <div class="churn-header">
+        <div class="churn-title-row">
+          <h3>Churn Prediction</h3>
+          <button class="churn-close-btn" id="churn-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="churn-body">
+        <div class="churn-section">
+          <h4 class="churn-section-title">Risk Summary</h4>
+          <div id="churn-summary"></div>
+        </div>
+        <div class="churn-section">
+          <h4 class="churn-section-title">At-Risk Customers</h4>
+          <div id="churn-table-wrap"></div>
+        </div>
+        <div class="churn-section">
+          <button class="churn-btn" id="churn-seed-btn">Seed Demo Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Competitor Alerts Panel ═══ -->
+  <div class="comp-overlay" id="competitor-alerts-panel">
+    <div class="comp-drawer">
+      <div class="comp-header">
+        <div class="comp-title-row">
+          <h3>Competitor Alerts</h3>
+          <button class="comp-close-btn" id="comp-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="comp-body">
+        <div class="comp-section">
+          <h4 class="comp-section-title">Tracked Competitors</h4>
+          <div id="comp-list"></div>
+        </div>
+        <div class="comp-section">
+          <h4 class="comp-section-title">Recent Changes</h4>
+          <div id="comp-changes-feed"></div>
+        </div>
+        <div class="comp-section">
+          <h4 class="comp-section-title">Add Competitor</h4>
+          <form class="comp-form" id="comp-add-form">
+            <input type="text" class="comp-input" id="comp-name" placeholder="Competitor name" required />
+            <input type="text" class="comp-input" id="comp-domain" placeholder="domain.com" required />
+            <button type="submit" class="comp-btn comp-btn-add">Add Competitor</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
     <div class="auto-drawer">
       <div class="auto-header">
         <div class="auto-title-row">
@@ -1210,6 +1539,203 @@
         </div>
         <div class="auto-pane" data-apane="notifications">
           <div id="auto-notifications"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Marketplace Panel ═══ -->
+  <div class="mkt-overlay" id="marketplace-panel">
+    <div class="mkt-drawer">
+      <div class="mkt-header">
+        <div class="mkt-title-row">
+          <h3>Marketplace</h3>
+          <button class="mkt-close-btn" id="mkt-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="mkt-tabs">
+          <button class="mkt-tab active" data-mkttab="browse">Browse</button>
+          <button class="mkt-tab" data-mkttab="installed">Installed</button>
+        </div>
+      </div>
+      <div class="mkt-body">
+        <div class="mkt-pane active" data-mktpane="browse">
+          <div id="mkt-grid"></div>
+        </div>
+        <div class="mkt-pane" data-mktpane="installed">
+          <div id="mkt-installed-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Templates Panel ═══ -->
+  <div class="tmpl-overlay" id="templates-panel">
+    <div class="tmpl-drawer">
+      <div class="tmpl-header">
+        <div class="tmpl-title-row">
+          <h3>Templates</h3>
+          <button class="tmpl-close-btn" id="tmpl-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="tmpl-filters">
+          <button class="tmpl-filter-btn active" data-filter="all">All</button>
+          <button class="tmpl-filter-btn" data-filter="commerce">Commerce</button>
+          <button class="tmpl-filter-btn" data-filter="marketing">Marketing</button>
+          <button class="tmpl-filter-btn" data-filter="development">Development</button>
+          <button class="tmpl-filter-btn" data-filter="minimal">Minimal</button>
+        </div>
+      </div>
+      <div class="tmpl-body">
+        <div id="tmpl-grid"></div>
+        <div class="tmpl-create-section">
+          <h4>Create from Current Layout</h4>
+          <input type="text" class="tmpl-input" id="tmpl-name-input" placeholder="Template name" />
+          <button class="tmpl-btn" id="tmpl-create-btn">Create from Current</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Benchmarks Panel ═══ -->
+  <div class="bench-overlay" id="benchmarks-panel">
+    <div class="bench-drawer">
+      <div class="bench-header">
+        <div class="bench-title-row">
+          <h3>Community Benchmarks</h3>
+          <button class="bench-close-btn" id="bench-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-section">
+          <h4 class="bench-section-title">Your Percentile Rankings</h4>
+          <div id="bench-gauges"></div>
+        </div>
+        <div class="bench-section">
+          <h4 class="bench-section-title">Submit My Metrics</h4>
+          <div class="bench-form">
+            <div class="bench-field">
+              <label>Revenue</label>
+              <input type="number" class="bench-input" id="bench-revenue" placeholder="Monthly revenue" step="0.01" />
+            </div>
+            <div class="bench-field">
+              <label>Conversion Rate (%)</label>
+              <input type="number" class="bench-input" id="bench-conversion" placeholder="e.g. 3.5" step="0.01" />
+            </div>
+            <div class="bench-field">
+              <label>Traffic (monthly visits)</label>
+              <input type="number" class="bench-input" id="bench-traffic" placeholder="e.g. 10000" />
+            </div>
+            <button class="bench-btn" id="bench-submit-btn">Submit My Metrics</button>
+          </div>
+        </div>
+        <div class="bench-section">
+          <h4 class="bench-section-title">Community Averages</h4>
+          <div id="bench-stats"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ API Keys Panel ═══ -->
+  <div class="apikey-overlay" id="api-keys-panel">
+    <div class="apikey-drawer">
+      <div class="apikey-header">
+        <div class="apikey-title-row">
+          <h3>API Keys</h3>
+          <button class="apikey-close-btn" id="apikey-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="apikey-body">
+        <div class="apikey-section">
+          <h4 class="apikey-section-title">Create API Key</h4>
+          <form class="apikey-form" id="apikey-create-form">
+            <input type="text" class="apikey-input" id="apikey-name-input" placeholder="Key name" required />
+            <div class="apikey-perms">
+              <label><input type="checkbox" id="apikey-perm-read" checked /> Read</label>
+              <label><input type="checkbox" id="apikey-perm-write" /> Write</label>
+            </div>
+            <button type="submit" class="apikey-btn apikey-btn-create">Create Key</button>
+          </form>
+          <div id="apikey-new-key" style="display:none"></div>
+        </div>
+        <div class="apikey-section">
+          <h4 class="apikey-section-title">Your API Keys</h4>
+          <div id="apikey-list"></div>
+        </div>
+        <div class="apikey-section">
+          <h4 class="apikey-section-title">API Documentation</h4>
+          <div class="apikey-docs">
+            <p>Use your API key via the <code>X-API-Key</code> header:</p>
+            <pre class="apikey-code-block">curl -H "X-API-Key: YOUR_KEY" /api/v1/metrics</pre>
+            <pre class="apikey-code-block">curl -H "X-API-Key: YOUR_KEY" /api/v1/orders</pre>
+            <pre class="apikey-code-block">curl -H "X-API-Key: YOUR_KEY" /api/v1/reports</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Embeds Panel ═══ -->
+  <div class="embed-overlay" id="embeds-panel">
+    <div class="embed-drawer">
+      <div class="embed-header">
+        <div class="embed-title-row">
+          <h3>Embedded Analytics</h3>
+          <button class="embed-close-btn" id="embed-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="embed-body">
+        <div class="embed-section">
+          <h4 class="embed-section-title">Configurator</h4>
+          <div class="embed-form">
+            <div class="embed-field">
+              <label>Chart Type</label>
+              <select class="embed-select" id="embed-type">
+                <option value="line">Line</option>
+                <option value="bar">Bar</option>
+                <option value="pie">Pie</option>
+                <option value="kpi">KPI</option>
+              </select>
+            </div>
+            <div class="embed-field">
+              <label>Title</label>
+              <input type="text" class="embed-input" id="embed-title" placeholder="Chart title" />
+            </div>
+            <div class="embed-field">
+              <label>Data (JSON array)</label>
+              <input type="text" class="embed-input" id="embed-data" placeholder="[10, 20, 30, 40, 50]" />
+            </div>
+            <div class="embed-field">
+              <label>Color</label>
+              <input type="color" id="embed-color" value="#a855f7" />
+            </div>
+          </div>
+        </div>
+        <div class="embed-section">
+          <h4 class="embed-section-title">Preview</h4>
+          <iframe id="embed-preview-iframe" class="embed-preview" width="100%" height="300" frameborder="0"></iframe>
+        </div>
+        <div class="embed-section">
+          <h4 class="embed-section-title">Embed Code</h4>
+          <div class="embed-code-block">
+            <label>IFrame Snippet</label>
+            <textarea class="embed-code-textarea" id="embed-iframe-code" rows="3" readonly></textarea>
+            <button class="embed-copy-btn" id="embed-copy-iframe">Copy IFrame</button>
+          </div>
+          <div class="embed-code-block">
+            <label>Script Snippet</label>
+            <textarea class="embed-code-textarea" id="embed-script-code" rows="3" readonly></textarea>
+            <button class="embed-copy-btn" id="embed-copy-script">Copy Script</button>
+          </div>
         </div>
       </div>
     </div>
