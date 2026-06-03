@@ -33,6 +33,11 @@
   <script src="pricing.js"></script>
   <script src="churn.js"></script>
   <script src="competitor-alerts.js"></script>
+  <script src="marketplace.js"></script>
+  <script src="templates.js"></script>
+  <script src="benchmarks.js"></script>
+  <script src="api-keys.js"></script>
+  <script src="embeds.js"></script>
   <link rel="stylesheet" href="styles.css" />
   <link rel="modulepreload" href="./main.js">
   <link rel="manifest" href="manifest.json" />
@@ -182,6 +187,21 @@
       </button>
       <button class="topbar-icon-btn" id="comp-btn" title="Competitors" aria-label="Competitors">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="market-btn" title="Marketplace" aria-label="Marketplace">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 7v11a2 2 0 002 2h14a2 2 0 002-2V7l-3-5z"/><line x1="3" y1="7" x2="21" y2="7"/><path d="M16 11a4 4 0 01-8 0"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="tmpl-btn" title="Templates" aria-label="Templates">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="bench-btn" title="Benchmarks" aria-label="Benchmarks">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="apikey-btn" title="API Keys" aria-label="API Keys">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+      </button>
+      <button class="topbar-icon-btn" id="embed-btn" title="Embeds" aria-label="Embeds">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       </button>
       <button class="settings-btn" id="settings-btn" title="Data Connections (S)" aria-label="Settings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -1519,6 +1539,203 @@
         </div>
         <div class="auto-pane" data-apane="notifications">
           <div id="auto-notifications"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Marketplace Panel ═══ -->
+  <div class="mkt-overlay" id="marketplace-panel">
+    <div class="mkt-drawer">
+      <div class="mkt-header">
+        <div class="mkt-title-row">
+          <h3>Marketplace</h3>
+          <button class="mkt-close-btn" id="mkt-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="mkt-tabs">
+          <button class="mkt-tab active" data-mkttab="browse">Browse</button>
+          <button class="mkt-tab" data-mkttab="installed">Installed</button>
+        </div>
+      </div>
+      <div class="mkt-body">
+        <div class="mkt-pane active" data-mktpane="browse">
+          <div id="mkt-grid"></div>
+        </div>
+        <div class="mkt-pane" data-mktpane="installed">
+          <div id="mkt-installed-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Templates Panel ═══ -->
+  <div class="tmpl-overlay" id="templates-panel">
+    <div class="tmpl-drawer">
+      <div class="tmpl-header">
+        <div class="tmpl-title-row">
+          <h3>Templates</h3>
+          <button class="tmpl-close-btn" id="tmpl-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="tmpl-filters">
+          <button class="tmpl-filter-btn active" data-filter="all">All</button>
+          <button class="tmpl-filter-btn" data-filter="commerce">Commerce</button>
+          <button class="tmpl-filter-btn" data-filter="marketing">Marketing</button>
+          <button class="tmpl-filter-btn" data-filter="development">Development</button>
+          <button class="tmpl-filter-btn" data-filter="minimal">Minimal</button>
+        </div>
+      </div>
+      <div class="tmpl-body">
+        <div id="tmpl-grid"></div>
+        <div class="tmpl-create-section">
+          <h4>Create from Current Layout</h4>
+          <input type="text" class="tmpl-input" id="tmpl-name-input" placeholder="Template name" />
+          <button class="tmpl-btn" id="tmpl-create-btn">Create from Current</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Benchmarks Panel ═══ -->
+  <div class="bench-overlay" id="benchmarks-panel">
+    <div class="bench-drawer">
+      <div class="bench-header">
+        <div class="bench-title-row">
+          <h3>Community Benchmarks</h3>
+          <button class="bench-close-btn" id="bench-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-section">
+          <h4 class="bench-section-title">Your Percentile Rankings</h4>
+          <div id="bench-gauges"></div>
+        </div>
+        <div class="bench-section">
+          <h4 class="bench-section-title">Submit My Metrics</h4>
+          <div class="bench-form">
+            <div class="bench-field">
+              <label>Revenue</label>
+              <input type="number" class="bench-input" id="bench-revenue" placeholder="Monthly revenue" step="0.01" />
+            </div>
+            <div class="bench-field">
+              <label>Conversion Rate (%)</label>
+              <input type="number" class="bench-input" id="bench-conversion" placeholder="e.g. 3.5" step="0.01" />
+            </div>
+            <div class="bench-field">
+              <label>Traffic (monthly visits)</label>
+              <input type="number" class="bench-input" id="bench-traffic" placeholder="e.g. 10000" />
+            </div>
+            <button class="bench-btn" id="bench-submit-btn">Submit My Metrics</button>
+          </div>
+        </div>
+        <div class="bench-section">
+          <h4 class="bench-section-title">Community Averages</h4>
+          <div id="bench-stats"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ API Keys Panel ═══ -->
+  <div class="apikey-overlay" id="api-keys-panel">
+    <div class="apikey-drawer">
+      <div class="apikey-header">
+        <div class="apikey-title-row">
+          <h3>API Keys</h3>
+          <button class="apikey-close-btn" id="apikey-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="apikey-body">
+        <div class="apikey-section">
+          <h4 class="apikey-section-title">Create API Key</h4>
+          <form class="apikey-form" id="apikey-create-form">
+            <input type="text" class="apikey-input" id="apikey-name-input" placeholder="Key name" required />
+            <div class="apikey-perms">
+              <label><input type="checkbox" id="apikey-perm-read" checked /> Read</label>
+              <label><input type="checkbox" id="apikey-perm-write" /> Write</label>
+            </div>
+            <button type="submit" class="apikey-btn apikey-btn-create">Create Key</button>
+          </form>
+          <div id="apikey-new-key" style="display:none"></div>
+        </div>
+        <div class="apikey-section">
+          <h4 class="apikey-section-title">Your API Keys</h4>
+          <div id="apikey-list"></div>
+        </div>
+        <div class="apikey-section">
+          <h4 class="apikey-section-title">API Documentation</h4>
+          <div class="apikey-docs">
+            <p>Use your API key via the <code>X-API-Key</code> header:</p>
+            <pre class="apikey-code-block">curl -H "X-API-Key: YOUR_KEY" /api/v1/metrics</pre>
+            <pre class="apikey-code-block">curl -H "X-API-Key: YOUR_KEY" /api/v1/orders</pre>
+            <pre class="apikey-code-block">curl -H "X-API-Key: YOUR_KEY" /api/v1/reports</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Embeds Panel ═══ -->
+  <div class="embed-overlay" id="embeds-panel">
+    <div class="embed-drawer">
+      <div class="embed-header">
+        <div class="embed-title-row">
+          <h3>Embedded Analytics</h3>
+          <button class="embed-close-btn" id="embed-close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="embed-body">
+        <div class="embed-section">
+          <h4 class="embed-section-title">Configurator</h4>
+          <div class="embed-form">
+            <div class="embed-field">
+              <label>Chart Type</label>
+              <select class="embed-select" id="embed-type">
+                <option value="line">Line</option>
+                <option value="bar">Bar</option>
+                <option value="pie">Pie</option>
+                <option value="kpi">KPI</option>
+              </select>
+            </div>
+            <div class="embed-field">
+              <label>Title</label>
+              <input type="text" class="embed-input" id="embed-title" placeholder="Chart title" />
+            </div>
+            <div class="embed-field">
+              <label>Data (JSON array)</label>
+              <input type="text" class="embed-input" id="embed-data" placeholder="[10, 20, 30, 40, 50]" />
+            </div>
+            <div class="embed-field">
+              <label>Color</label>
+              <input type="color" id="embed-color" value="#a855f7" />
+            </div>
+          </div>
+        </div>
+        <div class="embed-section">
+          <h4 class="embed-section-title">Preview</h4>
+          <iframe id="embed-preview-iframe" class="embed-preview" width="100%" height="300" frameborder="0"></iframe>
+        </div>
+        <div class="embed-section">
+          <h4 class="embed-section-title">Embed Code</h4>
+          <div class="embed-code-block">
+            <label>IFrame Snippet</label>
+            <textarea class="embed-code-textarea" id="embed-iframe-code" rows="3" readonly></textarea>
+            <button class="embed-copy-btn" id="embed-copy-iframe">Copy IFrame</button>
+          </div>
+          <div class="embed-code-block">
+            <label>Script Snippet</label>
+            <textarea class="embed-code-textarea" id="embed-script-code" rows="3" readonly></textarea>
+            <button class="embed-copy-btn" id="embed-copy-script">Copy Script</button>
+          </div>
         </div>
       </div>
     </div>
