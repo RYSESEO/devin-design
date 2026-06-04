@@ -44,7 +44,7 @@ const DashboardTabs = {
       if (!preset.widgets) { el.style.display = ''; return; }
       el.style.display = preset.widgets.includes(w) ? '' : 'none';
     });
-    document.querySelectorAll('.charts-row, .bottom-row').forEach(row => {
+    document.querySelectorAll('.charts-row, .bottom-row, .content-row').forEach(row => {
       const visible = [...row.querySelectorAll('[data-widget]')].some(c => c.style.display !== 'none');
       row.style.display = visible ? '' : 'none';
     });
