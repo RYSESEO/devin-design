@@ -1,196 +1,179 @@
-<p align="center">
-  <img src="assets/readme-banner.png" alt="Taste Skill - Anti-slop Agent Skills for premium frontends" width="100%" />
-</p>
+# RYSE Command Center
 
-# Taste Skill
+Real-time analytics dashboard for Shopify, GitHub, and marketing automation. Built with vanilla JS, Chart.js, and an Express/SQLite backend. Deployed on Railway.
 
-<p align="center">
-  <em>The Anti-Slop Frontend Framework for AI Agents</em>
-</p>
+**Live:** [devin-design-production.up.railway.app](https://devin-design-production.up.railway.app)
 
-<p align="center">
-  <a href="https://tasteskill.dev" title="Taste Skill - tasteskill.dev">
-    <img src="assets/taste-skill-logo.webp" width="80" height="80" alt="Taste Skill" />
-  </a>
-</p>
+## Features
 
-<p align="center">
-  <a href="https://tasteskill.dev">
-    <img src="https://img.shields.io/badge/OPEN-tasteskill.dev-%23a855f7?style=for-the-badge&labelColor=%230f172a" alt="Open tasteskill.dev" />
-  </a>
-</p>
+- **KPI Dashboard** - Revenue, agent sessions, leads, and content views with animated counters and sparklines
+- **Shopify Integration** - Orders, revenue, and top products via Admin API or OAuth
+- **GitHub Integration** - Activity feed, commit heatmap, CI/CD status via OAuth or personal token
+- **4 Theme Modes** - Default dark, Liquid Glass, Brutalist, Cyberpunk
+- **Real-time Updates** - WebSocket-powered live data streaming with reconnection
+- **Dashboard Tabs** - All Metrics, Marketing, Engineering, Executive filtered views
+- **Drag-and-Drop Layout** - Customizable widget positioning with persistence
+- **Command Palette** - Ctrl+K searchable command interface
+- **Focus Mode** - Expand any widget to full screen
+- **AI Chat Assistant** - Built-in conversational interface
+- **Voice Control** - Voice-activated commands
+- **Multi-Store Management** - Aggregate metrics across Shopify stores
+- **Workspaces** - Team collaboration with shared dashboards
+- **Reports** - Generate and export analytics reports
+- **Forecasting** - Demand prediction with trend analysis
+- **SEO Radar** - Keyword opportunity tracking
+- **Competitive Intelligence** - Competitor monitoring and alerts
+- **Widget Builder** - No-code custom widget creation
+- **Embedded Analytics** - Configurable iframe/script embeds
+- **PWA Support** - Installable with offline capability
 
-Portable **Agent Skills** that upgrade AI-built interfaces: stronger layout, typography, motion, and spacing instead of boilerplate-looking UIs. This repo also includes **image-generation skills** for reference boards (web, mobile, brand kits). Pair them with **ChatGPT Images** or similar generators, then hand the frames to Codex, Cursor, or Claude Code for implementation.
+## Tech Stack
 
-<p align="center">
-<a href="https://github.com/Leonxlnx/taste-skill/stargazers"><img src="https://img.shields.io/github/stars/Leonxlnx/taste-skill?style=for-the-badge&logo=github&labelColor=1e293b&color=fbbf24" alt="GitHub stars"/></a>
-<a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-fbbf24?style=for-the-badge&labelColor=1e293b" alt="MIT License"/></a>
-<a href="#installing"><img src="https://img.shields.io/badge/Tools-Codex%20%C2%B7%20Cursor%20%C2%B7%20Claude-111827?style=for-the-badge&labelColor=1e293b" alt="Supported agents"/></a>
-<a href="https://www.tasteskill.dev/changelog"><img src="https://img.shields.io/badge/Changelog-Latest-059669?style=for-the-badge&labelColor=1e293b" alt="Changelog on tasteskill.dev"/></a>
-</p>
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Vanilla JS, Chart.js, CSS custom properties |
+| Backend | Node.js, Express, better-sqlite3 |
+| Auth | JWT with refresh tokens, bcrypt |
+| Real-time | WebSocket (ws) with SSE fallback |
+| Build | Vite |
+| Tests | Vitest |
+| Deploy | Docker, Railway |
 
-## Disclaimer
+## Getting Started
 
-Taste Skill has no official token, coin, or crypto project. Any token using my name, image, or project is unaffiliated and not endorsed by me.
+### Prerequisites
 
-<p align="center"><sub><a href="#disclaimer">Disclaimer</a> · <a href="#installing">Install</a> · <a href="#skills">Skills</a> · <a href="#settings-taste-skill-only">Settings</a> · <a href="#examples">Examples</a> · <a href="#support-the-project">Sponsor</a> · <a href="#research">Research</a> · <a href="#common-questions">FAQ</a> · <a href="#license">License</a></sub></p>
+- Node.js 22+
+- npm
 
-## Feedback & Contributions
-
-We would love your feedback. Suggestions and bug reports:
-
-- Open a Pull Request or Issue on GitHub  
-- DM [@lexnlin](https://x.com/lexnlin) or [@blueemi99](https://x.com/blueemi99)  
-- Email us at [hello@tasteskill.dev](mailto:hello@tasteskill.dev)
-
-## Installing
-
-The [`npx skills add`](https://github.com/vercel-labs/agent-skills) CLI scans the `skills/` folder in this repo, so **all skills below (code and image-generation) install the same way.**
-
-```bash
-npx skills add https://github.com/Leonxlnx/taste-skill
-```
-
-Install a single skill by its **install name** (the `name:` field inside the SKILL frontmatter, not the folder name):
+### Installation
 
 ```bash
-npx skills add https://github.com/Leonxlnx/taste-skill --skill "design-taste-frontend"
+git clone https://github.com/RYSESEO/devin-design.git
+cd devin-design
+npm install
 ```
 
-You can also copy any `SKILL.md` into your project or paste it into ChatGPT / Codex conversations.
+### Configuration
 
-### Updating from the previous version
-
-The default `taste-skill` (install name `design-taste-frontend`) is now **v2 (experimental)**, a substantial rewrite of the original v1. If you already have v1 installed, just re-run the install command and you will be upgraded:
+Copy the example environment file:
 
 ```bash
-npx skills add https://github.com/Leonxlnx/taste-skill --skill "design-taste-frontend"
+cp .env.example .env
 ```
 
-The install name did not change, so no script updates are needed. The newer SKILL.md replaces the older one in place.
+Key variables:
 
-If you depend on the exact behavior of v1 and want to pin to it explicitly:
+| Variable | Description |
+|----------|-------------|
+| `JWT_SECRET` | Secret for signing auth tokens |
+| `ENCRYPTION_KEY` | Key for encrypting stored credentials |
+| `PORT` | Server port (default: 3001) |
+| `SHOPIFY_CLIENT_ID` | Shopify app client ID (for OAuth) |
+| `SHOPIFY_CLIENT_SECRET` | Shopify app client secret (for OAuth) |
+| `GITHUB_CLIENT_ID` | GitHub OAuth app client ID |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth app client secret |
+| `APP_URL` | Base URL for OAuth redirects (auto-detected if not set) |
+
+### Development
 
 ```bash
-npx skills add https://github.com/Leonxlnx/taste-skill --skill "design-taste-frontend-v1"
+npm run dev
 ```
 
-See [CHANGELOG.md](CHANGELOG.md) for the full v1 to v2 diff and the rationale.
+Starts both the Vite dev server (frontend) and nodemon (backend) concurrently.
 
-## Skills
+### Build
 
-Each skill does one job; you do not need all of them at once. **Implementation skills** output code. **Image-generation skills** output reference images only.
+```bash
+npm run build
+```
 
-The `Install name` column is the exact value you pass to `--skill`.
+### Production
 
-| Skill (folder) | Install name | Description |
-| --- | --- | --- |
-| **taste-skill** | `design-taste-frontend` | 🆕 **v2 (experimental)** - substantial rewrite of the default skill. Reads the brief, infers the design language, tunes three dials (VARIANCE / MOTION / DENSITY). Brief inference, design-system map, hard em-dash ban, canonical GSAP code skeletons, redesign-audit protocol, strict pre-flight check. Actively iterating toward v2.0.0 stable. |
-| **taste-skill-v1** | `design-taste-frontend-v1` | The original v1 of taste-skill, preserved for projects depending on its exact behavior. Use only if the v2 default breaks something specific in your workflow. |
-| **gpt-tasteskill** | `gpt-taste` | Stricter variant for GPT/Codex: higher layout variance, stronger GSAP direction, aggressive anti-slop. |
-| **image-to-code-skill** | `image-to-code` | Image-first pipeline: generate site references, analyze them, then implement the frontend to match. |
-| **redesign-skill** | `redesign-existing-projects` | Existing projects: audit the UI first, then fix layout, spacing, hierarchy, styling. |
-| **soft-skill** | `high-end-visual-design` | Polished, calm, expensive UI with softer contrast, whitespace, premium fonts, spring motion. |
-| **output-skill** | `full-output-enforcement` | When the model ships half-finished work: full output, no placeholder comments. |
-| **minimalist-skill** | `minimalist-ui` | Editorial product UI (Notion/Linear vibes), restrained palette, crisp structure. |
-| **brutalist-skill** | `industrial-brutalist-ui` | Hard mechanical language: Swiss type, sharp contrast, experimental layout. |
-| **stitch-skill** | `stitch-design-taste` | Google Stitch-compatible rules, including optional `DESIGN.md` export format. |
+```bash
+npm start
+```
 
-### Image generation skills
+Serves the built frontend and API from a single Express server.
 
-These produce design images only (no code). Use with ChatGPT Images, Codex image mode, or any agent that generates images.
+### Tests
 
-| Skill (folder) | Install name | Description |
-| --- | --- | --- |
-| **imagegen-frontend-web** | `imagegen-frontend-web` | Website comps: hero, landing, multi-section with strong typography, spacing, anti-slop art direction. |
-| **imagegen-frontend-mobile** | `imagegen-frontend-mobile` | Mobile screens and flows: iOS/Android/cross-platform, mockups, readable type, coherent sets. |
-| **brandkit** | `brandkit` | Brand-kit boards: logo directions, palettes, type, identity applications across categories. |
+```bash
+npm test
+```
 
-### Which one should I use?
+## Connecting Shopify
 
-- Start with **taste-skill** for the safest general default. (Now v2 experimental - see what changed in the [CHANGELOG](CHANGELOG.md).)
-- If you depend on the exact behavior of the original taste-skill, install **taste-skill-v1** instead. 
-- Use **gpt-taste** when you want the stricter GPT/Codex-oriented rules and motion/layout enforcement. 
-- Use **image-to-code-skill** for image → analyze → code website workflows. 
-- Use **redesign-skill** to improve an existing codebase instead of greenfield styling. 
-- Add **soft-skill**, **minimalist-skill**, or **brutalist-skill** when the visual direction is already chosen. 
-- Add **output-skill** if the agent keeps truncating output. 
-- Use **imagegen-frontend-web**, **imagegen-frontend-mobile**, or **brandkit** when the deliverable is **images** (comps, flows, identity boards), then pass results to your coding agent.
+### Option 1: Admin API Token (recommended for single store)
 
-### Image-first tip
+1. In Shopify admin, go to **Settings > Apps and sales channels > Develop apps**
+2. Create or open your custom app
+3. Under **API credentials**, get your Admin API access token (`shpat_...`)
+4. In the RYSE dashboard, open **Settings** (gear icon) and enter:
+   - **Store URL**: Your myshopify subdomain (e.g., `my-store` if your admin URL is `admin.shopify.com/store/my-store`)
+   - **Admin API Token**: Your `shpat_xxxxx` token
 
-For **image-to-code-skill**, state the pipeline in the prompt, e.g.: `follow the skill: generate images, then analyze, then code`.
+### Option 2: OAuth (for multi-store apps)
 
-### ChatGPT Images and Codex
+Set `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET` in your environment. The redirect URI is auto-detected from the deployment URL.
 
-Attach or paste **`imagegen-frontend-web`**, **`imagegen-frontend-mobile`**, or **`brandkit`** and ask for the frames you need, then feed the renders to Codex, Cursor, or Claude Code. Use **image-to-code-skill** when you want one workflow that both generates references and implements the site in code.
+## Deployment
 
-## Settings (taste-skill only)
+### Railway
 
-Numbers at the top of the file are 1-10 dials:
+The project includes a `Dockerfile` for containerized deployment. Set environment variables in the Railway dashboard.
 
-- **DESIGN_VARIANCE**: Layout experimentation (lower: centered/clean · higher: asymmetric/modern).
-- **MOTION_INTENSITY**: Animation depth (lower: hover · higher: scroll/magnetic).
-- **VISUAL_DENSITY**: Information per viewport (lower: spacious · higher: dense dashboards).
+### Docker
 
-## Examples
+```bash
+docker build -t ryse-dashboard .
+docker run -p 3001:3001 --env-file .env ryse-dashboard
+```
 
-Created with taste-skill:
+## Project Structure
 
-<p>
-  <img src="examples/floria-top.webp" width="400" />
-  <img src="examples/floria-bottom.webp" width="400" />
-</p>
+```
+dashboard/           Frontend (vanilla JS, CSS, HTML)
+  lib/               Modules (auth, realtime, layout, state-sync)
+  sw.js              Service worker (network-first caching)
+server/              Express backend
+  routes/            API endpoints
+  middleware/        Auth, encryption
+  db/                SQLite schema and migrations
+  ws/                WebSocket server and data streams
+```
 
-## Support the project
+## API
 
-If Taste Skill helps you, consider sponsoring:
+All API routes are under `/api/`. Authentication via `Authorization: Bearer <token>` header.
 
-[Sponsor on GitHub](https://github.com/sponsors/Leonxlnx)
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/auth/register` | Create account |
+| `POST /api/auth/login` | Sign in |
+| `POST /api/auth/refresh` | Refresh JWT |
+| `GET /api/oauth/shopify/install` | Initiate Shopify OAuth |
+| `GET /api/oauth/github/authorize` | Initiate GitHub OAuth |
+| `POST /api/proxy/shopify` | Forward requests to Shopify Admin API |
+| `POST /api/proxy/github` | Forward requests to GitHub API |
+| `GET /api/state` | Load saved dashboard state |
+| `PUT /api/state/layout` | Save layout configuration |
+| `PUT /api/state/connectors` | Save connector credentials |
+| `GET /api/health` | Health check |
 
-### Current Sponsors
+## Keyboard Shortcuts
 
-<a href="https://github.com/dnakov"><img src="https://github.com/dnakov.png" width="40" height="40" style="border-radius:50%" alt="dnakov" title="dnakov" /></a>
-<a href="https://github.com/AkramReshad"><img src="https://github.com/AkramReshad.png" width="40" height="40" style="border-radius:50%" alt="AkramReshad" title="AkramReshad" /></a>
-<a href="https://github.com/ajmalaksar25"><img src="https://github.com/ajmalaksar25.png" width="40" height="40" style="border-radius:50%" alt="ajmalaksar25" title="ajmalaksar25" /></a>
-<a href="https://github.com/krikkkk"><img src="https://github.com/krikkkk.png" width="40" height="40" style="border-radius:50%" alt="krikkkk" title="krikkkk" /></a>
-<a href="https://github.com/navanchauhan"><img src="https://github.com/navanchauhan.png" width="40" height="40" style="border-radius:50%" alt="navanchauhan" title="navanchauhan" /></a>
-<a href="https://github.com/robinebers"><img src="https://github.com/robinebers.png" width="40" height="40" style="border-radius:50%" alt="robinebers" title="robinebers" /></a>
-<a href="https://github.com/JKc66"><img src="https://github.com/JKc66.png" width="40" height="40" style="border-radius:50%" alt="JKc66" title="JKc66" /></a>
-<a href="https://github.com/u2393696078-rgb"><img src="https://github.com/u2393696078-rgb.png" width="40" height="40" style="border-radius:50%" alt="u2393696078-rgb" title="u2393696078-rgb" /></a>
-<a href="https://github.com/a-human-created-this"><img src="https://github.com/a-human-created-this.png" width="40" height="40" style="border-radius:50%" alt="a-human-created-this" title="a-human-created-this" /></a>
-<a href="https://github.com/AtharvaJaiswal005"><img src="https://github.com/AtharvaJaiswal005.png" width="40" height="40" style="border-radius:50%" alt="AtharvaJaiswal005" title="AtharvaJaiswal005" /></a>
-<a href="https://github.com/ghughes7"><img src="https://github.com/ghughes7.png" width="40" height="40" style="border-radius:50%" alt="ghughes7" title="ghughes7" /></a>
-<a href="https://github.com/mccun934"><img src="https://github.com/mccun934.png" width="40" height="40" style="border-radius:50%" alt="mccun934" title="mccun934" /></a>
-
-<p align="center">
- <a href="https://www.star-history.com/leonxlnx/taste-skill">
-  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=Leonxlnx/taste-skill&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=Leonxlnx/taste-skill" />
-   <img alt="Star History Rank" src="https://api.star-history.com/badge?repo=Leonxlnx/taste-skill" />
-  </picture>
- </a>
-</p>
-
-## Research
-
-Background writing that shaped these skills lives in [`research/`](research/).
-
-## Common Questions
-
-**How is this different from other AI design skills?**  
-Multiple specialized variants, adjustable dials in key skills, anti-repetition rules informed by dedicated research. All are framework agnostic across major coding agents.
-
-**Does it work with React, Vue, Svelte?**  
-Yes. Rules target design intent, not a single framework API.
-
-**What is SKILL.md?**  
-A portable instruction file agents can load automatically; install via `npx skills add` or by copying into a repo or conversation.
-
-**Do image-generation skills install with `npx skills add`?**  
-Yes. They live under `skills/` alongside the code skills so the same CLI discovers them.
+| Key | Action |
+|-----|--------|
+| `Ctrl+K` | Command palette |
+| `T` | Cycle themes |
+| `F` | Focus hovered widget |
+| `N` | Toggle notifications |
+| `L` | Customize layout |
+| `S` | Data connections |
+| `?` | Show all shortcuts |
 
 ## License
 
-[MIT License](LICENSE) · Copyright (c) 2026 Leonxlnx
+[MIT](LICENSE)
