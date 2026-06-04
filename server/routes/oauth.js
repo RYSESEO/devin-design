@@ -48,15 +48,21 @@ const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET || '';
 
 /**
  * Resolve the application base URL.
- * Priority: APP_URL env var > RAILWAY_PUBLIC_DOMAIN > request origin detection > localhost fallback
+ * Priority: APP_URL env var > RAILWAY_PUBLIC_DOMAIN > request host with forced https > localhost fallback
+ *
+ * NOTE: On Railway/Render/Heroku, traffic arrives over http internally even though
+ * the public URL is https. We force https for any non-localhost host to avoid
+ * redirect_uri mismatches with OAuth providers.
  */
 function getAppUrl(req) {
-  if (process.env.APP_URL) return process.env.APP_URL;
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
   if (process.env.RAILWAY_PUBLIC_DOMAIN) return `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`;
-  // Auto-detect from request headers (handles proxies like Railway, Render, etc.)
-  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+  // Detect host from headers
   const host = req.headers['x-forwarded-host'] || req.headers.host;
-  if (host) return `${proto}://${host}`;
+  if (host && host !== 'localhost' && !host.startsWith('localhost:')) {
+    // Always use https for production hosts (Railway, Render, etc. terminate SSL externally)
+    return `https://${host}`;
+  }
   return 'http://localhost:5173';
 }
 
