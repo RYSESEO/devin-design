@@ -32,8 +32,13 @@ function requireAuthOrQueryToken(req, res, next) {
   }
 }
 
-// All OAuth routes require authentication
-router.use(requireAuthOrQueryToken);
+// Most OAuth routes require authentication (callbacks handle auth differently)
+router.use((req, res, next) => {
+  // Callback routes authenticate via the state nonce (user_id stored in oauth_states)
+  const isCallback = req.path === '/shopify/callback' || req.path === '/github/callback';
+  if (isCallback) return next();
+  return requireAuthOrQueryToken(req, res, next);
+});
 
 const SHOPIFY_CLIENT_ID = process.env.SHOPIFY_CLIENT_ID || '';
 const SHOPIFY_CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET || '';
@@ -103,14 +108,16 @@ router.get('/shopify/callback', async (req, res) => {
     return res.redirect(`${getAppUrl(req)}?oauth=shopify&status=error&message=missing_state`);
   }
 
-  // Validate state nonce
+  // Look up state nonce to identify the user (callback has no auth token)
   const stateRow = db.prepare(
-    'SELECT * FROM oauth_states WHERE state = ? AND user_id = ? AND provider = ?'
-  ).get(state, req.user.id, 'shopify');
+    'SELECT * FROM oauth_states WHERE state = ? AND provider = ?'
+  ).get(state, 'shopify');
 
   if (!stateRow) {
     return res.redirect(`${getAppUrl(req)}?oauth=shopify&status=error&message=invalid_state`);
   }
+
+  const userId = stateRow.user_id;
 
   // Check state expiry
   if (stateRow.expires_at && new Date(stateRow.expires_at) < new Date()) {
@@ -166,12 +173,12 @@ router.get('/shopify/callback', async (req, res) => {
     const encryptedToken = encrypt(accessToken);
     db.prepare(
       'INSERT OR REPLACE INTO user_state (user_id, key, value, updated_at) VALUES (?, ?, ?, datetime(\'now\'))'
-    ).run(req.user.id, 'oauth_shopify_token', JSON.stringify(encryptedToken));
+    ).run(userId, 'oauth_shopify_token', JSON.stringify(encryptedToken));
 
     // Store the shop domain
     db.prepare(
       'INSERT OR REPLACE INTO user_state (user_id, key, value, updated_at) VALUES (?, ?, ?, datetime(\'now\'))'
-    ).run(req.user.id, 'oauth_shopify_shop', shop);
+    ).run(userId, 'oauth_shopify_shop', shop);
 
     res.redirect(`${getAppUrl(req)}?oauth=shopify&status=success`);
   } catch (err) {
@@ -203,14 +210,16 @@ router.get('/github/callback', async (req, res) => {
     return res.redirect(`${getAppUrl(req)}?oauth=github&status=error&message=missing_state`);
   }
 
-  // Validate state nonce
+  // Look up state nonce to identify the user (callback has no auth token)
   const stateRow = db.prepare(
-    'SELECT * FROM oauth_states WHERE state = ? AND user_id = ? AND provider = ?'
-  ).get(state, req.user.id, 'github');
+    'SELECT * FROM oauth_states WHERE state = ? AND provider = ?'
+  ).get(state, 'github');
 
   if (!stateRow) {
     return res.redirect(`${getAppUrl(req)}?oauth=github&status=error&message=invalid_state`);
   }
+
+  const userId = stateRow.user_id;
 
   // Check state expiry
   if (stateRow.expires_at && new Date(stateRow.expires_at) < new Date()) {
@@ -255,7 +264,7 @@ router.get('/github/callback', async (req, res) => {
     const encryptedToken = encrypt(accessToken);
     db.prepare(
       'INSERT OR REPLACE INTO user_state (user_id, key, value, updated_at) VALUES (?, ?, ?, datetime(\'now\'))'
-    ).run(req.user.id, 'oauth_github_token', JSON.stringify(encryptedToken));
+    ).run(userId, 'oauth_github_token', JSON.stringify(encryptedToken));
 
     res.redirect(`${getAppUrl(req)}?oauth=github&status=success`);
   } catch (err) {
