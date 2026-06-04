@@ -3610,3 +3610,83 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   .builder-condition-row,.builder-action-row{flex-wrap:wrap}
 }
 
+/* ─── Forecasting Overlay & Drawer ─────────────────────────── */
+.fc-overlay{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);justify-content:flex-end;animation:fadeIn .2s ease;display:none}
+.fc-overlay.fc-open{display:flex}
+.fc-drawer{width:700px;max-width:95vw;height:100vh;background:#0f0f14;border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight .25s ease}
+.fc-header{padding:18px 22px 0;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.fc-title-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px}
+.fc-title-row h3{font-size:1.1rem;font-weight:700;color:var(--text,#fafafa)}
+.fc-close-btn{background:none;border:none;color:var(--text-2,#a1a1aa);cursor:pointer;padding:4px;border-radius:6px;transition:color .2s}
+.fc-close-btn:hover{color:var(--text,#fafafa)}
+.fc-body{flex:1;overflow-y:auto;padding:22px}
+.fc-section{margin-bottom:24px}
+.fc-section-title{font-size:.9rem;font-weight:600;color:var(--text,#fafafa);margin-bottom:12px}
+.fc-chart-wrap{height:200px;position:relative}
+.fc-btn{background:var(--accent,#a855f7);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.fc-btn:hover{opacity:.85}
+
+/* ─── SEO Radar Overlay & Drawer ───────────────────────────── */
+.seo-overlay{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);justify-content:flex-end;animation:fadeIn .2s ease;display:none}
+.seo-overlay.seo-open{display:flex}
+.seo-drawer{width:700px;max-width:95vw;height:100vh;background:#0f0f14;border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight .25s ease}
+.seo-header{padding:18px 22px 0;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.seo-title-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px}
+.seo-title-row h3{font-size:1.1rem;font-weight:700;color:var(--text,#fafafa)}
+.seo-close-btn{background:none;border:none;color:var(--text-2,#a1a1aa);cursor:pointer;padding:4px;border-radius:6px;transition:color .2s}
+.seo-close-btn:hover{color:var(--text,#fafafa)}
+.seo-body{flex:1;overflow-y:auto;padding:22px}
+.seo-section{margin-bottom:24px}
+.seo-section-title{font-size:.9rem;font-weight:600;color:var(--text,#fafafa);margin-bottom:12px}
+
+/* ─── Pricing Overlay & Drawer ─────────────────────────────── */
+.pr-overlay{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);justify-content:flex-end;animation:fadeIn .2s ease;display:none}
+.pr-overlay.pr-open{display:flex}
+.pr-drawer{width:700px;max-width:95vw;height:100vh;background:#0f0f14;border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight .25s ease}
+.pr-header{padding:18px 22px 0;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.pr-title-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px}
+.pr-title-row h3{font-size:1.1rem;font-weight:700;color:var(--text,#fafafa)}
+.pr-close-btn{background:none;border:none;color:var(--text-2,#a1a1aa);cursor:pointer;padding:4px;border-radius:6px;transition:color .2s}
+.pr-close-btn:hover{color:var(--text,#fafafa)}
+.pr-body{flex:1;overflow-y:auto;padding:22px}
+.pr-section{margin-bottom:24px}
+.pr-section-title{font-size:.9rem;font-weight:600;color:var(--text,#fafafa);margin-bottom:12px}
+.pr-form{display:flex;flex-direction:column;gap:10px}
+.pr-input{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;color:var(--text,#fafafa);font-size:.85rem}
+.pr-input:focus{outline:none;border-color:var(--accent,#a855f7)}
+.pr-btn{background:var(--accent,#a855f7);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.pr-btn:hover{opacity:.85}
+
+/* ─── Churn Prediction Overlay & Drawer ────────────────────── */
+.churn-overlay{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);justify-content:flex-end;animation:fadeIn .2s ease;display:none}
+.churn-overlay.ch-p-open{display:flex}
+.churn-drawer{width:700px;max-width:95vw;height:100vh;background:#0f0f14;border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight .25s ease}
+.churn-header{padding:18px 22px 0;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.churn-title-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px}
+.churn-title-row h3{font-size:1.1rem;font-weight:700;color:var(--text,#fafafa)}
+.churn-close-btn{background:none;border:none;color:var(--text-2,#a1a1aa);cursor:pointer;padding:4px;border-radius:6px;transition:color .2s}
+.churn-close-btn:hover{color:var(--text,#fafafa)}
+.churn-body{flex:1;overflow-y:auto;padding:22px}
+.churn-section{margin-bottom:24px}
+.churn-section-title{font-size:.9rem;font-weight:600;color:var(--text,#fafafa);margin-bottom:12px}
+.churn-btn{background:var(--accent,#a855f7);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.churn-btn:hover{opacity:.85}
+
+/* ─── Competitor Alerts Overlay & Drawer ───────────────────── */
+.comp-overlay{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);justify-content:flex-end;animation:fadeIn .2s ease;display:none}
+.comp-overlay.comp-open{display:flex}
+.comp-drawer{width:700px;max-width:95vw;height:100vh;background:#0f0f14;border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight .25s ease}
+.comp-header{padding:18px 22px 0;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.comp-title-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px}
+.comp-title-row h3{font-size:1.1rem;font-weight:700;color:var(--text,#fafafa)}
+.comp-close-btn{background:none;border:none;color:var(--text-2,#a1a1aa);cursor:pointer;padding:4px;border-radius:6px;transition:color .2s}
+.comp-close-btn:hover{color:var(--text,#fafafa)}
+.comp-body{flex:1;overflow-y:auto;padding:22px}
+.comp-section{margin-bottom:24px}
+.comp-section-title{font-size:.9rem;font-weight:600;color:var(--text,#fafafa);margin-bottom:12px}
+.comp-form{display:flex;flex-direction:column;gap:10px}
+.comp-input{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;color:var(--text,#fafafa);font-size:.85rem}
+.comp-input:focus{outline:none;border-color:var(--accent,#a855f7)}
+.comp-btn{background:var(--accent,#a855f7);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.comp-btn:hover{opacity:.85}
+
