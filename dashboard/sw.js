@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ryse-dash-v3';
+const CACHE_VERSION = 'ryse-dash-v4';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 
@@ -12,7 +12,7 @@ const PRECACHE_ASSETS = [
   // For full offline support, use vite-plugin-pwa to generate a precache manifest.
 ];
 
-// Install: precache critical assets
+// Install: precache critical assets and activate immediately
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
@@ -21,7 +21,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate: clean up old caches
+// Activate: clean up old caches and take control immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -33,7 +33,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch: strategy-based caching
+// Fetch: network-first for everything to ensure fresh content
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -50,41 +50,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets (JS, CSS, fonts, images): cache-first
-  if (isStaticAsset(url.pathname)) {
-    event.respondWith(cacheFirst(request, STATIC_CACHE));
-    return;
-  }
-
-  // HTML/navigation: stale-while-revalidate
-  if (request.mode === 'navigate' || request.headers.get('Accept')?.includes('text/html')) {
-    event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
-    return;
-  }
-
-  // Default: network with cache fallback
+  // All other requests (HTML, CSS, JS): network-first so updates appear immediately
   event.respondWith(networkFirst(request, STATIC_CACHE));
 });
-
-function isStaticAsset(pathname) {
-  return /\.(js|css|woff2?|ttf|otf|png|jpg|jpeg|gif|webp|svg|ico)(\?.*)?$/.test(pathname);
-}
-
-async function cacheFirst(request, cacheName) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
-
-  try {
-    const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(cacheName);
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    return new Response('Offline', { status: 503 });
-  }
-}
 
 async function networkFirst(request, cacheName) {
   try {
@@ -96,23 +64,6 @@ async function networkFirst(request, cacheName) {
     return response;
   } catch {
     const cached = await caches.match(request);
-    return cached || new Response(JSON.stringify({ error: 'Offline' }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return cached || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
   }
-}
-
-async function staleWhileRevalidate(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
-
-  const fetchPromise = fetch(request).then(response => {
-    if (response.ok) {
-      cache.put(request, response.clone());
-    }
-    return response;
-  }).catch(() => null);
-
-  return cached || await fetchPromise || new Response('Offline', { status: 503 });
 }
