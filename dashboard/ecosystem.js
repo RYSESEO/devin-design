@@ -187,7 +187,7 @@ const PWASetup = {
     });
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      // SW registration is handled in main.js for immediate update detection
     }
 
     const installBtn = document.getElementById('pwa-install-btn');
