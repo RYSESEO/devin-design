@@ -202,7 +202,7 @@ class BaseConnector {
 class ShopifyConnector extends BaseConnector {
   constructor() {
     super('shopify', 'Shopify', '🛍️', '#96bf48', [
-      { key: 'store', label: 'Store URL', type: 'text', placeholder: 'your-store.myshopify.com' },
+      { key: 'store', label: 'Store URL', type: 'text', placeholder: 'your-store (myshopify subdomain)' },
       { key: 'token', label: 'Admin API Token', type: 'password', placeholder: 'shpat_xxxxx...' },
     ]);
   }
@@ -263,7 +263,15 @@ class ShopifyConnector extends BaseConnector {
   }
 
   _mapCredentialsForServer(creds) {
-    return { shopDomain: (creds.store || '').replace('.myshopify.com', ''), accessToken: creds.token };
+    // Normalize store input: handle "store.myshopify.com", "store", "https://store.myshopify.com", "store.com"
+    let shop = (creds.store || '').trim().toLowerCase();
+    // Remove protocol if present
+    shop = shop.replace(/^https?:\/\//, '');
+    // Remove trailing slashes or paths
+    shop = shop.split('/')[0];
+    // Remove .myshopify.com suffix if present to get just the store name
+    shop = shop.replace(/\.myshopify\.com$/, '');
+    return { shopDomain: shop, accessToken: creds.token };
   }
 
   _aggregateDaily(items, dateField) {

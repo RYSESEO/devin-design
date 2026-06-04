@@ -85,8 +85,12 @@ router.post('/shopify', async (req, res) => {
 
   const { endpoint, method = 'GET', params } = req.body;
 
+  if (!shopDomain || !accessToken) {
+    return res.status(400).json({ error: 'Missing shop domain or access token. Please reconfigure the Shopify connector.' });
+  }
+
   try {
-    const baseUrl = `https://${shopDomain}.myshopify.com/admin/api/2024-01`;
+    const baseUrl = `https://${shopDomain}.myshopify.com/admin/api/2024-10`;
     const url = validateProxyUrl(endpoint, baseUrl);
     if (!url) {
       return res.status(400).json({ error: 'Invalid endpoint: URL must stay within the target API origin' });
@@ -108,8 +112,14 @@ router.post('/shopify', async (req, res) => {
 
     const response = await fetch(url.toString(), fetchOpts);
     const data = await response.json();
+
+    if (!response.ok) {
+      console.error(`Shopify API error [${response.status}]: ${JSON.stringify(data)} (shop: ${shopDomain}, endpoint: ${endpoint})`);
+    }
+
     res.status(response.status).json(data);
   } catch (err) {
+    console.error(`Shopify proxy error: ${err.message} (shop: ${shopDomain}, endpoint: ${endpoint})`);
     res.status(502).json({ error: 'Failed to reach Shopify API', detail: err.message });
   }
 });
