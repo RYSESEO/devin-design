@@ -960,6 +960,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof initCinematic === 'function') initCinematic();
   if (typeof initOnboarding === 'function') initOnboarding();
 
+  // Initialize dashboard tabs and shareable links immediately (not lazily)
+  if (typeof DashboardTabs !== 'undefined') DashboardTabs.init();
+  if (typeof ShareableLinks !== 'undefined') ShareableLinks.init();
+
   /* ─── Performance: debounced resize handler ─── */
   window.addEventListener('resize', debounce(function() {
     Chart.helpers.each(Chart.instances, function(chart) { chart.resize(); });
