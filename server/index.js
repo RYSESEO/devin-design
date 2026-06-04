@@ -97,6 +97,10 @@ setInterval(() => {
 }, 300000);
 
 // Middleware
+// Trust proxy headers (x-forwarded-proto, x-forwarded-host) from Railway/reverse proxies
+// Without this, req.protocol always returns 'http' even when the client used https
+app.set('trust proxy', true);
+
 if (process.env.NODE_ENV === 'production' && !process.env.ENCRYPTION_KEY) {
   console.warn('[SECURITY WARNING] ENCRYPTION_KEY not set. Falling back to JWT_SECRET for encryption. Set a separate ENCRYPTION_KEY in production.');
 }
