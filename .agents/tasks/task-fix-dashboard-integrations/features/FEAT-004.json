@@ -2,7 +2,7 @@
   "id": "FEAT-004",
   "type": "fix",
   "description": "Fix automation templates so they actually create workflows instead of just changing button state. The TemplateGallery in dashboard/automations.js has a proper flow: clicking 'Activate' calls _autoPost('/api/automations/templates/' + id + '/activate', {}). The server-side route at POST /api/automations/templates/:id/activate correctly creates a new workflow from the template and returns it. The button changes from 'Activate' to 'Activated!' but the user reports nothing is generated. The issue is that after activation, the user expects to see the created workflow in the Workflows tab, but the UI only refreshes the templates list, not the workflows tab. Also, the AutomationHub panel only renders WorkflowBuilder.render() when first opening (and when switching to the workflows tab), so newly activated templates don't appear until the user manually switches tabs. Additionally, the server /api/automations/execute/:id endpoint only simulates execution (returns mock results without actually running any actions), which means even though workflows are created, they never actually do anything.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "In dashboard/automations.js, in the TemplateGallery._renderGrid() method, after a successful template activation (in the .then() callback of _autoPost), also call WorkflowBuilder.render() to refresh the workflow list. This ensures the newly created workflow immediately appears in the Workflows tab.",
     "In dashboard/automations.js, in the TemplateGallery._renderGrid() method, after successful activation, add a call to switch the active tab to 'workflows' so the user can see the new workflow was created. Use the same pattern as the tab switching in AutomationHub._init(): set the workflows tab to active, show the workflows pane, and call WorkflowBuilder.render().",
@@ -24,5 +24,5 @@
     "npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 275 tests pass. Build succeeds. The execute endpoint was changed from sync to async to support actual webhook delivery. Response shape preserved for backward compatibility (result.status, result.workflow_name, result.actions_executed, result.conditions_evaluated). Added action_details array to the response for richer execution info. The /workflows/:id/run alias duplicates the execute logic inline rather than using middleware forwarding for simplicity."
 }
