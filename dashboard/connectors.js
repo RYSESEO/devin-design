@@ -152,7 +152,14 @@ class BaseConnector {
       if (typeof window.saveConnectorConfig === 'function') {
         const serverCreds = this._mapCredentialsForServer(credentials);
         const serverId = this._getServerConnectorId();
-        window.saveConnectorConfig(serverId, serverCreds);
+        try {
+          await window.saveConnectorConfig(serverId, serverCreds);
+        } catch (saveErr) {
+          this.status = 'error';
+          this.lastError = 'Failed to save credentials to server: ' + (saveErr.message || 'Unknown error');
+          ConnectorManager.notify();
+          return;
+        }
       }
 
       const ok = await this.testConnection(credentials);
