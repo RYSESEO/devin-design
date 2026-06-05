@@ -613,25 +613,33 @@ async function executeAction(action, userId, workflowName) {
   return { type: actionType, status: 'executed', detail: 'action logged' };
 }
 
-// POST /api/automations/execute/:id
-router.post('/execute/:id', async (req, res) => {
-  const userId = req.user.id;
-  const workflowId = req.params.id;
-
+// Shared workflow execution logic
+async function runWorkflow(userId, workflowId) {
   const workflow = db.prepare(
     'SELECT * FROM automations WHERE id = ? AND user_id = ? AND deleted = 0'
   ).get(workflowId, userId);
 
   if (!workflow) {
-    return res.status(404).json({ error: 'Workflow not found' });
+    return { error: 'Workflow not found', status: 404 };
   }
 
   if (!workflow.enabled) {
-    return res.status(400).json({ error: 'Workflow is disabled' });
+    return { error: 'Workflow is disabled', status: 400 };
   }
 
-  const actions = JSON.parse(workflow.actions || '[]');
-  const conditions = JSON.parse(workflow.conditions || '[]');
+  let actions;
+  try {
+    actions = JSON.parse(workflow.actions || '[]');
+  } catch {
+    return { error: 'Workflow has invalid action configuration', status: 400 };
+  }
+
+  let conditions;
+  try {
+    conditions = JSON.parse(workflow.conditions || '[]');
+  } catch {
+    conditions = [];
+  }
 
   // Execute each action
   const actionResults = [];
@@ -656,55 +664,25 @@ router.post('/execute/:id', async (req, res) => {
     "UPDATE automations SET run_count = run_count + 1, last_run = datetime('now') WHERE id = ? AND user_id = ?"
   ).run(workflowId, userId);
 
-  res.json({ result: executionResult });
+  return { result: executionResult };
+}
+
+// POST /api/automations/execute/:id
+router.post('/execute/:id', async (req, res) => {
+  const outcome = await runWorkflow(req.user.id, req.params.id);
+  if (outcome.error) {
+    return res.status(outcome.status).json({ error: outcome.error });
+  }
+  res.json({ result: outcome.result });
 });
 
 // POST /api/automations/workflows/:id/run - alias for execute
 router.post('/workflows/:id/run', async (req, res) => {
-  // Rewrite the URL internally to use the execute endpoint logic
-  req.url = `/execute/${req.params.id}`;
-  req.params = { id: req.params.id };
-
-  const userId = req.user.id;
-  const workflowId = req.params.id;
-
-  const workflow = db.prepare(
-    'SELECT * FROM automations WHERE id = ? AND user_id = ? AND deleted = 0'
-  ).get(workflowId, userId);
-
-  if (!workflow) {
-    return res.status(404).json({ error: 'Workflow not found' });
+  const outcome = await runWorkflow(req.user.id, req.params.id);
+  if (outcome.error) {
+    return res.status(outcome.status).json({ error: outcome.error });
   }
-
-  if (!workflow.enabled) {
-    return res.status(400).json({ error: 'Workflow is disabled' });
-  }
-
-  const actions = JSON.parse(workflow.actions || '[]');
-  const conditions = JSON.parse(workflow.conditions || '[]');
-
-  const actionResults = [];
-  for (const action of actions) {
-    const result = await executeAction(action, userId, workflow.name);
-    actionResults.push(result);
-  }
-
-  const executionResult = {
-    workflow_id: workflow.id,
-    workflow_name: workflow.name,
-    trigger_type: workflow.trigger_type,
-    conditions_evaluated: conditions.length,
-    actions_executed: actions.length,
-    action_details: actionResults,
-    status: 'completed',
-    executed_at: new Date().toISOString()
-  };
-
-  db.prepare(
-    "UPDATE automations SET run_count = run_count + 1, last_run = datetime('now') WHERE id = ? AND user_id = ?"
-  ).run(workflowId, userId);
-
-  res.json({ result: executionResult });
+  res.json({ result: outcome.result });
 });
 
 export default router;

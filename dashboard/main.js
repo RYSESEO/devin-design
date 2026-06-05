@@ -499,6 +499,8 @@ if (document.readyState === 'loading') {
 // ═══ Service Worker Registration & Update Detection ═══
 // Registered here (not lazily) to ensure updates are detected on every visit.
 if ('serviceWorker' in navigator) {
+  let refreshing = false;
+
   navigator.serviceWorker.register('sw.js').then(reg => {
     function onUpdateReady(worker) {
       showToast({
@@ -512,6 +514,7 @@ if ('serviceWorker' in navigator) {
         const toast = container.lastElementChild;
         toast.style.cursor = 'pointer';
         toast.addEventListener('click', () => {
+          refreshing = true;
           worker.postMessage({ type: 'SKIP_WAITING' });
         });
       }
@@ -535,8 +538,10 @@ if ('serviceWorker' in navigator) {
     });
   }).catch(() => {});
 
-  // Reload only after the user explicitly triggered the update via SKIP_WAITING
+  // Reload only after the current tab explicitly triggered the update via SKIP_WAITING
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    window.location.reload();
+    if (refreshing) {
+      window.location.reload();
+    }
   });
 }

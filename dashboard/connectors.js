@@ -925,6 +925,9 @@ async function checkOAuthStatus() {
     if (!r.ok) return;
     const data = await r.json();
     if (!data) return;
+
+    const fetchPromises = [];
+
     if (data.shopify && data.shopify.connected) {
       const shopify = ConnectorManager.get('shopify');
       if (shopify && shopify.status !== 'connected') {
@@ -932,7 +935,7 @@ async function checkOAuthStatus() {
         shopify.lastSync = Date.now();
         ConnectorManager.notify();
         // Fetch live data using OAuth (server resolves token)
-        await shopify.fetchData({});
+        fetchPromises.push(shopify.fetchData({}));
       }
     }
     if (data.github && data.github.connected) {
@@ -942,9 +945,15 @@ async function checkOAuthStatus() {
         github.lastSync = Date.now();
         ConnectorManager.notify();
         // Fetch live data using OAuth (server resolves token)
-        await github.fetchData({});
+        fetchPromises.push(github.fetchData({}));
       }
     }
+
+    // Fetch data concurrently so a slow connector does not block the other
+    if (fetchPromises.length > 0) {
+      await Promise.allSettled(fetchPromises);
+    }
+
     updateDataSourceBadges();
   } catch (e) {
     // Silently ignore OAuth status check failures
