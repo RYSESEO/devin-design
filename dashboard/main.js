@@ -495,3 +495,41 @@ if (document.readyState === 'loading') {
 } else {
   initApp();
 }
+
+// ═══ Service Worker Registration & Update Detection ═══
+// Registered here (not lazily) to ensure updates are detected on every visit.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // Check for updates every 60 seconds
+    setInterval(() => reg.update(), 60000);
+
+    // When a new SW is waiting, activate it immediately
+    if (reg.waiting) {
+      reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
+
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      if (newWorker) {
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'activated') {
+            // New version activated - reload to get fresh assets
+            window.location.reload();
+          }
+        });
+      }
+    });
+  }).catch(() => {});
+
+  // Listen for SW_UPDATED message from the new service worker
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SW_UPDATED') {
+      window.location.reload();
+    }
+  });
+
+  // If a controller change happens (new SW took over), reload
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
+}
