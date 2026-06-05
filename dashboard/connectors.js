@@ -169,7 +169,9 @@ class BaseConnector {
         await this.fetchData(credentials);
       } else {
         this.status = 'error';
-        this.lastError = 'Connection test failed';
+        if (!this.lastError) {
+          this.lastError = 'Connection test failed';
+        }
       }
     } catch (e) {
       this.status = 'error';
@@ -215,15 +217,24 @@ class ShopifyConnector extends BaseConnector {
   }
 
   async testConnection(creds) {
-    if (!creds.store || !creds.token) return false;
+    if (!creds.store || !creds.token) {
+      this.lastError = 'Store URL and API token are required';
+      return false;
+    }
     try {
       const resp = await fetch('/api/proxy/shopify', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({ endpoint: '/shop.json', method: 'GET' })
       });
-      return resp.ok;
-    } catch {
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        this.lastError = data.error || `Shopify API error (${resp.status})`;
+        return false;
+      }
+      return true;
+    } catch (e) {
+      this.lastError = e.message || 'Network error connecting to Shopify';
       return false;
     }
   }
@@ -324,15 +335,24 @@ class GitHubConnector extends BaseConnector {
   }
 
   async testConnection(creds) {
-    if (!creds.token) return false;
+    if (!creds.token) {
+      this.lastError = 'Personal access token is required';
+      return false;
+    }
     try {
       const resp = await fetch('/api/proxy/github', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({ endpoint: '/user', method: 'GET' })
       });
-      return resp.ok;
-    } catch {
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        this.lastError = data.error || `GitHub API error (${resp.status})`;
+        return false;
+      }
+      return true;
+    } catch (e) {
+      this.lastError = e.message || 'Network error connecting to GitHub';
       return false;
     }
   }
@@ -770,10 +790,11 @@ const SettingsPanel = {
         });
         await connector.connect(creds);
         this.render();
-        updateDataSourceBadges();
-        if (connector.status === 'connected' && !ConnectorManager.demoMode) {
+        if (connector.status === 'connected') {
+          ConnectorManager.toggleDemoMode(false);
           rebuildAllWidgets();
         }
+        updateDataSourceBadges();
       });
     });
 
