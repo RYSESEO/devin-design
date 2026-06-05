@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-004",
+  "type": "fix",
+  "description": "Fix automation templates so they actually create workflows instead of just changing button state. The TemplateGallery in dashboard/automations.js has a proper flow: clicking 'Activate' calls _autoPost('/api/automations/templates/' + id + '/activate', {}). The server-side route at POST /api/automations/templates/:id/activate correctly creates a new workflow from the template and returns it. The button changes from 'Activate' to 'Activated!' but the user reports nothing is generated. The issue is that after activation, the user expects to see the created workflow in the Workflows tab, but the UI only refreshes the templates list, not the workflows tab. Also, the AutomationHub panel only renders WorkflowBuilder.render() when first opening (and when switching to the workflows tab), so newly activated templates don't appear until the user manually switches tabs. Additionally, the server /api/automations/execute/:id endpoint only simulates execution (returns mock results without actually running any actions), which means even though workflows are created, they never actually do anything.",
+  "status": "in_progress",
+  "steps": [
+    "In dashboard/automations.js, in the TemplateGallery._renderGrid() method, after a successful template activation (in the .then() callback of _autoPost), also call WorkflowBuilder.render() to refresh the workflow list. This ensures the newly created workflow immediately appears in the Workflows tab.",
+    "In dashboard/automations.js, in the TemplateGallery._renderGrid() method, after successful activation, add a call to switch the active tab to 'workflows' so the user can see the new workflow was created. Use the same pattern as the tab switching in AutomationHub._init(): set the workflows tab to active, show the workflows pane, and call WorkflowBuilder.render().",
+    "In server/routes/automations.js, enhance the POST /api/automations/execute/:id endpoint to actually attempt to execute the workflow actions rather than just returning mock 'completed' status. For each action in the workflow, implement basic handlers: (a) 'notify' / 'send_notification' - if the user has notification channels configured, send to those channels (reuse the existing webhook logic from the notifications/test endpoint). (b) 'create_discount' - log the action and broadcast an alert via WebSocket. (c) 'tag_customer' - log the action. (d) 'send_email' - log the action. (e) 'pause_ads' - log the action. Each action should track success/failure in the response. At minimum, the notify action should actually hit configured webhooks.",
+    "In server/routes/automations.js, add a POST /api/automations/workflows/:id/run endpoint (alias for /api/automations/execute/:id) that is more discoverable. The existing execute endpoint should remain for backward compatibility.",
+    "In dashboard/automations.js, add a 'Run Now' button to each workflow card (next to Edit and Delete). When clicked, it calls POST /api/automations/execute/:id and shows a toast with the execution results.",
+    "Verify that clicking 'Activate' on a template now visibly creates a workflow in the Workflows tab and that clicking 'Run Now' on that workflow actually sends notifications to configured channels."
+  ],
+  "acceptance_criteria": [
+    "Activating a template automatically refreshes the Workflows tab to show the new workflow",
+    "The UI switches to the Workflows tab after template activation so the user sees the result",
+    "The execute endpoint attempts real notification delivery for 'notify' and 'send_notification' actions when webhook channels are configured",
+    "Each workflow card has a 'Run Now' button that triggers execution and shows results in a toast",
+    "npm test passes (existing automation tests still pass)",
+    "npm run build succeeds"
+  ],
+  "verification": [
+    "npm test",
+    "npm run build"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
