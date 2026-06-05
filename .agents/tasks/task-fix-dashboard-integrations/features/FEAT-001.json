@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "fix",
   "description": "Fix the service worker reload loop that causes dashboard state to revert. The sw.js calls skipWaiting() on install and sends SW_UPDATED to all clients, while main.js listens for controllerchange and SW_UPDATED messages and calls window.location.reload() on both. This creates a reload cycle that resets in-memory auth state (JWT token) and connector status after connecting integrations.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "In dashboard/sw.js: Remove the self.skipWaiting() call from the install event handler. The activate event should only purge old caches and claim clients without sending SW_UPDATED immediately. Instead, let the new SW wait until the user navigates away or the app explicitly triggers the update.",
     "In dashboard/main.js: Remove the aggressive controllerchange event listener that calls window.location.reload(). Remove the SW_UPDATED message listener that also calls window.location.reload(). Remove the interval that calls reg.update() every 60 seconds. Remove the code that messages reg.waiting with SKIP_WAITING. Instead, implement a non-disruptive update notification: when an updatefound event fires and the new worker reaches 'installed' state, show a subtle toast or banner saying 'Update available - click to refresh' and only reload when the user clicks it.",
@@ -22,5 +22,5 @@
     "npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 275 tests pass. Build succeeds. The controllerchange listener is kept but now only fires after the user explicitly clicks the update toast (which sends SKIP_WAITING to the waiting SW). Added a message listener in sw.js so the client can trigger skipWaiting on demand."
 }
