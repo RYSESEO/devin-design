@@ -2618,6 +2618,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 .ai-chat-send-btn:hover { opacity: 0.85; }
 
+/* AI Chat Inline Charts */
+.ai-inline-chart {
+  margin-top: 8px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 8px;
+  max-width: 300px;
+}
+
+.ai-inline-chart canvas {
+  max-width: 100%;
+  height: 140px !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    Competitive Intelligence Panel
    ═══════════════════════════════════════════════════════════════ */

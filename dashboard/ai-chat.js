@@ -46,16 +46,16 @@ const AIChatAssistant = (() => {
   function renderMessages() {
     const container = document.getElementById('ai-chat-messages');
     if (!container) return;
-    container.innerHTML = messages.map(m => `
-      <div class="ai-msg ai-msg-${m.role}">
-        <div class="ai-msg-avatar">${m.role === 'user' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="10" y1="21" x2="14" y2="21"/></svg>'}</div>
-        <div class="ai-msg-body">${formatMessage(m.text)}</div>
-      </div>
-    `).join('') + (isTyping ? `
-      <div class="ai-msg ai-msg-assistant">
-        <div class="ai-msg-avatar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="10" y1="21" x2="14" y2="21"/></svg></div>
-        <div class="ai-msg-body ai-typing"><span></span><span></span><span></span></div>
-      </div>` : '');
+    container.innerHTML = messages.map(function(m) {
+      var msgHtml = '<div class="ai-msg ai-msg-' + m.role + '">' +
+        '<div class="ai-msg-avatar">' + (m.role === 'user' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="10" y1="21" x2="14" y2="21"/></svg>') + '</div>' +
+        '<div class="ai-msg-body">' + formatMessage(m.text);
+      if (m.chart) {
+        msgHtml += '<div class="ai-inline-chart"><canvas id="' + m.chart.id + '" width="280" height="140"></canvas></div>';
+      }
+      msgHtml += '</div></div>';
+      return msgHtml;
+    }).join('') + (isTyping ? '<div class="ai-msg ai-msg-assistant"><div class="ai-msg-avatar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="10" y1="21" x2="14" y2="21"/></svg></div><div class="ai-msg-body ai-typing"><span></span><span></span><span></span></div></div>' : '');
     container.scrollTop = container.scrollHeight;
   }
 
@@ -65,14 +65,95 @@ const AIChatAssistant = (() => {
     isTyping = true;
     renderMessages();
 
-    const intent = detectIntent(text);
-    const delay = 600 + Math.random() * 800;
+    // Try server query first
+    var token = (typeof window.getToken === 'function') ? window.getToken() : null;
+    var headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
 
-    setTimeout(() => {
+    fetch('/api/intelligence/query', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ question: text.trim() })
+    })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(result) {
       isTyping = false;
+      if (result && result.data) {
+        // Data query response with chart
+        var chartId = 'ai-chart-' + Date.now();
+        var msgText = '**' + result.title + '**\n\n' + result.summary;
+
+        // Check for live data
+        if (typeof ConnectorManager !== 'undefined' && !ConnectorManager.demoMode && typeof DataStore !== 'undefined') {
+          var storeEntry = DataStore.get(result.metric);
+          if (storeEntry && storeEntry.source !== 'demo') {
+            msgText += '\n\n_Using live data from ' + storeEntry.source + '_';
+          }
+        }
+
+        messages.push({ role: 'assistant', text: msgText, chart: { id: chartId, type: result.chartType, data: result.data, title: result.title } });
+      } else if (result && result.summary) {
+        messages.push({ role: 'assistant', text: result.summary });
+      } else {
+        // Fallback to local intent detection
+        var intent = detectIntent(text);
+        messages.push({ role: 'assistant', text: SAMPLE_RESPONSES[intent] || SAMPLE_RESPONSES.help });
+      }
+      renderMessages();
+      renderPendingCharts();
+    })
+    .catch(function() {
+      // Fallback to local responses on network error
+      isTyping = false;
+      var intent = detectIntent(text);
       messages.push({ role: 'assistant', text: SAMPLE_RESPONSES[intent] || SAMPLE_RESPONSES.help });
       renderMessages();
-    }, delay);
+    });
+  }
+
+  function renderPendingCharts() {
+    messages.forEach(function(m) {
+      if (m.chart && !m.chart.rendered) {
+        var canvas = document.getElementById(m.chart.id);
+        if (canvas) {
+          renderInlineChart(canvas, m.chart.type, m.chart.data, m.chart.title);
+          m.chart.rendered = true;
+        }
+      }
+    });
+  }
+
+  function renderInlineChart(canvas, type, data, title) {
+    if (!canvas || typeof Chart === 'undefined') return;
+    var ctx = canvas.getContext('2d');
+    var chartColors = ['#a855f7', '#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#22c55e'];
+
+    var config = {
+      type: type === 'doughnut' ? 'doughnut' : (type === 'bar' ? 'bar' : 'line'),
+      data: {
+        labels: data.labels,
+        datasets: [{
+          data: data.values,
+          backgroundColor: type === 'doughnut' ? chartColors.slice(0, data.values.length) : 'rgba(168, 85, 247, 0.2)',
+          borderColor: type === 'doughnut' ? chartColors.slice(0, data.values.length) : '#a855f7',
+          borderWidth: type === 'doughnut' ? 0 : 2,
+          fill: type === 'line',
+          tension: 0.4,
+          pointRadius: type === 'line' ? 2 : 0,
+        }]
+      },
+      options: {
+        responsive: false,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: type === 'doughnut', position: 'bottom', labels: { color: 'rgba(255,255,255,0.7)', font: { size: 10 } } }, title: { display: false } },
+        scales: type === 'doughnut' ? {} : {
+          x: { ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 9 } }, grid: { display: false } },
+          y: { ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+      }
+    };
+
+    new Chart(ctx, config);
   }
 
   function open() {
