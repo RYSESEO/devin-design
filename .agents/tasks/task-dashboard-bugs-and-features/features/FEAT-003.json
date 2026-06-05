@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Guided Connection Wizard - Replace the simple connector form with a step-by-step wizard that provides clear instructions for each integration setup",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "1. Modify the SettingsPanel.render() method in dashboard/connectors.js to render a multi-step wizard UI instead of the current flat form when a user clicks 'Connect'. The wizard should have: a step indicator (Step 1 of 3), content area, and Next/Back/Connect buttons.",
     "2. For Shopify: Step 1 shows instructions: 'Go to your Shopify admin > Settings > Apps and sales channels > Develop apps. Create or open a custom app.' with a visual screenshot placeholder. Step 2: 'Under API credentials, copy your Admin API access token (starts with shpat_)'. Step 3: Form fields for store subdomain and token, with an inline test button.",
@@ -26,5 +26,5 @@
     "Run npm run build and confirm it succeeds"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 275 tests pass. Build succeeds. Wizard replaces the flat connector form with a 3-step guided flow for all 5 connectors. OAuth buttons preserved for Shopify and GitHub. Input validation checks token prefixes (shpat_, ghp_, github_pat_). Vite non-module warnings are expected and by design."
 }
