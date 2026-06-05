@@ -29,8 +29,6 @@ export function initLazyPanels() {
           // If initFn returns false, treat as not initialized (retry on next click)
           if (result !== false) {
             initializedPanels.add(buttonId);
-            // Re-dispatch click so the newly-registered handler fires
-            setTimeout(() => btn.click(), 0);
           }
         } catch {
           // Don't mark as initialized on error - allow retry

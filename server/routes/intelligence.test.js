@@ -388,4 +388,39 @@ describe('Intelligence Routes', () => {
       expect(res.status).toBe(401);
     });
   });
+
+  describe('POST /api/intelligence/query', () => {
+    it('returns chart data for revenue query', async () => {
+      const res = await post('/api/intelligence/query', { question: 'Show me revenue for last week' }, authToken);
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.intent).toBe('revenue');
+      expect(data.chartType).toBe('line');
+      expect(data.data).toBeDefined();
+      expect(data.data.labels).toHaveLength(7);
+      expect(data.data.values).toHaveLength(7);
+      expect(data.summary).toContain('revenue');
+    });
+
+    it('returns chart data for leads query', async () => {
+      const res = await post('/api/intelligence/query', { question: 'What are my lead sources?' }, authToken);
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.intent).toBe('leads');
+      expect(data.chartType).toBe('bar');
+    });
+
+    it('returns help for unknown queries', async () => {
+      const res = await post('/api/intelligence/query', { question: 'What is the meaning of life?' }, authToken);
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.intent).toBe('unknown');
+      expect(data.data).toBeNull();
+    });
+
+    it('returns 400 for missing question', async () => {
+      const res = await post('/api/intelligence/query', {}, authToken);
+      expect(res.status).toBe(400);
+    });
+  });
 });

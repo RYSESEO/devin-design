@@ -490,4 +490,49 @@ describe('Automations Routes', () => {
       expect(data.error).toMatch(/disabled/);
     });
   });
+
+  describe('POST /api/automations/workflows/:id/preview', () => {
+    it('returns preview for an existing workflow', async () => {
+      const createRes = await post('/api/automations/workflows', {
+        name: 'Preview Test',
+        trigger_type: 'revenue_drop',
+        conditions: [{ field: 'revenue', operator: '<', value: '1000' }],
+        actions: [{ type: 'notify', config: { channel: '#sales' } }, { type: 'send_email', config: { to: 'team@example.com' } }]
+      }, authToken);
+      const { workflow } = await createRes.json();
+
+      const res = await post(`/api/automations/workflows/${workflow.id}/preview`, {}, authToken);
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.preview).toBeDefined();
+      expect(data.preview.workflow_name).toBe('Preview Test');
+      expect(data.preview.actions).toHaveLength(2);
+      expect(data.preview.actions[0].preview_text).toContain('Would');
+      expect(data.preview.summary).toContain('2 action(s)');
+    });
+
+    it('returns 404 for non-existent workflow', async () => {
+      const res = await post('/api/automations/workflows/99999/preview', {}, authToken);
+      expect(res.status).toBe(404);
+    });
+
+    it('works even for disabled workflows', async () => {
+      const createRes = await post('/api/automations/workflows', {
+        name: 'Disabled Preview',
+        trigger_type: 'new_order',
+        conditions: [],
+        actions: [{ type: 'create_discount', config: {} }]
+      }, authToken);
+      const { workflow } = await createRes.json();
+
+      // Disable it
+      await put(`/api/automations/workflows/${workflow.id}`, { enabled: false }, authToken);
+
+      // Preview should still work
+      const res = await post(`/api/automations/workflows/${workflow.id}/preview`, {}, authToken);
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.preview.actions).toHaveLength(1);
+    });
+  });
 });

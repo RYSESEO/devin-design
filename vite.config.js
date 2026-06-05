@@ -20,7 +20,23 @@ const legacyScripts = [
   'competitive.js',
   'widget-builder.js',
   'app.js',
-  'sw.js'
+  'sw.js',
+  'multi-store.js',
+  'workspaces.js',
+  'reports.js',
+  'billing.js',
+  'forecasting.js',
+  'seo-radar.js',
+  'pricing.js',
+  'churn.js',
+  'competitor-alerts.js',
+  'marketplace.js',
+  'templates.js',
+  'benchmarks.js',
+  'api-keys.js',
+  'embeds.js',
+  'health-monitor.js',
+  'freshness.js'
 ];
 
 function copyLegacyScripts() {

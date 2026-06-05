@@ -1,0 +1,32 @@
+{
+  "id": "FEAT-006",
+  "type": "feat",
+  "description": "AI Natural Language Data Queries - Enhance the AI chat to query connected data sources and render inline charts based on natural language questions",
+  "status": "completed",
+  "steps": [
+    "1. Enhance dashboard/ai-chat.js: Extend the detectIntent() function and response system to handle data queries. When a user asks 'Show me Shopify revenue for last week', the chat should: (a) detect this is a data query, (b) pull actual data from the DataStore (if live data is available) or demo data, (c) render an inline mini-chart in the chat response.",
+    "2. Add inline chart rendering to the AI chat: Create a renderInlineChart(data, type) function that generates a small Chart.js canvas inside the chat message bubble. Support line charts for time-series data (revenue over time) and bar charts for comparisons.",
+    "3. Add data query intents: Expand the intent detection to handle queries like: 'revenue this week', 'top products', 'lead sources breakdown', 'compare this week vs last week', 'GitHub activity summary'. Map each to the appropriate DataStore key.",
+    "4. Connect to live DataStore: When ConnectorManager.demoMode is false and live data exists, use real DataStore values in responses instead of static SAMPLE_RESPONSES. Format numbers with proper currency/comma formatting.",
+    "5. Add a server-side AI query endpoint: Add POST /api/intelligence/query to server/routes/intelligence.js that accepts a natural language question and returns structured data for charting. For now this can be rule-based (no external AI API needed) - parse the question, determine the metric, and return the relevant data shape.",
+    "6. Add test for the query endpoint in the existing server/routes/intelligence.test.js.",
+    "7. Add CSS for inline charts in chat: .ai-inline-chart class with appropriate sizing (max-width: 300px, height: 150px), rounded corners, and theme-aware colors.",
+    "8. Run npm test and npm run build to verify."
+  ],
+  "acceptance_criteria": [
+    "Asking 'Show me revenue for last week' in AI chat returns a response with an inline line chart",
+    "Asking 'top products' returns a formatted list (or bar chart) of product data",
+    "When live data is connected, responses use real DataStore values",
+    "When in demo mode, responses use demo data with clear labeling",
+    "Inline charts are responsive and respect the current theme colors",
+    "Server query endpoint returns structured data for known metric queries",
+    "New tests pass",
+    "Build and all tests pass"
+  ],
+  "verification": [
+    "Run npm test and confirm all tests pass (including new intelligence query test)",
+    "Run npm run build and confirm it succeeds"
+  ],
+  "blocked_reason": null,
+  "findings": "All 282 tests pass (4 new tests for the query endpoint). Build succeeds. The query endpoint is protected by requireAuth middleware like all other intelligence routes."
+}

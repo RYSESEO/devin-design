@@ -169,7 +169,9 @@ class BaseConnector {
         await this.fetchData(credentials);
       } else {
         this.status = 'error';
-        this.lastError = 'Connection test failed';
+        if (!this.lastError) {
+          this.lastError = 'Connection test failed';
+        }
       }
     } catch (e) {
       this.status = 'error';
@@ -214,16 +216,42 @@ class ShopifyConnector extends BaseConnector {
     ]);
   }
 
+  getWizardSteps() {
+    return [
+      {
+        title: 'Find Your API Credentials',
+        instructions: '1. Log in to your Shopify admin\n2. Go to Settings > Apps and sales channels\n3. Click Develop apps (you may need to enable developer permissions)\n4. Create a new app or select an existing one'
+      },
+      {
+        title: 'Copy Your Access Token',
+        instructions: '1. In your app, go to API credentials\n2. Under Admin API access token, click Reveal token once\n3. Copy the token (starts with shpat_)\n\nNote: You can only view this token once. Store it securely.'
+      },
+      {
+        title: 'Connect Your Store',
+        fields: ['store', 'token']
+      }
+    ];
+  }
+
   async testConnection(creds) {
-    if (!creds.store || !creds.token) return false;
+    if (!creds.store || !creds.token) {
+      this.lastError = 'Store URL and API token are required';
+      return false;
+    }
     try {
       const resp = await fetch('/api/proxy/shopify', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({ endpoint: '/shop.json', method: 'GET' })
       });
-      return resp.ok;
-    } catch {
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        this.lastError = data.error || `Shopify API error (${resp.status})`;
+        return false;
+      }
+      return true;
+    } catch (e) {
+      this.lastError = e.message || 'Network error connecting to Shopify';
       return false;
     }
   }
@@ -323,16 +351,42 @@ class GitHubConnector extends BaseConnector {
     ]);
   }
 
+  getWizardSteps() {
+    return [
+      {
+        title: 'Generate a Personal Access Token',
+        instructions: '1. Go to GitHub.com > Settings\n2. Click Developer settings (bottom of sidebar)\n3. Personal access tokens > Tokens (classic)\n4. Click Generate new token'
+      },
+      {
+        title: 'Select Token Scopes',
+        instructions: 'Select these scopes:\n- repo (Full control of repositories)\n- read:org (Read organization data)\n\nSet expiration to 90 days or No expiration.'
+      },
+      {
+        title: 'Enter Your Credentials',
+        fields: ['token', 'owner']
+      }
+    ];
+  }
+
   async testConnection(creds) {
-    if (!creds.token) return false;
+    if (!creds.token) {
+      this.lastError = 'Personal access token is required';
+      return false;
+    }
     try {
       const resp = await fetch('/api/proxy/github', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({ endpoint: '/user', method: 'GET' })
       });
-      return resp.ok;
-    } catch {
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        this.lastError = data.error || `GitHub API error (${resp.status})`;
+        return false;
+      }
+      return true;
+    } catch (e) {
+      this.lastError = e.message || 'Network error connecting to GitHub';
       return false;
     }
   }
@@ -392,6 +446,23 @@ class GA4Connector extends BaseConnector {
       { key: 'propertyId', label: 'GA4 Property ID', type: 'text', placeholder: '123456789' },
       { key: 'apiKey', label: 'API Key', type: 'password', placeholder: 'AIza...' },
     ]);
+  }
+
+  getWizardSteps() {
+    return [
+      {
+        title: 'Find Your Property ID',
+        instructions: '1. Go to Google Analytics\n2. Click Admin (gear icon)\n3. In the Property column, find your Property ID (numeric)'
+      },
+      {
+        title: 'Get an API Key',
+        instructions: '1. Go to Google Cloud Console\n2. APIs & Services > Credentials\n3. Create an API key or use an existing one'
+      },
+      {
+        title: 'Connect',
+        fields: ['propertyId', 'apiKey']
+      }
+    ];
   }
 
   async testConnection(creds) {
@@ -493,6 +564,23 @@ class SearchConsoleConnector extends BaseConnector {
     ]);
   }
 
+  getWizardSteps() {
+    return [
+      {
+        title: 'Verify Your Site',
+        instructions: '1. Go to Google Search Console\n2. Add a property if not already added\n3. Verify ownership via DNS, HTML file, or Google Analytics'
+      },
+      {
+        title: 'Get API Access',
+        instructions: '1. Go to Google Cloud Console\n2. Enable Search Console API\n3. Create an API key under Credentials'
+      },
+      {
+        title: 'Connect',
+        fields: ['siteUrl', 'apiKey']
+      }
+    ];
+  }
+
   async testConnection(creds) {
     if (!creds.siteUrl || !creds.apiKey) return false;
     try {
@@ -558,6 +646,23 @@ class StripeConnector extends BaseConnector {
     super('stripe', 'Stripe', '💳', '#635bff', [
       { key: 'secretKey', label: 'Secret Key', type: 'password', placeholder: 'sk_live_xxxxx...' },
     ]);
+  }
+
+  getWizardSteps() {
+    return [
+      {
+        title: 'Find Your API Key',
+        instructions: '1. Log in to your Stripe Dashboard\n2. Click Developers in the sidebar\n3. Go to API keys'
+      },
+      {
+        title: 'Copy Your Secret Key',
+        instructions: '1. Under Standard keys, find your Secret key\n2. Click Reveal live key or use the test key for testing\n3. Copy the key (starts with sk_live_ or sk_test_)'
+      },
+      {
+        title: 'Connect',
+        fields: ['secretKey']
+      }
+    ];
   }
 
   async testConnection(creds) {
@@ -692,7 +797,10 @@ const SettingsPanel = {
     const panel = document.getElementById('settings-connections');
     if (!panel) return;
 
-    panel.innerHTML = ConnectorManager.connectors.map(c => `
+    panel.innerHTML = ConnectorManager.connectors.map(c => {
+      const steps = c.getWizardSteps();
+      const totalSteps = steps.length;
+      return `
       <div class="connector-card" data-connector="${c.id}">
         <div class="connector-header">
           <span class="connector-icon">${c.icon}</span>
@@ -712,26 +820,30 @@ const SettingsPanel = {
         </div>
         ${c.lastError ? `<div class="connector-error">${c.lastError}</div>` : ''}
         ${c.lastSync ? `<div class="connector-sync-time">Last synced: ${new Date(c.lastSync).toLocaleTimeString()}</div>` : ''}
-        <div class="connector-form" id="form-${c.id}" hidden>
+        <div class="connector-wizard" id="wizard-${c.id}" hidden>
           ${(c.id === 'shopify' || c.id === 'github') ? `
             <div class="conn-oauth-section">
               <button class="conn-btn conn-btn-oauth" data-action="oauth" data-id="${c.id}">
                 Connect with OAuth
               </button>
-              <span class="conn-oauth-divider">or enter credentials manually:</span>
+              <span class="conn-oauth-divider">or follow the steps below:</span>
             </div>
           ` : ''}
-          ${c.fields.map(f => `
-            <div class="conn-field">
-              <label>${f.label}</label>
-              <input type="${f.type}" placeholder="${f.placeholder}" data-connector="${c.id}" data-field="${f.key}" />
-            </div>
-          `).join('')}
-          <button class="conn-btn conn-btn-save" data-action="connect" data-id="${c.id}">Connect & Sync</button>
+          <div class="wizard-steps-indicator">
+            ${steps.map((_, i) => `<span class="wizard-step-dot${i === 0 ? ' active' : ''}" data-step="${i + 1}">${i + 1}</span>${i < totalSteps - 1 ? '<span class="wizard-step-line"></span>' : ''}`).join('')}
+          </div>
+          <div class="wizard-content" id="wizard-content-${c.id}">
+          </div>
+          <div class="wizard-actions">
+            <button class="conn-btn wizard-back" data-id="${c.id}" hidden>Back</button>
+            <button class="conn-btn conn-btn-connect wizard-next" data-id="${c.id}">Next</button>
+          </div>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
+    this._wizardState = {};
     this._bindEvents();
   },
 
@@ -741,11 +853,18 @@ const SettingsPanel = {
   },
 
   _bindEvents() {
+    const self = this;
+
     document.querySelectorAll('[data-action="toggle-form"]').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.dataset.id;
-        const form = document.getElementById(`form-${id}`);
-        form.hidden = !form.hidden;
+        const wizard = document.getElementById(`wizard-${id}`);
+        if (wizard.hidden) {
+          wizard.hidden = false;
+          self._initWizard(id);
+        } else {
+          wizard.hidden = true;
+        }
       });
     });
 
@@ -760,20 +879,51 @@ const SettingsPanel = {
       });
     });
 
-    document.querySelectorAll('[data-action="connect"]').forEach(btn => {
+    document.querySelectorAll('.wizard-next').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
+        const state = self._wizardState[id];
+        if (!state) return;
         const connector = ConnectorManager.get(id);
-        const creds = {};
-        document.querySelectorAll(`input[data-connector="${id}"]`).forEach(inp => {
-          creds[inp.dataset.field] = inp.value.trim();
-        });
-        await connector.connect(creds);
-        this.render();
-        updateDataSourceBadges();
-        if (connector.status === 'connected' && !ConnectorManager.demoMode) {
-          rebuildAllWidgets();
+        const steps = connector.getWizardSteps();
+        const currentStep = steps[state.current];
+
+        // If on the final step, validate and connect
+        if (state.current === steps.length - 1) {
+          const validation = self._validateWizardFields(id, connector);
+          if (!validation.valid) {
+            self._showValidationError(id, validation.message);
+            return;
+          }
+          self._clearValidationError(id);
+          const creds = {};
+          document.querySelectorAll(`#wizard-content-${id} input[data-connector="${id}"]`).forEach(inp => {
+            creds[inp.dataset.field] = inp.value.trim();
+          });
+          btn.disabled = true;
+          btn.textContent = 'Connecting...';
+          await connector.connect(creds);
+          self.render();
+          if (connector.status === 'connected') {
+            ConnectorManager.toggleDemoMode(false);
+            rebuildAllWidgets();
+          }
+          updateDataSourceBadges();
+        } else {
+          // Move to next step
+          state.current++;
+          self._renderWizardStep(id);
         }
+      });
+    });
+
+    document.querySelectorAll('.wizard-back').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        const state = self._wizardState[id];
+        if (!state || state.current === 0) return;
+        state.current--;
+        self._renderWizardStep(id);
       });
     });
 
@@ -781,7 +931,7 @@ const SettingsPanel = {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
         await ConnectorManager.get(id).disconnect();
-        this.render();
+        self.render();
         updateDataSourceBadges();
       });
     });
@@ -794,11 +944,112 @@ const SettingsPanel = {
         if (creds) {
           await connector.fetchData(creds);
           connector.lastSync = Date.now();
-          this.render();
+          self.render();
           if (!ConnectorManager.demoMode) rebuildAllWidgets();
         }
       });
     });
+  },
+
+  _initWizard(id) {
+    this._wizardState[id] = { current: 0 };
+    this._renderWizardStep(id);
+  },
+
+  _renderWizardStep(id) {
+    const state = this._wizardState[id];
+    if (!state) return;
+    const connector = ConnectorManager.get(id);
+    const steps = connector.getWizardSteps();
+    const step = steps[state.current];
+    const contentEl = document.getElementById(`wizard-content-${id}`);
+    const wizardEl = document.getElementById(`wizard-${id}`);
+
+    // Update step dots
+    wizardEl.querySelectorAll('.wizard-step-dot').forEach(dot => {
+      const dotStep = parseInt(dot.dataset.step) - 1;
+      dot.classList.remove('active', 'completed');
+      if (dotStep === state.current) {
+        dot.classList.add('active');
+      } else if (dotStep < state.current) {
+        dot.classList.add('completed');
+      }
+    });
+
+    // Update back button
+    const backBtn = wizardEl.querySelector('.wizard-back');
+    backBtn.hidden = state.current === 0;
+
+    // Update next button text
+    const nextBtn = wizardEl.querySelector('.wizard-next');
+    if (state.current === steps.length - 1) {
+      nextBtn.textContent = 'Connect & Sync';
+    } else {
+      nextBtn.textContent = 'Next';
+    }
+    nextBtn.disabled = false;
+
+    // Render step content
+    let html = `<div class="wizard-step-title">${step.title}</div>`;
+    if (step.instructions) {
+      html += `<div class="wizard-instructions">${step.instructions}</div>`;
+    }
+    if (step.fields) {
+      const fields = connector.fields.filter(f => step.fields.includes(f.key));
+      html += fields.map(f => `
+        <div class="conn-field">
+          <label>${f.label}</label>
+          <input type="${f.type}" placeholder="${f.placeholder}" data-connector="${id}" data-field="${f.key}" />
+        </div>
+      `).join('');
+    }
+    contentEl.innerHTML = html;
+  },
+
+  _validateWizardFields(id, connector) {
+    const inputs = document.querySelectorAll(`#wizard-content-${id} input[data-connector="${id}"]`);
+    for (const inp of inputs) {
+      const val = inp.value.trim();
+      if (!val) {
+        return { valid: false, message: `${inp.previousElementSibling?.textContent || 'Field'} is required` };
+      }
+    }
+
+    // Connector-specific validation
+    if (id === 'shopify') {
+      const tokenInput = document.querySelector(`#wizard-content-${id} input[data-field="token"]`);
+      if (tokenInput) {
+        const token = tokenInput.value.trim();
+        if (token && !token.startsWith('shpat_')) {
+          return { valid: false, message: 'Shopify token should start with shpat_' };
+        }
+      }
+    } else if (id === 'github') {
+      const tokenInput = document.querySelector(`#wizard-content-${id} input[data-field="token"]`);
+      if (tokenInput) {
+        const token = tokenInput.value.trim();
+        if (token && !token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+          return { valid: false, message: 'GitHub token should start with ghp_ or github_pat_' };
+        }
+      }
+    }
+
+    return { valid: true, message: '' };
+  },
+
+  _showValidationError(id, message) {
+    const contentEl = document.getElementById(`wizard-content-${id}`);
+    this._clearValidationError(id);
+    const errEl = document.createElement('div');
+    errEl.className = 'wizard-validation-error';
+    errEl.textContent = message;
+    contentEl.appendChild(errEl);
+  },
+
+  _clearValidationError(id) {
+    const contentEl = document.getElementById(`wizard-content-${id}`);
+    const existing = contentEl.querySelector('.wizard-validation-error');
+    if (existing) existing.remove();
   }
 };
 

@@ -335,4 +335,108 @@ router.post('/alerts/:id/trigger', (req, res) => {
   res.json({ alert: updated, triggered: true });
 });
 
+// POST /api/intelligence/query - Natural language data query
+router.post('/query', (req, res) => {
+  const { question } = req.body;
+  if (!question || typeof question !== 'string') {
+    return res.status(400).json({ error: 'question is required' });
+  }
+
+  const lower = question.toLowerCase();
+  let result;
+
+  // Rule-based intent detection (no external AI needed)
+  if (/revenue|sales|shopify|orders|money/.test(lower)) {
+    result = {
+      intent: 'revenue',
+      metric: 'shopify_revenue',
+      chartType: 'line',
+      title: 'Shopify Revenue',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        values: [6200, 7400, 5800, 8400, 7100, 6900, 5900]
+      },
+      summary: 'Total revenue for the period: $47,832 (+24.1% vs previous period)',
+      source: 'demo'
+    };
+  } else if (/lead|pipeline|conversion|funnel/.test(lower)) {
+    result = {
+      intent: 'leads',
+      metric: 'lead_sources',
+      chartType: 'bar',
+      title: 'Lead Sources',
+      data: {
+        labels: ['Organic', 'Paid', 'Referral', 'Social', 'Direct'],
+        values: [142, 78, 62, 48, 32]
+      },
+      summary: '362 total leads this period (+9.7%)',
+      source: 'demo'
+    };
+  } else if (/agent|devin|session|pr|commit|deploy/.test(lower)) {
+    result = {
+      intent: 'agents',
+      metric: 'agent_sessions',
+      chartType: 'line',
+      title: 'Agent Activity',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        values: [156, 189, 201, 234, 178, 145, 181]
+      },
+      summary: '1,284 agent sessions this period (+18.4%)',
+      source: 'demo'
+    };
+  } else if (/content|blog|view|engagement|post/.test(lower)) {
+    result = {
+      intent: 'content',
+      metric: 'content_views',
+      chartType: 'bar',
+      title: 'Content Performance',
+      data: {
+        labels: ['Blog', 'YouTube', 'Social', 'Newsletter', 'Podcast'],
+        values: [34200, 22100, 18600, 9400, 5120]
+      },
+      summary: '89,420 total content views (+31.2%)',
+      source: 'demo'
+    };
+  } else if (/token|usage|spend|cost|model|claude|gpt/.test(lower)) {
+    result = {
+      intent: 'tokens',
+      metric: 'token_usage',
+      chartType: 'doughnut',
+      title: 'Token Usage by Model',
+      data: {
+        labels: ['Claude 3.5 Sonnet', 'GPT-4o', 'Claude 3 Haiku', 'GPT-4o mini'],
+        values: [840, 520, 380, 210]
+      },
+      summary: 'Total token spend: $2,140 for the 7-day period',
+      source: 'demo'
+    };
+  } else if (/forecast|predict|project|next|future|trend/.test(lower)) {
+    result = {
+      intent: 'forecast',
+      metric: 'forecast',
+      chartType: 'line',
+      title: '30-Day Forecast',
+      data: {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        values: [48000, 52000, 49000, 55000]
+      },
+      summary: 'Projected revenue next 30 days: ~$198,000 (+18% growth trajectory)',
+      source: 'demo'
+    };
+  } else {
+    result = {
+      intent: 'unknown',
+      metric: null,
+      chartType: null,
+      title: 'Help',
+      data: null,
+      summary: 'I can query: revenue, leads, agent activity, content, tokens, and forecasts. Try asking "Show me revenue for last week" or "What are my top lead sources?"',
+      source: null
+    };
+  }
+
+  res.json(result);
+});
+
 export default router;

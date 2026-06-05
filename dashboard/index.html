@@ -250,6 +250,20 @@
     </div>
   </header>
 
+  <!-- Health Monitor Bar -->
+  <div class="health-bar" id="health-bar">
+    <div class="health-bar-items" id="health-bar-items">
+      <!-- Dynamically populated -->
+    </div>
+    <button class="health-bar-diag-btn" id="health-diag-btn" title="Run Diagnostics">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      Diagnostics
+    </button>
+    <button class="health-bar-toggle" id="health-bar-toggle" title="Toggle health bar">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  </div>
+
   <!-- Dashboard Tabs -->
   <nav class="dash-tabs-bar" id="dash-tabs-bar">
     <button class="dash-tab active" data-dtab="all">
@@ -294,6 +308,7 @@
           <span class="kpi-delta positive">+18.4%</span>
         </div>
         <div class="kpi-spark" id="spark-agents"></div>
+        <div class="widget-freshness" data-freshness="agents"></div>
       </article>
 
       <article class="kpi-card kpi-revenue" data-widget="revenue" data-grid-id="revenue">
@@ -305,6 +320,7 @@
           <span class="kpi-delta positive">+24.1%</span>
         </div>
         <div class="kpi-spark" id="spark-revenue"></div>
+        <div class="widget-freshness" data-freshness="revenue"></div>
       </article>
 
       <article class="kpi-card kpi-leads" data-widget="leads-kpi" data-grid-id="leads-kpi">
@@ -316,6 +332,7 @@
           <span class="kpi-delta positive">+9.7%</span>
         </div>
         <div class="kpi-spark" id="spark-leads"></div>
+        <div class="widget-freshness" data-freshness="leads-kpi"></div>
       </article>
 
       <article class="kpi-card kpi-content" data-widget="content-kpi" data-grid-id="content-kpi">
@@ -327,6 +344,7 @@
           <span class="kpi-delta positive">+31.2%</span>
         </div>
         <div class="kpi-spark" id="spark-content"></div>
+        <div class="widget-freshness" data-freshness="content-kpi"></div>
       </article>
     </section>
 
@@ -342,6 +360,7 @@
           </div>
         </div>
         <div class="chart-wrap"><canvas id="chart-agent-usage"></canvas></div>
+        <div class="widget-freshness" data-freshness="agent-usage"></div>
       </article>
 
       <article class="chart-card" data-widget="lead-sources" data-grid-id="lead-sources">
@@ -352,6 +371,7 @@
         </div>
         <div class="chart-wrap chart-wrap-donut"><canvas id="chart-lead-sources"></canvas></div>
         <ul class="donut-legend" id="lead-legend"></ul>
+        <div class="widget-freshness" data-freshness="lead-sources"></div>
       </article>
     </section>
 
@@ -364,6 +384,7 @@
           <button class="expand-btn" data-expand="shopify" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="chart-wrap"><canvas id="chart-shopify"></canvas></div>
+        <div class="widget-freshness" data-freshness="shopify"></div>
       </article>
 
       <article class="chart-card" data-widget="content-perf" data-grid-id="content-perf">
@@ -373,6 +394,7 @@
           <button class="expand-btn" data-expand="content-perf" title="Focus mode (F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
         </div>
         <div class="chart-wrap"><canvas id="chart-content"></canvas></div>
+        <div class="widget-freshness" data-freshness="content-perf"></div>
       </article>
     </section>
 
@@ -431,6 +453,7 @@
             </div>
           </li>
         </ul>
+        <div class="widget-freshness" data-freshness="agent-feed"></div>
       </article>
 
       <!-- Shopify Top Products -->
@@ -454,6 +477,7 @@
             <tr><td><span class="product-dot" style="--dot:#f59e0b"></span>Site Speed Boost</td><td>63</td><td>$4,410</td><td><span class="conv-bar" style="--w:38%">38%</span></td></tr>
           </tbody>
         </table>
+        <div class="widget-freshness" data-freshness="top-products"></div>
       </article>
 
       <!-- Lead Pipeline -->
@@ -498,6 +522,7 @@
             <span class="pipe-stat-label">Avg Cycle</span>
           </div>
         </div>
+        <div class="widget-freshness" data-freshness="pipeline"></div>
       </article>
     </section>
 
@@ -530,6 +555,7 @@
             <div class="bar-track"><div class="bar-fill" style="--w:12%;--color:#f59e0b" data-animate></div></div>
           </div>
         </div>
+        <div class="widget-freshness" data-freshness="channels"></div>
       </article>
 
       <article class="chart-card" data-widget="tokens" data-grid-id="tokens">
@@ -539,6 +565,7 @@
         </div>
         <div class="chart-wrap chart-wrap-donut"><canvas id="chart-tokens"></canvas></div>
         <ul class="donut-legend" id="token-legend"></ul>
+        <div class="widget-freshness" data-freshness="tokens"></div>
       </article>
 
       <article class="stats-card" data-widget="quick-stats" data-grid-id="quick-stats">
@@ -572,6 +599,7 @@
             <span class="qs-label">Satisfaction Score</span>
           </div>
         </div>
+        <div class="widget-freshness" data-freshness="quick-stats"></div>
       </article>
     </section>
 
@@ -1740,6 +1768,23 @@
     </div>
   </div>
 
+  <!-- ═══ Diagnostics Panel ═══ -->
+  <div class="diag-overlay" id="diag-panel" hidden>
+    <div class="diag-drawer">
+      <div class="diag-header">
+        <h3>Connection Diagnostics</h3>
+        <button class="diag-close-btn" id="diag-close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="diag-body" id="diag-body">
+        <!-- Dynamically populated with test results -->
+      </div>
+    </div>
+  </div>
+
+  <script src="health-monitor.js"></script>
+  <script src="freshness.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

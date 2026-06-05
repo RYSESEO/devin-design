@@ -1,0 +1,29 @@
+{
+  "id": "FEAT-001",
+  "type": "fix",
+  "description": "Fix critical bugs: Shopify connector errors, hard reset needed after connecting, and broken top nav items",
+  "status": "in_progress",
+  "steps": [
+    "1. Fix saveConnectorConfig in dashboard/lib/state-sync.js: Currently the function silently catches all errors and never indicates failure to the caller. Change it to throw when the server returns a non-200 response, so the connector's connect() method can properly detect failures and show errors to users.",
+    "2. Fix the Shopify connector flow in dashboard/connectors.js: In the ShopifyConnector.connect flow, the testConnection() method calls /api/proxy/shopify BEFORE saveConnectorConfig completes (or it cannot detect failures). Ensure the full sequence is: (a) save credentials to server, (b) CONFIRM the save succeeded (check response), (c) THEN test the connection. The testConnection should also report the actual error message from the server response body (not just check resp.ok).",
+    "3. Fix hard reset issue after connecting: In dashboard/connectors.js, after a connector connects successfully (this.status = 'connected'), the DataStore is updated but the dashboard charts/widgets are not rebuilt unless ConnectorManager.demoMode is already false. The fix: after a successful connection in the SettingsPanel connect handler, always call rebuildAllWidgets() and updateDataSourceBadges() regardless of demoMode state. Also ensure ConnectorManager.demoMode is set to false when any connector connects.",
+    "4. Fix top nav buttons: The lazy-panels system in dashboard/lib/lazy-panels.js has a bug where it re-dispatches btn.click() via setTimeout after initialization, which causes an infinite loop or double-fire because the listener is not {once: true}. The fix: after the panel is initialized and added to initializedPanels, the re-dispatched click will hit the same listener but skip the init (since initializedPanels.has(buttonId) is now true). However, the panel's OWN click handler (registered during init) needs to be the one that toggles it. The problem is that the lazy panel's event listener fires FIRST (it was registered first) and then the panel's own handler fires. The re-dispatch via setTimeout causes double toggling. Fix: Remove the setTimeout re-dispatch. Instead, after calling initFn() successfully, immediately invoke the panel's toggle/open function directly.",
+    "5. Fix vite.config.js legacyScripts: Add all missing panel scripts to the legacyScripts array so they are copied to production builds: multi-store.js, workspaces.js, reports.js, billing.js, forecasting.js, seo-radar.js, pricing.js, churn.js, competitor-alerts.js, marketplace.js, templates.js, benchmarks.js, api-keys.js, embeds.js.",
+    "6. Ensure npm test still passes after all fixes."
+  ],
+  "acceptance_criteria": [
+    "saveConnectorConfig throws an error when the server returns non-200",
+    "Shopify connector shows meaningful error messages from the server response when connection fails",
+    "Dashboard widgets automatically rebuild after a successful connector connection without requiring page reload",
+    "Top nav buttons open their respective panels on first click without requiring double-click or causing toggle loops",
+    "All 275 existing tests pass",
+    "npm run build succeeds with all panel scripts included in dist"
+  ],
+  "verification": [
+    "Run npm test and confirm all tests pass",
+    "Run npm run build and confirm it succeeds",
+    "Verify dist/client/ contains all panel JS files (multi-store.js, workspaces.js, etc.)"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

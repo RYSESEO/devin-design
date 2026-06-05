@@ -151,6 +151,7 @@ var WorkflowBuilder = {
             '<span class="workflow-stat">Last: ' + lastRun + '</span>' +
             '<div class="workflow-actions">' +
               '<button class="workflow-run-btn" data-wf-id="' + w.id + '">Run</button>' +
+              '<button class="workflow-preview-btn" data-wf-id="' + w.id + '">Preview</button>' +
               '<button class="workflow-edit-btn" data-wf-id="' + w.id + '">Edit</button>' +
               '<button class="workflow-delete-btn" data-wf-id="' + w.id + '">Delete</button>' +
             '</div>' +
@@ -229,6 +230,88 @@ var WorkflowBuilder = {
           btn.disabled = false;
         });
       });
+    });
+
+    el.querySelectorAll('.workflow-preview-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var id = btn.getAttribute('data-wf-id');
+        btn.disabled = true;
+        btn.textContent = 'Loading...';
+        _autoPost('/api/automations/workflows/' + id + '/preview', {}).then(function(data) {
+          var preview = data.preview || {};
+          self._showPreviewOverlay(el, preview);
+          btn.textContent = 'Preview';
+          btn.disabled = false;
+        }).catch(function() {
+          _autoToast('&#x26A0;', 'Error', 'Could not load preview.');
+          btn.textContent = 'Preview';
+          btn.disabled = false;
+        });
+      });
+    });
+  },
+
+  _showPreviewOverlay: function(el, preview) {
+    var html = '<div class="auto-preview-overlay">' +
+      '<div class="auto-preview-header">' +
+        '<div class="auto-preview-title">' + _autoEscapeHtml(preview.workflow_name || 'Workflow') + '</div>' +
+        '<span class="auto-preview-badge">Dry Run</span>' +
+        '<button class="auto-preview-close">&times;</button>' +
+      '</div>' +
+      '<div class="auto-preview-flow">';
+
+    // Trigger step
+    if (preview.trigger) {
+      html += '<div class="auto-preview-step">' +
+        '<div class="auto-preview-step-label">Trigger</div>' +
+        '<div class="auto-preview-step-text">' + _autoEscapeHtml(preview.trigger.description || preview.trigger.type) + '</div>' +
+      '</div>';
+      html += '<div class="auto-preview-arrow">&#x2193;</div>';
+    }
+
+    // Conditions
+    if (preview.conditions && preview.conditions.length > 0) {
+      html += '<div class="auto-preview-step">' +
+        '<div class="auto-preview-step-label">Conditions</div>';
+      preview.conditions.forEach(function(c) {
+        html += '<div class="auto-preview-step-text">' + _autoEscapeHtml(c.description) + '</div>';
+      });
+      html += '</div>';
+      html += '<div class="auto-preview-arrow">&#x2193;</div>';
+    }
+
+    // Actions
+    if (preview.actions && preview.actions.length > 0) {
+      preview.actions.forEach(function(a, i) {
+        html += '<div class="auto-preview-step">' +
+          '<div class="auto-preview-step-label">Step ' + (i + 1) + ': ' + _autoEscapeHtml(a.type) + '</div>' +
+          '<div class="auto-preview-step-text">' + _autoEscapeHtml(a.preview_text) + '</div>' +
+        '</div>';
+        if (i < preview.actions.length - 1) {
+          html += '<div class="auto-preview-arrow">&#x2193;</div>';
+        }
+      });
+    }
+
+    html += '</div>';
+
+    // Summary
+    if (preview.summary) {
+      html += '<div class="auto-preview-summary">' + _autoEscapeHtml(preview.summary) + '</div>';
+    }
+
+    html += '</div>';
+
+    // Insert overlay into el
+    var overlay = document.createElement('div');
+    overlay.innerHTML = html;
+    var overlayEl = overlay.firstChild;
+    el.style.position = 'relative';
+    el.appendChild(overlayEl);
+
+    // Bind close
+    overlayEl.querySelector('.auto-preview-close').addEventListener('click', function() {
+      overlayEl.remove();
     });
   },
 

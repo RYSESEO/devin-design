@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Guided Connection Wizard - Replace the simple connector form with a step-by-step wizard that provides clear instructions for each integration setup",
+  "status": "completed",
+  "steps": [
+    "1. Modify the SettingsPanel.render() method in dashboard/connectors.js to render a multi-step wizard UI instead of the current flat form when a user clicks 'Connect'. The wizard should have: a step indicator (Step 1 of 3), content area, and Next/Back/Connect buttons.",
+    "2. For Shopify: Step 1 shows instructions: 'Go to your Shopify admin > Settings > Apps and sales channels > Develop apps. Create or open a custom app.' with a visual screenshot placeholder. Step 2: 'Under API credentials, copy your Admin API access token (starts with shpat_)'. Step 3: Form fields for store subdomain and token, with an inline test button.",
+    "3. For GitHub: Step 1: 'Go to GitHub > Settings > Developer settings > Personal access tokens > Generate new token'. Step 2: 'Select scopes: repo, read:org'. Step 3: Form fields for token and owner/org.",
+    "4. For other connectors (GA4, Search Console, Stripe): Similar guided steps appropriate to each service.",
+    "5. Add CSS for the wizard UI in dashboard/styles.css: Step progress indicator with numbered circles, animated transitions between steps, clear instruction blocks with code/highlight formatting.",
+    "6. Add a validate function in the wizard that checks input format before allowing progression (e.g., Shopify token must start with 'shpat_', GitHub token with 'ghp_' or 'github_pat_').",
+    "7. Run npm test and npm run build to verify."
+  ],
+  "acceptance_criteria": [
+    "Clicking Connect on a connector opens a multi-step wizard instead of showing a flat form",
+    "Shopify wizard has 3 steps with clear instructions at each step",
+    "GitHub wizard has 3 steps with clear instructions",
+    "Input validation provides immediate feedback on token format",
+    "Back button allows returning to previous steps",
+    "Final step connects and shows success/failure status inline",
+    "Build and tests pass"
+  ],
+  "verification": [
+    "Run npm test and confirm all tests pass",
+    "Run npm run build and confirm it succeeds"
+  ],
+  "blocked_reason": null,
+  "findings": "All 275 tests pass. Build succeeds. Wizard replaces the flat connector form with a 3-step guided flow for all 5 connectors. OAuth buttons preserved for Shopify and GitHub. Input validation checks token prefixes (shpat_, ghp_, github_pat_). Vite non-module warnings are expected and by design."
+}

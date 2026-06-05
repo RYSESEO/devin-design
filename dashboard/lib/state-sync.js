@@ -84,18 +84,21 @@ export function savePreferences(prefs) {
 
 /**
  * Save connector configuration server-side (credentials go to the server only).
+ * Throws on failure so the caller can handle errors.
  */
 export async function saveConnectorConfig(connectorId, credentials) {
-  if (!isAuthenticated()) return;
+  if (!isAuthenticated()) {
+    throw new Error('Not authenticated');
+  }
 
-  try {
-    await fetch(`${API_BASE_URL}/api/state/connectors`, {
-      method: 'PUT',
-      headers: authHeaders(),
-      body: JSON.stringify({ connectorId, credentials })
-    });
-  } catch {
-    // Silent fail
+  const res = await fetch(`${API_BASE_URL}/api/state/connectors`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ connectorId, credentials })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `Server error (${res.status})`);
   }
 }
 

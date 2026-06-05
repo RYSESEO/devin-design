@@ -1,0 +1,29 @@
+{
+  "id": "FEAT-005",
+  "type": "feat",
+  "description": "Automation Dry-Run Preview - Before running an automation, show a preview of what would happen with specific example output",
+  "status": "completed",
+  "steps": [
+    "1. Modify dashboard/automations.js: In the automation workflow execution handler, add a 'Preview' button alongside the 'Run' button for each automation template.",
+    "2. Create a dry-run preview panel: When 'Preview' is clicked, show a modal/drawer that displays: (a) The trigger condition that would fire this automation, (b) The actions that would execute with example data filled in (e.g., 'This would send a Slack message to #sales with: New order: $124.99'), (c) Any conditions/filters that would be evaluated.",
+    "3. Add a server-side dry-run endpoint: Add POST /api/automations/:id/preview to server/routes/automations.js that accepts an automation config and returns a simulated result. It should use the automation's template to generate realistic example output without actually executing side effects.",
+    "4. Add test for the preview endpoint in server/routes/automations.test.js: Test that the dry-run returns a valid preview object with example outputs for known automation templates.",
+    "5. Add CSS for the preview panel in dashboard/styles.css: A clear, readable preview card showing the automation flow with arrows between steps, highlighted example values, and a confidence indicator.",
+    "6. Run npm test and npm run build to verify."
+  ],
+  "acceptance_criteria": [
+    "Each automation template shows a 'Preview' button",
+    "Clicking Preview shows what the automation would do with realistic example data",
+    "The preview clearly labels example values vs. static text",
+    "No actual side effects occur during preview",
+    "The server preview endpoint returns valid example output",
+    "New test for the preview endpoint passes",
+    "Build and all tests pass"
+  ],
+  "verification": [
+    "Run npm test and confirm all tests pass (including new automation preview test)",
+    "Run npm run build and confirm it succeeds"
+  ],
+  "blocked_reason": null,
+  "findings": "All 278 tests pass (275 original + 3 new preview tests). Build succeeds. Preview endpoint at POST /api/automations/workflows/:id/preview returns dry-run data without side effects. Works on disabled workflows. Frontend shows Preview button in workflow cards with overlay display."
+}
