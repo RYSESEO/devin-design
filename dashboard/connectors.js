@@ -152,7 +152,14 @@ class BaseConnector {
       if (typeof window.saveConnectorConfig === 'function') {
         const serverCreds = this._mapCredentialsForServer(credentials);
         const serverId = this._getServerConnectorId();
-        window.saveConnectorConfig(serverId, serverCreds);
+        try {
+          await window.saveConnectorConfig(serverId, serverCreds);
+        } catch (saveErr) {
+          this.status = 'error';
+          this.lastError = 'Failed to save credentials to server: ' + (saveErr.message || 'Unknown error');
+          ConnectorManager.notify();
+          return;
+        }
       }
 
       const ok = await this.testConnection(credentials);
@@ -897,40 +904,60 @@ async function initConnectors() {
   initDemoModeToggle();
   await ConnectorManager.restoreAll();
   updateDataSourceBadges();
-  checkOAuthStatus();
+  await checkOAuthStatus();
   handleOAuthRedirect();
+  // After all connections restored, ensure dashboard reflects live state
+  if (ConnectorManager.hasAnyConnected()) {
+    ConnectorManager.toggleDemoMode(false);
+    rebuildAllWidgets();
+  }
 }
 
 /* ─── OAuth Integration ───────────────────────────────────── */
-function checkOAuthStatus() {
+async function checkOAuthStatus() {
   const token = (typeof window.getToken === 'function') ? window.getToken() : null;
   if (!token) return;
 
-  fetch('/api/oauth/status', {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-    .then(r => r.ok ? r.json() : null)
-    .then(data => {
-      if (!data) return;
-      if (data.shopify && data.shopify.connected) {
-        const shopify = ConnectorManager.get('shopify');
-        if (shopify && shopify.status !== 'connected') {
-          shopify.status = 'connected';
-          shopify.lastSync = Date.now();
-          ConnectorManager.notify();
-        }
+  try {
+    const r = await fetch('/api/oauth/status', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!r.ok) return;
+    const data = await r.json();
+    if (!data) return;
+
+    const fetchPromises = [];
+
+    if (data.shopify && data.shopify.connected) {
+      const shopify = ConnectorManager.get('shopify');
+      if (shopify && shopify.status !== 'connected') {
+        shopify.status = 'connected';
+        shopify.lastSync = Date.now();
+        ConnectorManager.notify();
+        // Fetch live data using OAuth (server resolves token)
+        fetchPromises.push(shopify.fetchData({}));
       }
-      if (data.github && data.github.connected) {
-        const github = ConnectorManager.get('github');
-        if (github && github.status !== 'connected') {
-          github.status = 'connected';
-          github.lastSync = Date.now();
-          ConnectorManager.notify();
-        }
+    }
+    if (data.github && data.github.connected) {
+      const github = ConnectorManager.get('github');
+      if (github && github.status !== 'connected') {
+        github.status = 'connected';
+        github.lastSync = Date.now();
+        ConnectorManager.notify();
+        // Fetch live data using OAuth (server resolves token)
+        fetchPromises.push(github.fetchData({}));
       }
-      updateDataSourceBadges();
-    })
-    .catch(() => {});
+    }
+
+    // Fetch data concurrently so a slow connector does not block the other
+    if (fetchPromises.length > 0) {
+      await Promise.allSettled(fetchPromises);
+    }
+
+    updateDataSourceBadges();
+  } catch (e) {
+    // Silently ignore OAuth status check failures
+  }
 }
 
 function handleOAuthRedirect() {

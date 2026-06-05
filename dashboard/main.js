@@ -499,37 +499,49 @@ if (document.readyState === 'loading') {
 // ═══ Service Worker Registration & Update Detection ═══
 // Registered here (not lazily) to ensure updates are detected on every visit.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(reg => {
-    // Check for updates every 60 seconds
-    setInterval(() => reg.update(), 60000);
+  let refreshing = false;
 
-    // When a new SW is waiting, activate it immediately
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    function onUpdateReady(worker) {
+      showToast({
+        icon: '🔄',
+        title: 'Update available',
+        msg: 'A new version is ready. Click here to refresh.'
+      });
+      // Allow clicking the latest toast to apply the update
+      const container = document.getElementById('toast-container');
+      if (container && container.lastElementChild) {
+        const toast = container.lastElementChild;
+        toast.style.cursor = 'pointer';
+        toast.addEventListener('click', () => {
+          refreshing = true;
+          worker.postMessage({ type: 'SKIP_WAITING' });
+        });
+      }
+    }
+
+    // If a SW is already waiting when we register, offer update
     if (reg.waiting) {
-      reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      onUpdateReady(reg.waiting);
     }
 
     reg.addEventListener('updatefound', () => {
       const newWorker = reg.installing;
       if (newWorker) {
         newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'activated') {
-            // New version activated - reload to get fresh assets
-            window.location.reload();
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // New SW installed but waiting - offer update to the user
+            onUpdateReady(newWorker);
           }
         });
       }
     });
   }).catch(() => {});
 
-  // Listen for SW_UPDATED message from the new service worker
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'SW_UPDATED') {
+  // Reload only after the current tab explicitly triggered the update via SKIP_WAITING
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) {
       window.location.reload();
     }
-  });
-
-  // If a controller change happens (new SW took over), reload
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    window.location.reload();
   });
 }

@@ -2,12 +2,12 @@ const CACHE_VERSION = 'ryse-dash-v5';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 
-// Install: skip waiting immediately to activate the new service worker
+// Install: let the new SW wait until explicitly activated by the client
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
+  // No skipWaiting() here - the app controls when the new SW activates
 });
 
-// Activate: purge ALL old caches and claim clients immediately
+// Activate: purge ALL old caches and claim clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -16,13 +16,14 @@ self.addEventListener('activate', (event) => {
           .map(key => caches.delete(key))
       )
     ).then(() => self.clients.claim())
-    .then(() => {
-      // Notify all clients to reload for the new version
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => client.postMessage({ type: 'SW_UPDATED' }));
-      });
-    })
   );
+});
+
+// Listen for SKIP_WAITING message from the client to activate a waiting SW
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Fetch: network-first for everything, cache only as offline fallback

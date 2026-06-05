@@ -150,6 +150,7 @@ var WorkflowBuilder = {
             '<span class="workflow-stat">Runs: ' + (w.run_count || 0) + '</span>' +
             '<span class="workflow-stat">Last: ' + lastRun + '</span>' +
             '<div class="workflow-actions">' +
+              '<button class="workflow-run-btn" data-wf-id="' + w.id + '">Run</button>' +
               '<button class="workflow-edit-btn" data-wf-id="' + w.id + '">Edit</button>' +
               '<button class="workflow-delete-btn" data-wf-id="' + w.id + '">Delete</button>' +
             '</div>' +
@@ -207,6 +208,25 @@ var WorkflowBuilder = {
           self.render();
         }).catch(function() {
           _autoToast('&#x26A0;', 'Error', 'Could not delete workflow.');
+        });
+      });
+    });
+
+    el.querySelectorAll('.workflow-run-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var id = btn.getAttribute('data-wf-id');
+        btn.disabled = true;
+        btn.textContent = 'Running...';
+        _autoPost('/api/automations/execute/' + id, {}).then(function(data) {
+          var result = data.result || {};
+          _autoToast('&#x2705;', 'Executed', (result.workflow_name || 'Workflow') + ': ' + (result.actions_executed || 0) + ' action(s) run, status: ' + (result.status || 'unknown'));
+          btn.textContent = 'Run';
+          btn.disabled = false;
+          self.render();
+        }).catch(function() {
+          _autoToast('&#x26A0;', 'Error', 'Could not execute workflow.');
+          btn.textContent = 'Run';
+          btn.disabled = false;
         });
       });
     });
@@ -448,6 +468,18 @@ var TemplateGallery = {
           _autoToast('&#x2705;', 'Activated', 'Template activated as a workflow.');
           btn.textContent = 'Activated!';
           setTimeout(function() { btn.textContent = 'Activate'; btn.disabled = false; }, 2000);
+
+          // Switch to workflows tab to show the new workflow
+          var panel = document.getElementById('automation-panel');
+          if (panel) {
+            panel.querySelectorAll('.auto-tab').forEach(function(t) { t.classList.remove('active'); });
+            panel.querySelectorAll('.auto-pane').forEach(function(p) { p.classList.remove('active'); });
+            var wfTab = panel.querySelector('.auto-tab[data-tab="workflows"]');
+            var wfPane = panel.querySelector('[data-apane="workflows"]');
+            if (wfTab) wfTab.classList.add('active');
+            if (wfPane) wfPane.classList.add('active');
+          }
+          WorkflowBuilder.render();
         }).catch(function() {
           _autoToast('&#x26A0;', 'Error', 'Could not activate template.');
           btn.textContent = 'Activate';
