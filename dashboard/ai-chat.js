@@ -36,6 +36,56 @@ const AIChatAssistant = (() => {
     return 'help';
   }
 
+  // Map intents to DataStore keys and transform live data into chart format
+  function getLiveChartData(intent, metric) {
+    if (typeof DataStore === 'undefined') return null;
+
+    if (intent === 'revenue') {
+      var entry = DataStore.get('shopify_orders_chart');
+      if (entry && entry.source !== 'demo' && entry.value) {
+        var val = entry.value;
+        if (val.labels && val.revenue) {
+          return { labels: val.labels, values: val.revenue };
+        }
+      }
+    } else if (intent === 'agents') {
+      var entry = DataStore.get('github_activity');
+      if (entry && entry.source !== 'demo' && entry.value) {
+        var val = entry.value;
+        return {
+          labels: ['PRs Opened', 'PRs Merged', 'Commits'],
+          values: [val.prs_opened || 0, val.prs_merged || 0, val.commits || 0]
+        };
+      }
+    } else if (intent === 'leads') {
+      var entry = DataStore.get('lead_sources');
+      if (entry && entry.source !== 'demo' && entry.value) {
+        var val = entry.value;
+        if (val.labels && val.values) {
+          return { labels: val.labels, values: val.values };
+        }
+      }
+    } else if (intent === 'content') {
+      var entry = DataStore.get('content_views');
+      if (entry && entry.source !== 'demo' && entry.value) {
+        var val = entry.value;
+        if (val.labels && val.values) {
+          return { labels: val.labels, values: val.values };
+        }
+      }
+    } else if (intent === 'tokens') {
+      var entry = DataStore.get('token_usage');
+      if (entry && entry.source !== 'demo' && entry.value) {
+        var val = entry.value;
+        if (val.labels && val.values) {
+          return { labels: val.labels, values: val.values };
+        }
+      }
+    }
+
+    return null;
+  }
+
   function formatMessage(text) {
     return text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -82,16 +132,18 @@ const AIChatAssistant = (() => {
         // Data query response with chart
         var chartId = 'ai-chart-' + Date.now();
         var msgText = '**' + result.title + '**\n\n' + result.summary;
+        var chartData = result.data;
 
-        // Check for live data
+        // When live data is available in DataStore, replace chart data with real values
         if (typeof ConnectorManager !== 'undefined' && !ConnectorManager.demoMode && typeof DataStore !== 'undefined') {
-          var storeEntry = DataStore.get(result.metric);
-          if (storeEntry && storeEntry.source !== 'demo') {
-            msgText += '\n\n_Using live data from ' + storeEntry.source + '_';
+          var liveData = getLiveChartData(result.intent, result.metric);
+          if (liveData) {
+            chartData = liveData;
+            msgText += '\n\n_Using live data from connected source_';
           }
         }
 
-        messages.push({ role: 'assistant', text: msgText, chart: { id: chartId, type: result.chartType, data: result.data, title: result.title } });
+        messages.push({ role: 'assistant', text: msgText, chart: { id: chartId, type: result.chartType, data: chartData, title: result.title } });
       } else if (result && result.summary) {
         messages.push({ role: 'assistant', text: result.summary });
       } else {

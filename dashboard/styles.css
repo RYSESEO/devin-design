@@ -3513,7 +3513,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 /* ─── Workflow Cards ──────────────────────────────────────── */
 .workflow-list{display:flex;flex-direction:column;gap:12px}
-.workflow-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;transition:border-color .15s}
+.workflow-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;transition:border-color .15s;position:relative;overflow:hidden}
 .workflow-card:hover{border-color:rgba(255,255,255,.12)}
 .workflow-card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .workflow-trigger-icon{font-size:1.4rem;flex-shrink:0}
