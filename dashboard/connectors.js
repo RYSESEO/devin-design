@@ -904,40 +904,51 @@ async function initConnectors() {
   initDemoModeToggle();
   await ConnectorManager.restoreAll();
   updateDataSourceBadges();
-  checkOAuthStatus();
+  await checkOAuthStatus();
   handleOAuthRedirect();
+  // After all connections restored, ensure dashboard reflects live state
+  if (ConnectorManager.hasAnyConnected()) {
+    ConnectorManager.toggleDemoMode(false);
+    rebuildAllWidgets();
+  }
 }
 
 /* ─── OAuth Integration ───────────────────────────────────── */
-function checkOAuthStatus() {
+async function checkOAuthStatus() {
   const token = (typeof window.getToken === 'function') ? window.getToken() : null;
   if (!token) return;
 
-  fetch('/api/oauth/status', {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-    .then(r => r.ok ? r.json() : null)
-    .then(data => {
-      if (!data) return;
-      if (data.shopify && data.shopify.connected) {
-        const shopify = ConnectorManager.get('shopify');
-        if (shopify && shopify.status !== 'connected') {
-          shopify.status = 'connected';
-          shopify.lastSync = Date.now();
-          ConnectorManager.notify();
-        }
+  try {
+    const r = await fetch('/api/oauth/status', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!r.ok) return;
+    const data = await r.json();
+    if (!data) return;
+    if (data.shopify && data.shopify.connected) {
+      const shopify = ConnectorManager.get('shopify');
+      if (shopify && shopify.status !== 'connected') {
+        shopify.status = 'connected';
+        shopify.lastSync = Date.now();
+        ConnectorManager.notify();
+        // Fetch live data using OAuth (server resolves token)
+        await shopify.fetchData({});
       }
-      if (data.github && data.github.connected) {
-        const github = ConnectorManager.get('github');
-        if (github && github.status !== 'connected') {
-          github.status = 'connected';
-          github.lastSync = Date.now();
-          ConnectorManager.notify();
-        }
+    }
+    if (data.github && data.github.connected) {
+      const github = ConnectorManager.get('github');
+      if (github && github.status !== 'connected') {
+        github.status = 'connected';
+        github.lastSync = Date.now();
+        ConnectorManager.notify();
+        // Fetch live data using OAuth (server resolves token)
+        await github.fetchData({});
       }
-      updateDataSourceBadges();
-    })
-    .catch(() => {});
+    }
+    updateDataSourceBadges();
+  } catch (e) {
+    // Silently ignore OAuth status check failures
+  }
 }
 
 function handleOAuthRedirect() {
