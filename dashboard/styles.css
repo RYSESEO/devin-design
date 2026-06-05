@@ -296,6 +296,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .conn-field input:focus{border-color:var(--accent)}
 .conn-field input::placeholder{color:var(--text-3)}
 
+/* ─── Connector Wizard ─────────────────────────────────────── */
+.connector-wizard{padding:16px 0 0 52px}
+.connector-wizard[hidden]{display:none}
+.wizard-steps-indicator{display:flex;gap:8px;margin-bottom:16px;align-items:center}
+.wizard-step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);transition:all 0.2s}
+.wizard-step-dot.active{background:var(--accent, #a855f7);color:#fff}
+.wizard-step-dot.completed{background:#22c55e;color:#fff}
+.wizard-step-line{flex:1;height:2px;background:rgba(255,255,255,0.1)}
+.wizard-content{min-height:160px}
+.wizard-step-title{font-size:14px;font-weight:600;margin-bottom:8px;color:rgba(255,255,255,0.9)}
+.wizard-instructions{font-size:13px;line-height:1.6;color:rgba(255,255,255,0.7);white-space:pre-line;background:rgba(0,0,0,0.2);border-radius:8px;padding:12px 16px;margin-bottom:12px}
+.wizard-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.wizard-validation-error{color:#ef4444;font-size:12px;margin-top:4px}
+
 /* ─── Mobile Menu Button (hamburger) ──────────────────────── */
 .mobile-menu-btn{display:none;align-items:center;justify-content:center;width:44px;height:44px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-2);cursor:pointer;transition:all .2s;padding:0;flex-shrink:0}
 .mobile-menu-btn:hover{border-color:var(--border-h);color:var(--text)}
