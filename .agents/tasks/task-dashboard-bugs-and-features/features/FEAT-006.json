@@ -2,7 +2,7 @@
   "id": "FEAT-006",
   "type": "feat",
   "description": "AI Natural Language Data Queries - Enhance the AI chat to query connected data sources and render inline charts based on natural language questions",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "1. Enhance dashboard/ai-chat.js: Extend the detectIntent() function and response system to handle data queries. When a user asks 'Show me Shopify revenue for last week', the chat should: (a) detect this is a data query, (b) pull actual data from the DataStore (if live data is available) or demo data, (c) render an inline mini-chart in the chat response.",
     "2. Add inline chart rendering to the AI chat: Create a renderInlineChart(data, type) function that generates a small Chart.js canvas inside the chat message bubble. Support line charts for time-series data (revenue over time) and bar charts for comparisons.",
@@ -28,5 +28,5 @@
     "Run npm run build and confirm it succeeds"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 282 tests pass (4 new tests for the query endpoint). Build succeeds. The query endpoint is protected by requireAuth middleware like all other intelligence routes."
 }
