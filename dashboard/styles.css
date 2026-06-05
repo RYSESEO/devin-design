@@ -3916,6 +3916,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 /* ─── Diagnostics Panel ───────────────────────────────────── */
 .diag-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center}
+.diag-overlay[hidden]{display:none}
 .diag-drawer{background:var(--card-bg,#18181b);border:1px solid rgba(255,255,255,0.08);border-radius:16px;width:90%;max-width:560px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
 .diag-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid rgba(255,255,255,0.06)}
 .diag-header h3{font-size:1rem;font-weight:600;color:var(--text,#fafafa);margin:0}
