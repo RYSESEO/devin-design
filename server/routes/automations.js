@@ -667,6 +667,104 @@ async function runWorkflow(userId, workflowId) {
   return { result: executionResult };
 }
 
+// POST /api/automations/workflows/:id/preview (dry-run)
+router.post('/workflows/:id/preview', (req, res) => {
+  const userId = req.user.id;
+  const workflowId = req.params.id;
+
+  const workflow = db.prepare(
+    'SELECT * FROM automations WHERE id = ? AND user_id = ? AND deleted = 0'
+  ).get(workflowId, userId);
+
+  if (!workflow) {
+    return res.status(404).json({ error: 'Workflow not found' });
+  }
+
+  let actions;
+  try {
+    actions = JSON.parse(workflow.actions || '[]');
+  } catch {
+    actions = [];
+  }
+
+  let conditions;
+  try {
+    conditions = JSON.parse(workflow.conditions || '[]');
+  } catch {
+    conditions = [];
+  }
+
+  const triggerConfig = JSON.parse(workflow.trigger_config || '{}');
+
+  // Build trigger description
+  const triggerDescriptions = {
+    revenue_drop: 'Triggers when revenue drops below threshold',
+    new_order: 'Triggers when a new order is placed',
+    lead_score_change: 'Triggers when a lead score changes',
+    scheduled: 'Triggers on a scheduled interval',
+    product_velocity_low: 'Triggers when product velocity is low',
+    inventory_low: 'Triggers when inventory is running low',
+    cart_abandoned: 'Triggers when a cart is abandoned',
+    revenue_milestone: 'Triggers when a revenue milestone is reached',
+    order_total_above: 'Triggers when order total exceeds threshold'
+  };
+
+  const triggerDescription = triggerDescriptions[workflow.trigger_type] || 'Triggers when ' + workflow.trigger_type + ' fires';
+
+  // Generate preview for each action
+  const actionPreviews = actions.map(function(action) {
+    const actionType = action.type;
+    const config = action.config || {};
+    let previewText;
+    let exampleData = {};
+
+    if (actionType === 'notify' || actionType === 'send_notification') {
+      previewText = "Would send notification: '" + workflow.name + " triggered'";
+      exampleData = { channel: config.channel || '#general', message: workflow.name + ' automation fired' };
+    } else if (actionType === 'create_discount') {
+      const codeName = workflow.name.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+      previewText = "Would create discount code: AUTO_" + codeName + "_10OFF for 10% off";
+      exampleData = { code: 'AUTO_' + codeName + '_10OFF', discount: '10%' };
+    } else if (actionType === 'tag_customer') {
+      previewText = "Would tag customer with: '" + workflow.name + "_processed'";
+      exampleData = { tag: workflow.name + '_processed' };
+    } else if (actionType === 'send_email') {
+      previewText = "Would send email with subject: '" + workflow.name + " Alert'";
+      exampleData = { subject: workflow.name + ' Alert', to: config.to || 'team@example.com' };
+    } else if (actionType === 'pause_ads') {
+      previewText = "Would pause active ad campaigns";
+      exampleData = { action: 'pause', target: 'active campaigns' };
+    } else {
+      previewText = "Would execute action: " + actionType;
+      exampleData = { type: actionType };
+    }
+
+    return {
+      type: actionType,
+      preview_text: previewText,
+      example_data: exampleData
+    };
+  });
+
+  // Build conditions descriptions
+  const conditionDescriptions = conditions.map(function(c) {
+    return { description: (c.field || '') + ' ' + (c.operator || '') + ' ' + (c.value || '') };
+  });
+
+  const preview = {
+    workflow_name: workflow.name,
+    trigger: {
+      type: workflow.trigger_type,
+      description: triggerDescription
+    },
+    conditions: conditionDescriptions,
+    actions: actionPreviews,
+    summary: "This automation would execute " + actions.length + " action(s) when " + workflow.trigger_type + " fires."
+  };
+
+  res.json({ preview });
+});
+
 // POST /api/automations/execute/:id
 router.post('/execute/:id', async (req, res) => {
   const outcome = await runWorkflow(req.user.id, req.params.id);
