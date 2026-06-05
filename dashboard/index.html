@@ -250,6 +250,20 @@
     </div>
   </header>
 
+  <!-- Health Monitor Bar -->
+  <div class="health-bar" id="health-bar">
+    <div class="health-bar-items" id="health-bar-items">
+      <!-- Dynamically populated -->
+    </div>
+    <button class="health-bar-diag-btn" id="health-diag-btn" title="Run Diagnostics">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      Diagnostics
+    </button>
+    <button class="health-bar-toggle" id="health-bar-toggle" title="Toggle health bar">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  </div>
+
   <!-- Dashboard Tabs -->
   <nav class="dash-tabs-bar" id="dash-tabs-bar">
     <button class="dash-tab active" data-dtab="all">
@@ -1740,6 +1754,22 @@
     </div>
   </div>
 
+  <!-- ═══ Diagnostics Panel ═══ -->
+  <div class="diag-overlay" id="diag-panel" hidden>
+    <div class="diag-drawer">
+      <div class="diag-header">
+        <h3>Connection Diagnostics</h3>
+        <button class="diag-close-btn" id="diag-close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="diag-body" id="diag-body">
+        <!-- Dynamically populated with test results -->
+      </div>
+    </div>
+  </div>
+
+  <script src="health-monitor.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

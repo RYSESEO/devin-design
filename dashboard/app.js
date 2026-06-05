@@ -959,6 +959,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof initCrossPost === 'function') initCrossPost();
   if (typeof initCinematic === 'function') initCinematic();
   if (typeof initOnboarding === 'function') initOnboarding();
+  if (typeof initHealthMonitor === 'function') initHealthMonitor();
 
   // Initialize dashboard tabs and shareable links immediately (not lazily)
   if (typeof DashboardTabs !== 'undefined') DashboardTabs.init();

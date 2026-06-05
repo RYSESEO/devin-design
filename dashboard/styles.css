@@ -3868,3 +3868,52 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .embed-copy-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text-2,#a1a1aa);padding:6px 12px;border-radius:6px;font-size:.75rem;font-weight:600;cursor:pointer;margin-top:6px;transition:all .2s}
 .embed-copy-btn:hover{background:var(--accent,#a855f7);color:#fff;border-color:var(--accent,#a855f7)}
 
+/* ─── Health Monitor Bar ──────────────────────────────────── */
+.health-bar{display:flex;align-items:center;gap:12px;padding:4px 16px;background:rgba(20,20,30,0.6);border-bottom:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(8px);transition:all .3s ease}
+.health-bar-collapsed .health-bar-items,.health-bar-collapsed .health-bar-diag-btn{display:none}
+.health-bar-collapsed{padding:2px 16px}
+.health-bar-items{display:flex;align-items:center;gap:16px;flex:1}
+.health-item{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text-2,#a1a1aa)}
+.health-item-name{font-weight:500;color:var(--text,#fafafa)}
+.health-item-latency{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text-2,#a1a1aa)}
+.health-dot{width:8px;height:8px;border-radius:50%;background:#71717a;flex-shrink:0;transition:background .3s}
+.health-dot-ok{background:#22c55e;box-shadow:0 0 4px rgba(34,197,94,0.4)}
+.health-dot-warn{background:#eab308;box-shadow:0 0 4px rgba(234,179,8,0.4)}
+.health-dot-error{background:#ef4444;box-shadow:0 0 4px rgba(239,68,68,0.4)}
+.health-bar-toggle{background:none;border:none;color:var(--text-2,#a1a1aa);cursor:pointer;padding:4px;border-radius:4px;display:flex;align-items:center;transition:transform .3s}
+.health-bar-toggle:hover{color:var(--text,#fafafa)}
+.health-bar-collapsed .health-bar-toggle{transform:rotate(180deg)}
+.health-bar-diag-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--text-2,#a1a1aa);padding:3px 10px;border-radius:6px;font-size:.7rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all .2s}
+.health-bar-diag-btn:hover{background:var(--accent,#a855f7);color:#fff;border-color:var(--accent,#a855f7)}
+
+/* ─── Diagnostics Panel ───────────────────────────────────── */
+.diag-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center}
+.diag-drawer{background:var(--card-bg,#18181b);border:1px solid rgba(255,255,255,0.08);border-radius:16px;width:90%;max-width:560px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.diag-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.diag-header h3{font-size:1rem;font-weight:600;color:var(--text,#fafafa);margin:0}
+.diag-close-btn{background:none;border:none;color:var(--text-2,#a1a1aa);cursor:pointer;padding:4px;border-radius:6px;transition:color .2s}
+.diag-close-btn:hover{color:var(--text,#fafafa)}
+.diag-body{padding:16px 24px 24px;overflow-y:auto;flex:1}
+.diag-connector{margin-bottom:20px;padding:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px}
+.diag-connector-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.diag-connector-header h4{margin:0;font-size:.85rem;font-weight:600;color:var(--text,#fafafa)}
+.diag-status{font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:500;text-transform:capitalize}
+.diag-status-connected{background:rgba(34,197,94,0.15);color:#22c55e}
+.diag-status-disconnected,.diag-status-error{background:rgba(239,68,68,0.15);color:#ef4444}
+.diag-status-ok{background:rgba(34,197,94,0.15);color:#22c55e}
+.diag-status-warn,.diag-status-connecting{background:rgba(234,179,8,0.15);color:#eab308}
+.diag-steps{margin-bottom:10px}
+.diag-step{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:.78rem;color:var(--text-2,#a1a1aa)}
+.diag-step-icon{font-size:.9rem;width:16px;text-align:center;flex-shrink:0}
+.diag-step-pass{color:#22c55e}
+.diag-step-pass .diag-step-icon{color:#22c55e}
+.diag-step-fail{color:#ef4444}
+.diag-step-fail .diag-step-icon{color:#ef4444}
+.diag-step-running{color:var(--text-2,#a1a1aa)}
+.diag-step-running .diag-step-icon{animation:diag-spin 1s linear infinite}
+@keyframes diag-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.diag-step-detail{font-size:.7rem;color:var(--text-2,#a1a1aa);margin-left:4px;opacity:.7}
+.diag-run-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--text,#fafafa);padding:6px 14px;border-radius:6px;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s}
+.diag-run-btn:hover{background:var(--accent,#a855f7);border-color:var(--accent,#a855f7);color:#fff}
+.diag-run-btn:disabled{opacity:.5;cursor:not-allowed}
+

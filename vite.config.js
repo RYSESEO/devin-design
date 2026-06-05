@@ -34,7 +34,8 @@ const legacyScripts = [
   'templates.js',
   'benchmarks.js',
   'api-keys.js',
-  'embeds.js'
+  'embeds.js',
+  'health-monitor.js'
 ];
 
 function copyLegacyScripts() {
