@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-002",
+  "type": "fix",
+  "description": "Fix the Shopify connector credential race condition that causes connection test failure. In dashboard/connectors.js, the BaseConnector.connect() method calls window.saveConnectorConfig() (which is async and PUTs to /api/state/connectors) but does NOT await the result. It then immediately calls this.testConnection() which hits /api/proxy/shopify. The proxy route looks up credentials in the database - but they haven't been saved yet because saveConnectorConfig wasn't awaited. This race condition causes the Shopify connection to always fail on first attempt.",
+  "status": "completed",
+  "steps": [
+    "In dashboard/connectors.js, in the BaseConnector.connect() method (around line 148-156), change the saveConnectorConfig call to be awaited. Currently it does: window.saveConnectorConfig(serverId, serverCreds); Change it to: await window.saveConnectorConfig(serverId, serverCreds); This ensures the server has stored the credentials before testConnection() is called.",
+    "Also verify the saveConnectorConfig function in dashboard/lib/state-sync.js returns a promise (it already does since it uses async/await internally, but verify there's no issue with the return value).",
+    "Add error handling around the saveConnectorConfig call so that if it fails, we get a meaningful error message rather than a silent failure that leads to 'Connector not configured' from the proxy.",
+    "In the ShopifyConnector.testConnection() method, verify the request body sends the correct structure. The proxy expects to find credentials under the key 'connector_shopify' (from _getServerConnectorId() which returns 'shopify'). Confirm the endpoint '/shop.json' is correct for the Shopify Admin API test.",
+    "Test the fix by examining the flow: credentials are saved to server -> then testConnection is called -> proxy reads credentials from DB -> forwards to Shopify API."
+  ],
+  "acceptance_criteria": [
+    "The BaseConnector.connect() method awaits the saveConnectorConfig call before calling testConnection",
+    "If saveConnectorConfig fails, the connector shows an appropriate error message rather than a confusing 'Connection test failed'",
+    "The proxy route at /api/proxy/shopify can successfully find credentials that were just saved",
+    "npm test passes",
+    "npm run build succeeds"
+  ],
+  "verification": [
+    "npm test",
+    "npm run build"
+  ],
+  "blocked_reason": null,
+  "findings": "Fix was straightforward: added await before window.saveConnectorConfig() and wrapped in try/catch with early return on failure. All 275 tests pass, build succeeds. The saveConnectorConfig function in state-sync.js is already async and returns a promise correctly."
+}
