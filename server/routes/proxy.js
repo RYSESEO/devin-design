@@ -51,10 +51,21 @@ function getOAuthCredentials(userId, provider) {
  * Validate that the resolved URL stays within the expected origin.
  * Prevents SSRF by rejecting absolute URLs in the endpoint parameter
  * that would override the base URL.
+ *
+ * Ensures baseUrl has a trailing slash so that relative resolution
+ * preserves the full base path (e.g. /admin/api/2024-10/).
+ * Strips leading slashes from endpoint to prevent path-absolute
+ * resolution that would discard the base path.
  */
 function validateProxyUrl(endpoint, baseUrl) {
-  const resolved = new URL(endpoint, baseUrl);
-  const base = new URL(baseUrl);
+  // Reject protocol-relative URLs (e.g. //evil.com/path) which are SSRF vectors
+  if (endpoint.startsWith('//')) {
+    return null;
+  }
+  const normalizedBase = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
+  const normalizedEndpoint = endpoint.replace(/^\/+/, '');
+  const resolved = new URL(normalizedEndpoint, normalizedBase);
+  const base = new URL(normalizedBase);
   if (resolved.origin !== base.origin) {
     return null;
   }
