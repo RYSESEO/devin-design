@@ -71,6 +71,9 @@ function animateCounters() {
   document.querySelectorAll('.kpi-value').forEach(el => {
     const target = parseInt(el.dataset.count, 10);
     const prefix = el.dataset.prefix || '';
+    // Skip re-animation if displayed value already matches the target
+    const displayed = parseInt((el.textContent || '').replace(/[^0-9]/g, ''), 10);
+    if (displayed === target) return;
     const duration = 1600;
     const start = performance.now();
     function step(now) {
