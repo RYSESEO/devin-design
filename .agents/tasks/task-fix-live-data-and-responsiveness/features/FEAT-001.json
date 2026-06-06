@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "fix",
   "description": "Fix BUG 1 (live data never replaces demo data) and BUG 2 (dashboard unresponsive after connecting). These are tightly coupled: the chart rebuild is what causes the freeze, and the chart rebuild also never uses live data. Both fixes must land together.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Step 1 - Debounce ConnectorManager.notify() in dashboard/connectors.js (around line 769): Replace the simple forEach with a debounced version (use a 100ms debounce). The notify() method currently does `this._listeners.forEach(fn => fn())`. Wrap this so rapid-fire calls (e.g. connecting->connected->toggleDemoMode) coalesce into one notification. Add a private _notifyTimer field and clear/set it in notify().",
     "Step 2 - Debounce rebuildAllWidgets() in dashboard/connectors.js (around line 1111): Wrap the function body in a debounce so multiple calls within 200ms only execute once. The function is called from: wizard success (line 909), sync button (line 948), demo toggle change (line 1071), initConnectors (line 1163), and CMD_COMMANDS. All callers use the same global function name so wrapping the definition is sufficient.",
@@ -29,5 +29,5 @@
     "Manually inspect dashboard/health-monitor.js subscription to confirm debounce and in-flight guard"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 282 tests pass. Build succeeds. The Vite warnings about non-module scripts are pre-existing (dashboard JS is vanilla browser JS loaded without type=module). No HTML changes were needed."
 }
