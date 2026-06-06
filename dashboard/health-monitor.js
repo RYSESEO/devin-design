@@ -414,8 +414,27 @@
 
     // Subscribe to connector changes
     if (typeof ConnectorManager !== 'undefined') {
+      var _healthCheckInFlight = false;
+      var _healthDebounceTimer = null;
       ConnectorManager.subscribe(function() {
-        runHealthChecks();
+        clearTimeout(_healthDebounceTimer);
+        _healthDebounceTimer = setTimeout(function() {
+          if (_healthCheckInFlight) return;
+          _healthCheckInFlight = true;
+          var result;
+          try {
+            result = runHealthChecks();
+          } catch (e) {
+            _healthCheckInFlight = false;
+            return;
+          }
+          if (result && typeof result.then === 'function') {
+            result.then(function() { _healthCheckInFlight = false; })
+              .catch(function() { _healthCheckInFlight = false; });
+          } else {
+            _healthCheckInFlight = false;
+          }
+        }, 500);
       });
     }
 

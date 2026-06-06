@@ -718,6 +718,7 @@ class StripeConnector extends BaseConnector {
 const ConnectorManager = {
   connectors: [],
   _listeners: [],
+  _notifyTimer: null,
   demoMode: true,
 
   init() {
@@ -767,7 +768,10 @@ const ConnectorManager = {
   },
 
   notify() {
-    this._listeners.forEach(fn => fn());
+    clearTimeout(this._notifyTimer);
+    this._notifyTimer = setTimeout(() => {
+      this._listeners.forEach(fn => fn());
+    }, 100);
   }
 };
 
@@ -1108,14 +1112,20 @@ function updateDataSourceBadges() {
 }
 
 /* ─── Wire Live Data to Widgets ───────────────────────────── */
+var _rebuildTimer = null;
 function rebuildAllWidgets() {
-  // This function is called from app.js context where rebuildCharts exists
-  if (typeof rebuildCharts === 'function') {
-    const theme = document.documentElement.getAttribute('data-theme') || 'default';
-    const tc = THEME_CHART_COLORS[theme] || THEME_CHART_COLORS.default;
-    rebuildCharts(tc);
-  }
-  updateDataSourceBadges();
+  clearTimeout(_rebuildTimer);
+  _rebuildTimer = setTimeout(function() {
+    if (typeof rebuildCharts === 'function') {
+      const theme = document.documentElement.getAttribute('data-theme') || 'default';
+      const tc = THEME_CHART_COLORS[theme] || THEME_CHART_COLORS.default;
+      rebuildCharts(tc);
+    }
+    if (typeof animateCounters === 'function') {
+      animateCounters();
+    }
+    updateDataSourceBadges();
+  }, 200);
 }
 
 /* ─── Get Live or Demo Data ───────────────────────────────── */

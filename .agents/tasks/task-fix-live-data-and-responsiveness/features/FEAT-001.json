@@ -1,0 +1,33 @@
+{
+  "id": "FEAT-001",
+  "type": "fix",
+  "description": "Fix BUG 1 (live data never replaces demo data) and BUG 2 (dashboard unresponsive after connecting). These are tightly coupled: the chart rebuild is what causes the freeze, and the chart rebuild also never uses live data. Both fixes must land together.",
+  "status": "completed",
+  "steps": [
+    "Step 1 - Debounce ConnectorManager.notify() in dashboard/connectors.js (around line 769): Replace the simple forEach with a debounced version (use a 100ms debounce). The notify() method currently does `this._listeners.forEach(fn => fn())`. Wrap this so rapid-fire calls (e.g. connecting->connected->toggleDemoMode) coalesce into one notification. Add a private _notifyTimer field and clear/set it in notify().",
+    "Step 2 - Debounce rebuildAllWidgets() in dashboard/connectors.js (around line 1111): Wrap the function body in a debounce so multiple calls within 200ms only execute once. The function is called from: wizard success (line 909), sync button (line 948), demo toggle change (line 1071), initConnectors (line 1163), and CMD_COMMANDS. All callers use the same global function name so wrapping the definition is sufficient.",
+    "Step 3 - Debounce health monitor's ConnectorManager subscription in dashboard/health-monitor.js (around line 417): Currently `ConnectorManager.subscribe(function() { runHealthChecks(); })` runs health checks on every notify. Add a guard: if a health check is already in-flight (Promise not resolved), skip. Also debounce the subscription callback by 500ms so rapid notify calls don't queue multiple checks.",
+    "Step 4 - Make initShopifyChart() in dashboard/app.js (around line 176) consume live data from DataStore via getLiveData(): Before building the chart data arrays, check `getLiveData('shopify_orders_chart', null)`. If it returns non-null data with .labels, .orders, .revenue arrays, use those. Otherwise fall back to the existing hardcoded demo arrays. The getLiveData function is globally available (defined in connectors.js which loads before app.js).",
+    "Step 5 - Make animateCounters() in dashboard/app.js (around line 55) update the revenue KPI with live data: Before animating, check `getLiveData('shopify_revenue', null)`. If non-null, find the KPI element with class 'kpi-revenue' and update its `.kpi-value` element's data-count attribute to the live value. Also check `getLiveData('shopify_order_count', null)` for the orders KPI if one exists. This ensures the animated counter targets reflect real data.",
+    "Step 6 - Update rebuildAllWidgets() in dashboard/connectors.js to also call animateCounters() after rebuildCharts(), so KPI values refresh when data changes. Currently it only calls rebuildCharts() and updateDataSourceBadges().",
+    "Step 7 - Verify that index.html KPI card for revenue (around line 319) does not need structural changes - the data-count attribute will be dynamically updated by step 5. No HTML changes needed unless the element lacks a suitable selector (it has class 'kpi-revenue' on the article)."
+  ],
+  "acceptance_criteria": [
+    "When Shopify is connected and DataStore has shopify_revenue set to e.g. 150, the revenue KPI animates to $150 instead of $47,832",
+    "When Shopify is connected and DataStore has shopify_orders_chart data, the Shopify chart displays those values instead of hardcoded demo data",
+    "When in demo mode (no connector connected), the dashboard still shows the original demo values ($47,832 revenue, hardcoded chart data)",
+    "Connecting an integration does NOT cause the dashboard to freeze - multiple rapid notify() calls coalesce into a single rebuild",
+    "The health monitor does not fire runHealthChecks() on every rapid ConnectorManager.notify() - it debounces and skips if already in-flight",
+    "All 282 existing tests still pass",
+    "npm run build succeeds"
+  ],
+  "verification": [
+    "Run 'npm test' and confirm all 282 tests pass",
+    "Run 'npm run build' and confirm Vite build succeeds without errors",
+    "Manually inspect dashboard/app.js initShopifyChart() to confirm it calls getLiveData() and falls back to demo data",
+    "Manually inspect dashboard/connectors.js notify() to confirm debounce logic",
+    "Manually inspect dashboard/health-monitor.js subscription to confirm debounce and in-flight guard"
+  ],
+  "blocked_reason": null,
+  "findings": "All 282 tests pass. Build succeeds. The Vite warnings about non-module scripts are pre-existing (dashboard JS is vanilla browser JS loaded without type=module). No HTML changes were needed. Review issues #2 and #3 fixed: counter re-animation now skipped when displayed value matches target, and health-check in-flight guard resets on synchronous throw via try/catch."
+}
