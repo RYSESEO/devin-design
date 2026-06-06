@@ -51,6 +51,23 @@ function fadeGradient(ctx, color, h) {
 
 /* ─── KPI Counter Animation ──────────────────────────────── */
 function animateCounters() {
+  // Update revenue KPI with live data if available
+  if (typeof getLiveData === 'function') {
+    var liveRevenue = getLiveData('shopify_revenue', null);
+    if (liveRevenue !== null) {
+      var revenueCard = document.querySelector('.kpi-revenue .kpi-value');
+      if (revenueCard) {
+        revenueCard.setAttribute('data-count', liveRevenue);
+      }
+    }
+    var liveOrders = getLiveData('shopify_order_count', null);
+    if (liveOrders !== null) {
+      var ordersCard = document.querySelector('.kpi-orders .kpi-value');
+      if (ordersCard) {
+        ordersCard.setAttribute('data-count', liveOrders);
+      }
+    }
+  }
   document.querySelectorAll('.kpi-value').forEach(el => {
     const target = parseInt(el.dataset.count, 10);
     const prefix = el.dataset.prefix || '';
@@ -175,14 +192,23 @@ function initLeadSources() {
 /* ─── Shopify Chart (Bar + Line combo) ────────────────────── */
 function initShopifyChart() {
   const ctx = document.getElementById('chart-shopify').getContext('2d');
+  var liveChart = (typeof getLiveData === 'function') ? getLiveData('shopify_orders_chart', null) : null;
+  var chartLabels = DAYS_7;
+  var chartOrders = [42, 58, 65, 48, 72, 55, 61];
+  var chartRevenue = [4200, 5800, 7150, 4800, 8400, 6100, 6800];
+  if (liveChart && liveChart.labels && liveChart.orders && liveChart.revenue) {
+    chartLabels = liveChart.labels;
+    chartOrders = liveChart.orders;
+    chartRevenue = liveChart.revenue;
+  }
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: DAYS_7,
+      labels: chartLabels,
       datasets: [
         {
           label: 'Orders',
-          data: [42, 58, 65, 48, 72, 55, 61],
+          data: chartOrders,
           backgroundColor: gradient(ctx, COLORS.accent + 'cc', COLORS.accent2 + '66'),
           borderRadius: 6,
           borderSkipped: false,
@@ -192,7 +218,7 @@ function initShopifyChart() {
         {
           label: 'Revenue',
           type: 'line',
-          data: [4200, 5800, 7150, 4800, 8400, 6100, 6800],
+          data: chartRevenue,
           borderColor: COLORS.green,
           backgroundColor: 'transparent',
           tension: 0.4,
