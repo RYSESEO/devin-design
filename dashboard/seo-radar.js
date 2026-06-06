@@ -59,8 +59,19 @@ var SeoRadarPanel = {
     _seoFetch('/api/seo/opportunities').then(function(data) {
       self.renderTable(data);
     }).catch(function() {
+      if (typeof getLiveData === 'function') {
+        var scData = getLiveData('search_console', null);
+        if (scData && Array.isArray(scData)) {
+          self.renderTable({ opportunities: scData });
+          var wrap = document.getElementById('seo-table-wrap');
+          if (wrap) {
+            wrap.insertAdjacentHTML('afterbegin', '<div class="data-source-badge live">Source: Search Console</div>');
+          }
+          return;
+        }
+      }
       var body = document.getElementById('seo-table-wrap');
-      if (body) body.innerHTML = '<p class="seo-empty">No SEO data available.</p>';
+      if (body) body.innerHTML = '<div class="data-source-badge demo">Source: Demo</div><p class="seo-empty">No SEO data available.</p>';
     });
   },
 

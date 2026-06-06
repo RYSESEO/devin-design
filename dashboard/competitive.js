@@ -80,6 +80,7 @@ const CompetitiveIntel = (() => {
     const container = document.getElementById('ci-overview');
     if (!container) return;
     container.innerHTML = `
+      <div class="demo-data-banner">Showing sample competitive data. Real-time competitor tracking requires an enterprise API connection.</div>
       <div class="ci-grid">
         ${COMPETITORS.map(c => `
           <div class="ci-competitor-card">

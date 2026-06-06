@@ -235,11 +235,10 @@ const WidgetBuilder = (() => {
         nextId = 1;
         types.forEach(type => createWidget(type));
         renderCanvas();
-        // Switch to canvas tab
+        // Hide templates overlay to show the canvas with new widgets
+        const overlay = document.getElementById('wb-templates-overlay');
+        if (overlay) overlay.classList.remove('active');
         document.querySelectorAll('.wb-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.wb-pane').forEach(p => p.classList.remove('active'));
-        document.querySelector('.wb-tab[data-wbtab="canvas"]')?.classList.add('active');
-        document.querySelector('.wb-pane[data-wbpane="canvas"]')?.classList.add('active');
       });
     });
   }
@@ -273,14 +272,19 @@ const WidgetBuilder = (() => {
     if (btn) btn.addEventListener('click', toggle);
     if (closeBtn) closeBtn.addEventListener('click', close);
 
-    // Tab switching
-    document.querySelectorAll('.wb-tab').forEach(tab => {
+    // Templates tab toggles the templates overlay
+    document.querySelectorAll('.wb-tab[data-wbtab="templates"]').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.wb-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.wb-pane').forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        const pane = document.querySelector(`.wb-pane[data-wbpane="${tab.dataset.wbtab}"]`);
-        if (pane) pane.classList.add('active');
+        const overlay = document.getElementById('wb-templates-overlay');
+        if (!overlay) return;
+        const isActive = overlay.classList.contains('active');
+        if (isActive) {
+          overlay.classList.remove('active');
+          tab.classList.remove('active');
+        } else {
+          overlay.classList.add('active');
+          tab.classList.add('active');
+        }
       });
     });
 

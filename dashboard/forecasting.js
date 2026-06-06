@@ -87,9 +87,28 @@ var ForecastingPanel = {
       self.renderChart(data);
       self.renderTrend(data);
       self.renderSeasonality(data);
+      var wrap = document.getElementById('fc-chart-wrap');
+      if (wrap) wrap.insertAdjacentHTML('afterbegin', '<div class="data-source-badge live">Source: Forecast API</div>');
     }).catch(function(err) {
+      if (typeof getLiveData === 'function') {
+        var shopifyData = getLiveData('shopify_orders_chart', null);
+        if (shopifyData && Array.isArray(shopifyData) && shopifyData.length > 0) {
+          var predictions = shopifyData.map(function(item, idx) {
+            return { date: item.date || ('Day ' + (idx + 1)), predicted_quantity: item.count || item.orders || 0 };
+          });
+          var total = predictions.reduce(function(s, p) { return s + p.predicted_quantity; }, 0);
+          var avg = total / predictions.length;
+          var slope = predictions.length > 1 ? (predictions[predictions.length - 1].predicted_quantity - predictions[0].predicted_quantity) / predictions.length : 0;
+          self.renderChart({ predictions: predictions, trend: { slope: slope }, seasonality: {} });
+          self.renderTrend({ trend: { slope: slope } });
+          self.renderSeasonality({ seasonality: {} });
+          var wrap = document.getElementById('fc-chart-wrap');
+          if (wrap) wrap.insertAdjacentHTML('afterbegin', '<div class="data-source-badge demo">Source: Shopify orders (estimated)</div>');
+          return;
+        }
+      }
       var body = document.getElementById('fc-chart-wrap');
-      if (body) body.innerHTML = '<p class="fc-empty">No forecast data available. Click "Load Demo Data" to seed orders.</p>';
+      if (body) body.innerHTML = '<div class="data-source-badge demo">Source: Demo data</div><p class="fc-empty">No forecast data available. Click "Load Demo Data" to seed orders.</p>';
     });
   },
 

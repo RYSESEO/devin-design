@@ -106,6 +106,14 @@ var ReportsPanel = {
     var container = document.getElementById('rpt-list');
     if (!container) return;
 
+    var badgeHtml = '<span class="data-source-badge demo">Demo</span>';
+    if (typeof ConnectorManager !== 'undefined' && !ConnectorManager.demoMode && typeof getLiveData === 'function') {
+      var liveCheck = getLiveData('shopify_orders_chart', null);
+      if (liveCheck) {
+        badgeHtml = '<span class="data-source-badge live">Live</span>';
+      }
+    }
+
     if (self._reports.length === 0) {
       container.innerHTML = '<p class="rpt-empty">No reports generated yet.</p>';
       return;
@@ -114,7 +122,7 @@ var ReportsPanel = {
     container.innerHTML = self._reports.map(function(report) {
       return '<div class="rpt-item" data-report-id="' + report.id + '">' +
         '<div class="rpt-item-info">' +
-          '<span class="rpt-item-title">' + _rptEscape(report.title) + '</span>' +
+          '<span class="rpt-item-title">' + _rptEscape(report.title) + ' ' + badgeHtml + '</span>' +
           '<span class="rpt-item-date">' + new Date(report.created_at).toLocaleDateString() + '</span>' +
         '</div>' +
         '<button class="rpt-btn rpt-btn-view" data-action="view" data-id="' + report.id + '">View</button>' +

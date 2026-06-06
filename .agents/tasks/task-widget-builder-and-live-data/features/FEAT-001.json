@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-001",
+  "type": "fix",
+  "description": "Fix the Widget Builder layout so Canvas and Palette are visible side by side, enabling drag-and-drop functionality. Currently they are on separate tabs, making it impossible to drag widgets from the Palette onto the Canvas.",
+  "status": "completed",
+  "steps": [
+    "1. In dashboard/index.html (around line 1232-1270), restructure the widget builder panel HTML: Remove the 'Canvas' and 'Palette' tabs from the .wb-tabs div. Keep only a 'Templates' button/tab. Restructure .wb-body to have a side-by-side layout: a left sidebar containing the palette (#wb-palette) and a main area containing the canvas (#wb-canvas). The Templates view should be accessible via a button that shows/hides the templates overlay or replaces the palette temporarily.",
+    "2. In dashboard/styles.css (starting around line 2745), update the widget builder CSS: Change .wb-body to use CSS flexbox or grid with a left sidebar (palette, ~250px wide) and main content area (canvas). Remove .wb-pane display:none toggling for canvas/palette since they should always be visible. Keep .wb-pane logic only for templates if needed as an overlay. Ensure responsive behavior so on narrow screens the palette collapses or stacks.",
+    "3. In dashboard/widget-builder.js, update the init() function: Remove or modify the tab switching logic that hides canvas/palette. The tab click listeners should only handle the Templates button (to show/hide the templates overlay). Remove the tab switching from the renderTemplates() 'Use Template' handler (lines that switch to canvas tab) since the canvas is always visible. Ensure renderPalette() and renderCanvas() are both called on open() and both containers are always visible.",
+    "4. Verify drag-and-drop works: When the panel opens, both the palette (left sidebar) and canvas (main area) should be visible simultaneously. Dragging a palette item should trigger dragstart with the type, and dropping on the canvas should create the widget. Click-to-add should also still work."
+  ],
+  "acceptance_criteria": [
+    "The widget builder panel shows palette and canvas side by side when opened",
+    "Dragging a widget type from the palette to the canvas creates the widget on the canvas",
+    "Clicking a palette item still adds it to the canvas (existing functionality preserved)",
+    "Templates are accessible via a button and when used, widgets appear on the always-visible canvas",
+    "npm run build completes without errors",
+    "npm test passes"
+  ],
+  "verification": [
+    "Run npm run build and confirm no build errors",
+    "Run npm test and confirm all tests pass"
+  ],
+  "blocked_reason": null,
+  "findings": "Implementation completed cleanly. Build produces expected warnings about non-module scripts (pre-existing behavior). All 282 tests pass. The .wb-pane CSS rules were kept for backward compatibility but are no longer used by the widget builder panel directly."
+}

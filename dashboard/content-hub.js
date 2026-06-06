@@ -225,7 +225,13 @@ const ContentPerformance = {
     const el = document.getElementById('perf-table');
     if (!el) return;
     const sorted = [...this.data].sort((a, b) => (a[this.sortKey] > b[this.sortKey] ? 1 : -1) * this.sortDir);
-    el.innerHTML = `
+    var bannerHtml = '';
+    if (typeof getLiveData === 'function' && getLiveData('content_views', null)) {
+      bannerHtml = '<div class="data-source-badge live">Powered by Google Analytics</div>';
+    } else {
+      bannerHtml = '<div class="demo-data-banner">Demo data - Connect Google Analytics for real content performance</div>';
+    }
+    el.innerHTML = bannerHtml + `
       <div class="perf-header">
         <span class="perf-col perf-title-col">Content</span>
         <span class="perf-col perf-sortable" data-sort="views">Views</span>

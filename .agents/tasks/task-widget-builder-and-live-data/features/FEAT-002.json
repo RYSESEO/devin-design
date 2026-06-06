@@ -1,0 +1,33 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Wire dashboard panels to use real data via getLiveData() pattern when connectors are active, falling back gracefully to demo data. For panels that require external APIs without connectors (social media, competitive intel), show a 'Connect X to see real data' message instead of silently displaying demo data as if it were real.",
+  "status": "completed",
+  "steps": [
+    "1. In dashboard/forecasting.js: Update the ForecastingPanel.loadDemand() method to first check if Shopify data is available via getLiveData('shopify_orders_chart', null). If live Shopify order data is available, use it to generate the forecast predictions locally (calculate trend from the order counts) instead of only relying on the /api/forecasting/demand endpoint. Keep the API call as primary, but if it fails AND live Shopify data is available, generate a simple forecast from that data. Show a data source indicator (e.g., 'Source: Shopify' vs 'Source: Demo data').",
+    "2. In dashboard/reports.js: Update ReportsPanel to check if ConnectorManager.demoMode is active. If the report generation API call fails or returns empty data, and live data is available from DataStore, include that live data in the report view. Add a small badge or indicator showing whether the report contains live or demo data. When generating a report, if Shopify data is available, show revenue/orders from DataStore in the report viewer.",
+    "3. In dashboard/social-dashboard.js: Add a connection status banner at the top of the social panel. Since there's no social media connector in ConnectorManager, show a message like 'Demo Data - Connect your social accounts to see real metrics' prominently at the top of the panel when it opens. Add this as a banner div that is conditionally rendered in the renderOverview() method and other render methods. The banner should have a class for styling and be visually distinct (e.g., amber/yellow background).",
+    "4. In dashboard/competitive.js: Add a similar demo data indicator to the CompetitiveIntel panel. In the open() function, prepend a banner to the panel that says 'Showing sample competitive data. Real-time competitor tracking requires an enterprise API connection.' Style it consistently with the social panel banner.",
+    "5. In dashboard/content-hub.js: The ContentPerformance section uses hardcoded data. Update ContentPerformance.render() to check getLiveData('content_views', null) for GA4 data. If GA4 is connected, show a note saying 'Powered by Google Analytics' next to the performance table. If not connected, show 'Demo data - Connect Google Analytics for real content performance'.",
+    "6. In dashboard/seo-radar.js: Add a fallback in SeoRadarPanel.loadOpportunities() - if the API call fails and Search Console data is available via getLiveData('search_console', null), render that data. Also add a data source indicator showing whether data is from 'Search Console API' or 'Demo'.",
+    "7. In dashboard/benchmarks.js: The benchmarks panel already uses server API calls correctly. Add a small note in the renderGauges and renderStats functions that shows data source (e.g., 'Community data' vs 'Your submitted data'). No major changes needed here.",
+    "8. In dashboard/styles.css: Add CSS for the demo-data-banner class used by the banners added in steps 3-6. Style: amber/yellow background (rgba(234,179,8,0.1)), border (1px solid rgba(234,179,8,0.3)), border-radius 8px, padding 10px 14px, font-size 12px, color #eab308, margin-bottom 14px. Also add a .data-source-badge class for the small source indicators."
+  ],
+  "acceptance_criteria": [
+    "Social Dashboard shows a visible demo data banner when opened",
+    "Competitive Intelligence panel shows a demo data indicator",
+    "Content Hub performance section indicates whether data is from GA4 or demo",
+    "SEO Radar falls back to Search Console DataStore data when API fails",
+    "Forecasting panel can use Shopify DataStore data as a fallback for predictions",
+    "Reports panel indicates data source (live vs demo)",
+    "All banners are styled consistently with amber/yellow theme",
+    "npm run build completes without errors",
+    "npm test passes"
+  ],
+  "verification": [
+    "Run npm run build and confirm no build errors",
+    "Run npm test and confirm all tests pass"
+  ],
+  "blocked_reason": null,
+  "findings": "All changes implemented cleanly. Build and all 282 tests pass. The non-module script warnings during build are pre-existing."
+}
