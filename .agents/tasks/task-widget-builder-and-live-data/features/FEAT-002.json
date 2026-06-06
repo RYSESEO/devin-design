@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Wire dashboard panels to use real data via getLiveData() pattern when connectors are active, falling back gracefully to demo data. For panels that require external APIs without connectors (social media, competitive intel), show a 'Connect X to see real data' message instead of silently displaying demo data as if it were real.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "1. In dashboard/forecasting.js: Update the ForecastingPanel.loadDemand() method to first check if Shopify data is available via getLiveData('shopify_orders_chart', null). If live Shopify order data is available, use it to generate the forecast predictions locally (calculate trend from the order counts) instead of only relying on the /api/forecasting/demand endpoint. Keep the API call as primary, but if it fails AND live Shopify data is available, generate a simple forecast from that data. Show a data source indicator (e.g., 'Source: Shopify' vs 'Source: Demo data').",
     "2. In dashboard/reports.js: Update ReportsPanel to check if ConnectorManager.demoMode is active. If the report generation API call fails or returns empty data, and live data is available from DataStore, include that live data in the report view. Add a small badge or indicator showing whether the report contains live or demo data. When generating a report, if Shopify data is available, show revenue/orders from DataStore in the report viewer.",
@@ -29,5 +29,5 @@
     "Run npm test and confirm all tests pass"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All changes implemented cleanly. Build and all 282 tests pass. The non-module script warnings during build are pre-existing."
 }
