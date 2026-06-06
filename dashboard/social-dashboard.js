@@ -5,6 +5,8 @@
              top posts, posting schedule, audience demographics
    ═══════════════════════════════════════════════════════════════ */
 
+const SOCIAL_DEMO_BANNER = '<div class="demo-data-banner">Demo Data - Connect your social accounts to see real metrics</div>';
+
 const SocialDashboard = {
   isOpen: false,
   activeTab: 'overview',
@@ -96,7 +98,7 @@ const SocialDashboard = {
     const platforms = Object.entries(this.platforms);
 
     el.innerHTML = `
-      <div class="demo-data-banner">Demo Data - Connect your social accounts to see real metrics</div>
+      ${SOCIAL_DEMO_BANNER}
       <div class="soc-kpi-row">
         <div class="soc-kpi-card"><div class="soc-kpi-val">${this.formatNum(kpi.totalFollowers)}</div><div class="soc-kpi-label">Total Followers</div></div>
         <div class="soc-kpi-card"><div class="soc-kpi-val">${kpi.avgEngagement}%</div><div class="soc-kpi-label">Avg Engagement</div></div>
@@ -129,7 +131,7 @@ const SocialDashboard = {
     const labels = ['7d ago', '6d', '5d', '4d', '3d', '2d', '1d', 'Today'];
     const canvas = document.getElementById('social-growth-chart');
     if (!canvas) {
-      el.innerHTML = `<div class="demo-data-banner">Demo Data - Connect your social accounts to see real metrics</div><canvas id="social-growth-chart" height="240"></canvas>`;
+      el.innerHTML = `${SOCIAL_DEMO_BANNER}<canvas id="social-growth-chart" height="240"></canvas>`;
     }
     const ctx = document.getElementById('social-growth-chart');
     if (!ctx) return;
@@ -168,7 +170,7 @@ const SocialDashboard = {
       p.topPosts.forEach(post => allPosts.push({ ...post, platform: p.name, color: p.color, icon: p.icon }));
     });
     allPosts.sort((a, b) => (b.likes + b.shares) - (a.likes + a.shares));
-    el.innerHTML = '<div class="demo-data-banner">Demo Data - Connect your social accounts to see real metrics</div>' + allPosts.slice(0, 8).map(p => `
+    el.innerHTML = SOCIAL_DEMO_BANNER + allPosts.slice(0, 8).map(p => `
       <div class="soc-post-card">
         <div class="soc-post-head">
           <span class="soc-post-plat" style="background:${p.color}">${p.icon.toUpperCase()}</span>
@@ -206,7 +208,7 @@ const SocialDashboard = {
       ]
     };
     el.innerHTML = `
-      <div class="demo-data-banner">Demo Data - Connect your social accounts to see real metrics</div>
+      ${SOCIAL_DEMO_BANNER}
       <div class="soc-demo-grid">
         <div class="soc-demo-section">
           <h5 class="soc-demo-title">Age Distribution</h5>

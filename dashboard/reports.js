@@ -106,10 +106,13 @@ var ReportsPanel = {
     var container = document.getElementById('rpt-list');
     if (!container) return;
 
-    var isDemoMode = typeof ConnectorManager !== 'undefined' && ConnectorManager.demoMode;
-    var badgeHtml = isDemoMode
-      ? '<span class="data-source-badge demo">Demo</span>'
-      : '<span class="data-source-badge live">Live</span>';
+    var badgeHtml = '<span class="data-source-badge demo">Demo</span>';
+    if (typeof ConnectorManager !== 'undefined' && !ConnectorManager.demoMode && typeof getLiveData === 'function') {
+      var liveCheck = getLiveData('shopify_orders_chart', null);
+      if (liveCheck) {
+        badgeHtml = '<span class="data-source-badge live">Live</span>';
+      }
+    }
 
     if (self._reports.length === 0) {
       container.innerHTML = '<p class="rpt-empty">No reports generated yet.</p>';

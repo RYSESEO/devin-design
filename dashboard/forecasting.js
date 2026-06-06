@@ -103,7 +103,7 @@ var ForecastingPanel = {
           self.renderTrend({ trend: { slope: slope } });
           self.renderSeasonality({ seasonality: {} });
           var wrap = document.getElementById('fc-chart-wrap');
-          if (wrap) wrap.insertAdjacentHTML('afterbegin', '<div class="data-source-badge live">Source: Shopify</div>');
+          if (wrap) wrap.insertAdjacentHTML('afterbegin', '<div class="data-source-badge demo">Source: Shopify orders (estimated)</div>');
           return;
         }
       }
