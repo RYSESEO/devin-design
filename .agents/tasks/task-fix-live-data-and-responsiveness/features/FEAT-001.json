@@ -29,5 +29,5 @@
     "Manually inspect dashboard/health-monitor.js subscription to confirm debounce and in-flight guard"
   ],
   "blocked_reason": null,
-  "findings": "All 282 tests pass. Build succeeds. The Vite warnings about non-module scripts are pre-existing (dashboard JS is vanilla browser JS loaded without type=module). No HTML changes were needed."
+  "findings": "All 282 tests pass. Build succeeds. The Vite warnings about non-module scripts are pre-existing (dashboard JS is vanilla browser JS loaded without type=module). No HTML changes were needed. Review issues #2 and #3 fixed: counter re-animation now skipped when displayed value matches target, and health-check in-flight guard resets on synchronous throw via try/catch."
 }
