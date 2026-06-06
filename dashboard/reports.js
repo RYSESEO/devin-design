@@ -106,6 +106,11 @@ var ReportsPanel = {
     var container = document.getElementById('rpt-list');
     if (!container) return;
 
+    var isDemoMode = typeof ConnectorManager !== 'undefined' && ConnectorManager.demoMode;
+    var badgeHtml = isDemoMode
+      ? '<span class="data-source-badge demo">Demo</span>'
+      : '<span class="data-source-badge live">Live</span>';
+
     if (self._reports.length === 0) {
       container.innerHTML = '<p class="rpt-empty">No reports generated yet.</p>';
       return;
@@ -114,7 +119,7 @@ var ReportsPanel = {
     container.innerHTML = self._reports.map(function(report) {
       return '<div class="rpt-item" data-report-id="' + report.id + '">' +
         '<div class="rpt-item-info">' +
-          '<span class="rpt-item-title">' + _rptEscape(report.title) + '</span>' +
+          '<span class="rpt-item-title">' + _rptEscape(report.title) + ' ' + badgeHtml + '</span>' +
           '<span class="rpt-item-date">' + new Date(report.created_at).toLocaleDateString() + '</span>' +
         '</div>' +
         '<button class="rpt-btn rpt-btn-view" data-action="view" data-id="' + report.id + '">View</button>' +

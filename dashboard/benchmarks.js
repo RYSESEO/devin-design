@@ -99,7 +99,7 @@ var BenchmarksPanel = {
       return;
     }
 
-    var html = '<div class="bench-gauge-grid">';
+    var html = '<div class="data-source-badge live" style="margin-bottom:10px">Your metrics vs community</div><div class="bench-gauge-grid">';
     benchmarks.forEach(function(b) {
       var percentile = b.percentile || 50;
       var topPercent = 100 - percentile;
@@ -135,7 +135,7 @@ var BenchmarksPanel = {
       return;
     }
 
-    var html = '<div class="bench-stats-grid">';
+    var html = '<div class="data-source-badge live" style="margin-bottom:10px">Community averages</div><div class="bench-stats-grid">';
     stats.forEach(function(s) {
       html += '<div class="bench-stat-card">' +
         '<span class="bench-stat-metric">' + _benchEscape(s.metric) + '</span>' +
