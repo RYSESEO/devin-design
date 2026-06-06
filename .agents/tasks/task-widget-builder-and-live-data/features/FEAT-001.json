@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "fix",
   "description": "Fix the Widget Builder layout so Canvas and Palette are visible side by side, enabling drag-and-drop functionality. Currently they are on separate tabs, making it impossible to drag widgets from the Palette onto the Canvas.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "1. In dashboard/index.html (around line 1232-1270), restructure the widget builder panel HTML: Remove the 'Canvas' and 'Palette' tabs from the .wb-tabs div. Keep only a 'Templates' button/tab. Restructure .wb-body to have a side-by-side layout: a left sidebar containing the palette (#wb-palette) and a main area containing the canvas (#wb-canvas). The Templates view should be accessible via a button that shows/hides the templates overlay or replaces the palette temporarily.",
     "2. In dashboard/styles.css (starting around line 2745), update the widget builder CSS: Change .wb-body to use CSS flexbox or grid with a left sidebar (palette, ~250px wide) and main content area (canvas). Remove .wb-pane display:none toggling for canvas/palette since they should always be visible. Keep .wb-pane logic only for templates if needed as an overlay. Ensure responsive behavior so on narrow screens the palette collapses or stacks.",
@@ -22,5 +22,5 @@
     "Run npm test and confirm all tests pass"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Implementation completed cleanly. Build produces expected warnings about non-module scripts (pre-existing behavior). All 282 tests pass. The .wb-pane CSS rules were kept for backward compatibility but are no longer used by the widget builder panel directly."
 }
