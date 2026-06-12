@@ -9,6 +9,7 @@ Real-time analytics dashboard for Shopify, GitHub, and marketing automation. Bui
 - **KPI Dashboard** - Revenue, agent sessions, leads, and content views with animated counters and sparklines
 - **Shopify Integration** - Orders, revenue, and top products via Admin API or OAuth
 - **GitHub Integration** - Activity feed, commit heatmap, CI/CD status via OAuth or personal token
+- **Google Integration** - GA4 traffic and Search Console queries via Google OAuth
 - **4 Theme Modes** - Default dark, Liquid Glass, Brutalist, Cyberpunk
 - **Real-time Updates** - WebSocket-powered live data streaming with reconnection
 - **Dashboard Tabs** - All Metrics, Marketing, Engineering, Executive filtered views
@@ -73,6 +74,8 @@ Key variables:
 | `SHOPIFY_CLIENT_SECRET` | Shopify app client secret (for OAuth) |
 | `GITHUB_CLIENT_ID` | GitHub OAuth app client ID |
 | `GITHUB_CLIENT_SECRET` | GitHub OAuth app client secret |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID (GA4 + Search Console) |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `APP_URL` | Base URL for OAuth redirects (auto-detected if not set) |
 
 ### Development
@@ -155,6 +158,7 @@ All API routes are under `/api/`. Authentication via `Authorization: Bearer <tok
 | `POST /api/auth/refresh` | Refresh JWT |
 | `GET /api/oauth/shopify/install` | Initiate Shopify OAuth |
 | `GET /api/oauth/github/authorize` | Initiate GitHub OAuth |
+| `GET /api/oauth/google/authorize` | Initiate Google OAuth (GA4 + Search Console) |
 | `POST /api/proxy/shopify` | Forward requests to Shopify Admin API |
 | `POST /api/proxy/github` | Forward requests to GitHub API |
 | `GET /api/state` | Load saved dashboard state |

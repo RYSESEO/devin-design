@@ -477,19 +477,28 @@ class GA4Connector extends BaseConnector {
   constructor() {
     super('ga4', 'Google Analytics 4', '📊', '#f9ab00', [
       { key: 'propertyId', label: 'GA4 Property ID', type: 'text', placeholder: '123456789' },
-      { key: 'apiKey', label: 'API Key', type: 'password', placeholder: 'AIza...' },
+      { key: 'apiKey', label: 'OAuth Access Token', type: 'password', placeholder: 'ya29...' },
     ]);
   }
 
   getWizardSteps() {
+    if (ConnectorManager.googleOAuth) {
+      return [
+        {
+          title: 'Finish Connecting Google Analytics',
+          instructions: 'Your Google account is connected via OAuth.\n\n1. Go to Google Analytics > Admin (gear icon)\n2. In the Property column, find your numeric Property ID\n3. Enter it below',
+          fields: ['propertyId']
+        }
+      ];
+    }
     return [
       {
         title: 'Find Your Property ID',
         instructions: '1. Go to Google Analytics\n2. Click Admin (gear icon)\n3. In the Property column, find your Property ID (numeric)'
       },
       {
-        title: 'Get an API Key',
-        instructions: '1. Go to Google Cloud Console\n2. APIs & Services > Credentials\n3. Create an API key or use an existing one'
+        title: 'Get an Access Token',
+        instructions: 'Recommended: use the "Connect with Google" button above instead.\n\nAlternatively, paste an OAuth access token with the analytics.readonly scope (note: manually issued tokens expire after 1 hour).'
       },
       {
         title: 'Connect',
@@ -499,7 +508,14 @@ class GA4Connector extends BaseConnector {
   }
 
   async testConnection(creds) {
-    if (!creds.propertyId || !creds.apiKey) return false;
+    if (!creds.propertyId) {
+      this.lastError = 'GA4 property ID is required';
+      return false;
+    }
+    if (!creds.apiKey && !ConnectorManager.googleOAuth) {
+      this.lastError = 'Connect with Google OAuth or provide an access token';
+      return false;
+    }
     try {
       const resp = await fetch('/api/proxy/analytics', {
         method: 'POST',
@@ -593,11 +609,20 @@ class SearchConsoleConnector extends BaseConnector {
   constructor() {
     super('gsc', 'Search Console', '🔍', '#4285f4', [
       { key: 'siteUrl', label: 'Site URL', type: 'text', placeholder: 'https://example.com' },
-      { key: 'apiKey', label: 'API Key', type: 'password', placeholder: 'AIza...' },
+      { key: 'apiKey', label: 'OAuth Access Token', type: 'password', placeholder: 'ya29...' },
     ]);
   }
 
   getWizardSteps() {
+    if (ConnectorManager.googleOAuth) {
+      return [
+        {
+          title: 'Finish Connecting Search Console',
+          instructions: 'Your Google account is connected via OAuth.\n\nEnter the site URL exactly as it appears in Search Console (e.g. https://example.com or sc-domain:example.com)',
+          fields: ['siteUrl']
+        }
+      ];
+    }
     return [
       {
         title: 'Verify Your Site',
@@ -605,7 +630,7 @@ class SearchConsoleConnector extends BaseConnector {
       },
       {
         title: 'Get API Access',
-        instructions: '1. Go to Google Cloud Console\n2. Enable Search Console API\n3. Create an API key under Credentials'
+        instructions: 'Recommended: use the "Connect with Google" button above instead.\n\nAlternatively, paste an OAuth access token with the webmasters.readonly scope (note: manually issued tokens expire after 1 hour).'
       },
       {
         title: 'Connect',
@@ -615,7 +640,14 @@ class SearchConsoleConnector extends BaseConnector {
   }
 
   async testConnection(creds) {
-    if (!creds.siteUrl || !creds.apiKey) return false;
+    if (!creds.siteUrl) {
+      this.lastError = 'Site URL is required';
+      return false;
+    }
+    if (!creds.apiKey && !ConnectorManager.googleOAuth) {
+      this.lastError = 'Connect with Google OAuth or provide an access token';
+      return false;
+    }
     try {
       const resp = await fetch('/api/proxy/search-console', {
         method: 'POST',
@@ -754,6 +786,9 @@ const ConnectorManager = {
   _listeners: [],
   _notifyTimer: null,
   demoMode: true,
+  // True once the user has connected a Google account via OAuth
+  // (shared by the GA4 and Search Console connectors)
+  googleOAuth: false,
 
   init() {
     this.connectors = [
@@ -867,6 +902,18 @@ const SettingsPanel = {
               <span class="conn-oauth-divider">or follow the steps below:</span>
             </div>
           ` : ''}
+          ${(c.id === 'ga4' || c.id === 'gsc') ? `
+            <div class="conn-oauth-section">
+              ${ConnectorManager.googleOAuth
+                ? `<span class="conn-oauth-divider">Google account connected.</span>
+                   <button class="conn-btn conn-btn-disconnect" data-action="google-oauth-disconnect" data-id="${c.id}">Disconnect Google</button>`
+                : `<button class="conn-btn conn-btn-oauth" data-action="oauth" data-id="${c.id}">
+                    Connect with Google
+                  </button>
+                  <span class="conn-oauth-divider">or follow the steps below:</span>`
+              }
+            </div>
+          ` : ''}
           <div class="wizard-steps-indicator">
             ${steps.map((_, i) => `<span class="wizard-step-dot${i === 0 ? ' active' : ''}" data-step="${i + 1}">${i + 1}</span>${i < totalSteps - 1 ? '<span class="wizard-step-line"></span>' : ''}`).join('')}
           </div>
@@ -913,8 +960,14 @@ const SettingsPanel = {
           initiateShopifyOAuth();
         } else if (id === 'github') {
           initiateGitHubOAuth();
+        } else if (id === 'ga4' || id === 'gsc') {
+          initiateGoogleOAuth();
         }
       });
+    });
+
+    document.querySelectorAll('[data-action="google-oauth-disconnect"]').forEach(btn => {
+      btn.addEventListener('click', () => disconnectGoogleOAuth());
     });
 
     document.querySelectorAll('.wizard-next').forEach(btn => {
@@ -1287,6 +1340,11 @@ async function checkOAuthStatus() {
 
     const fetchPromises = [];
 
+    if (data.google && data.google.connected) {
+      ConnectorManager.googleOAuth = true;
+      ConnectorManager.notify();
+    }
+
     if (data.shopify && data.shopify.connected) {
       const shopify = ConnectorManager.get('shopify');
       if (shopify && shopify.status !== 'connected') {
@@ -1339,6 +1397,12 @@ function handleOAuthRedirect() {
         github.lastSync = Date.now();
         ConnectorManager.notify();
       }
+    } else if (oauth === 'google') {
+      // Google OAuth grants API access, but GA4/Search Console still need
+      // their property ID / site URL - reopen settings to finish setup
+      ConnectorManager.googleOAuth = true;
+      ConnectorManager.notify();
+      SettingsPanel.open();
     }
     updateDataSourceBadges();
     // Clean up URL params
@@ -1363,6 +1427,38 @@ function initiateGitHubOAuth() {
   const token = (typeof window.getToken === 'function') ? window.getToken() : null;
   if (!token) { alert('Please sign in first'); return; }
   window.location.href = `/api/oauth/github/authorize?token=${encodeURIComponent(token)}`;
+}
+
+function initiateGoogleOAuth() {
+  const token = (typeof window.getToken === 'function') ? window.getToken() : null;
+  if (!token) { alert('Please sign in first'); return; }
+  window.location.href = `/api/oauth/google/authorize?token=${encodeURIComponent(token)}`;
+}
+
+function disconnectGoogleOAuth() {
+  const token = (typeof window.getToken === 'function') ? window.getToken() : null;
+  if (!token) return;
+
+  fetch('/api/oauth/google/disconnect', {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  })
+    .then(r => r.ok ? r.json() : null)
+    .then(async data => {
+      if (data && data.success) {
+        ConnectorManager.googleOAuth = false;
+        // Google-backed connectors can no longer fetch - disconnect them too
+        for (const id of ['ga4', 'gsc']) {
+          const connector = ConnectorManager.get(id);
+          if (connector && connector.status === 'connected') {
+            await connector.disconnect();
+          }
+        }
+        updateDataSourceBadges();
+        SettingsPanel.render();
+      }
+    })
+    .catch(() => {});
 }
 
 function disconnectOAuth(provider) {

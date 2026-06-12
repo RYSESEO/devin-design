@@ -35,7 +35,7 @@ function requireAuthOrQueryToken(req, res, next) {
 // Most OAuth routes require authentication (callbacks handle auth differently)
 router.use((req, res, next) => {
   // Callback routes authenticate via the state nonce (user_id stored in oauth_states)
-  const isCallback = req.path === '/shopify/callback' || req.path === '/github/callback';
+  const isCallback = req.path === '/shopify/callback' || req.path === '/github/callback' || req.path === '/google/callback';
   if (isCallback) return next();
   return requireAuthOrQueryToken(req, res, next);
 });
@@ -45,6 +45,11 @@ const SHOPIFY_CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET || '';
 const SHOPIFY_SCOPES = process.env.SHOPIFY_SCOPES || 'read_products,read_orders';
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID || '';
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET || '';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+// Read-only access to GA4 Data API and Search Console
+const GOOGLE_SCOPES = process.env.GOOGLE_SCOPES ||
+  'https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly';
 
 /**
  * Resolve the application base URL.
@@ -279,6 +284,168 @@ router.get('/github/callback', async (req, res) => {
   }
 });
 
+/**
+ * Persist Google OAuth tokens (encrypted) for a user.
+ * refreshToken is only updated when Google supplies one (first consent).
+ */
+function storeGoogleTokens(userId, accessToken, refreshToken, expiresIn) {
+  const upsert = db.prepare(
+    'INSERT OR REPLACE INTO user_state (user_id, key, value, updated_at) VALUES (?, ?, ?, datetime(\'now\'))'
+  );
+  upsert.run(userId, 'oauth_google_token', JSON.stringify(encrypt(accessToken)));
+  if (refreshToken) {
+    upsert.run(userId, 'oauth_google_refresh', JSON.stringify(encrypt(refreshToken)));
+  }
+  const expiresAt = Date.now() + (Number(expiresIn) > 0 ? Number(expiresIn) : 3600) * 1000;
+  upsert.run(userId, 'oauth_google_expires', String(expiresAt));
+}
+
+/**
+ * Return a valid Google access token for the user, refreshing it via the
+ * stored refresh token when expired. Returns null when the user has not
+ * connected Google OAuth (or refresh fails).
+ */
+export async function getGoogleAccessToken(userId) {
+  const tokenRow = db.prepare(
+    'SELECT value FROM user_state WHERE user_id = ? AND key = ?'
+  ).get(userId, 'oauth_google_token');
+  if (!tokenRow) return null;
+
+  const readToken = (row) => {
+    try { return decrypt(JSON.parse(row.value)); } catch { return null; }
+  };
+
+  const expiresRow = db.prepare(
+    'SELECT value FROM user_state WHERE user_id = ? AND key = ?'
+  ).get(userId, 'oauth_google_expires');
+  const expiresAt = expiresRow ? parseInt(expiresRow.value, 10) : 0;
+
+  // 60s clock-skew margin before treating the token as expired
+  if (expiresAt && Date.now() < expiresAt - 60000) {
+    return readToken(tokenRow);
+  }
+
+  const refreshRow = db.prepare(
+    'SELECT value FROM user_state WHERE user_id = ? AND key = ?'
+  ).get(userId, 'oauth_google_refresh');
+  if (!refreshRow) {
+    // No refresh token stored - return the access token and let Google decide
+    return readToken(tokenRow);
+  }
+  const refreshToken = readToken(refreshRow);
+  if (!refreshToken) return null;
+
+  try {
+    const resp = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token'
+      }).toString()
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (!data.access_token) return null;
+    storeGoogleTokens(userId, data.access_token, data.refresh_token || null, data.expires_in);
+    return data.access_token;
+  } catch {
+    return null;
+  }
+}
+
+// GET /api/oauth/google/authorize - Initiate Google OAuth (GA4 + Search Console)
+router.get('/google/authorize', (req, res) => {
+  const state = generateState();
+
+  // Store state in oauth_states table with 10-minute expiry
+  db.prepare(
+    "INSERT INTO oauth_states (user_id, provider, state, expires_at) VALUES (?, ?, ?, datetime('now', '+10 minutes'))"
+  ).run(req.user.id, 'google', state);
+
+  const redirectUri = `${getAppUrl(req)}/api/oauth/google/callback`;
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: GOOGLE_SCOPES,
+    // Required to obtain a refresh token so the dashboard keeps working
+    // after the 1-hour access token expires
+    access_type: 'offline',
+    prompt: 'consent',
+    state
+  });
+
+  res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+});
+
+// GET /api/oauth/google/callback - Handle Google OAuth callback
+router.get('/google/callback', async (req, res) => {
+  const { code, state } = req.query;
+
+  if (!state) {
+    return res.redirect(`${getAppUrl(req)}?oauth=google&status=error&message=missing_state`);
+  }
+
+  // Look up state nonce to identify the user (callback has no auth token)
+  const stateRow = db.prepare(
+    'SELECT * FROM oauth_states WHERE state = ? AND provider = ?'
+  ).get(state, 'google');
+
+  if (!stateRow) {
+    return res.redirect(`${getAppUrl(req)}?oauth=google&status=error&message=invalid_state`);
+  }
+
+  const userId = stateRow.user_id;
+
+  // Check state expiry
+  if (stateRow.expires_at && new Date(stateRow.expires_at) < new Date()) {
+    db.prepare('DELETE FROM oauth_states WHERE id = ?').run(stateRow.id);
+    return res.redirect(`${getAppUrl(req)}?oauth=google&status=error&message=state_expired`);
+  }
+
+  // Delete state nonce (one-time use)
+  db.prepare('DELETE FROM oauth_states WHERE id = ?').run(stateRow.id);
+
+  if (!code) {
+    return res.redirect(`${getAppUrl(req)}?oauth=google&status=error&message=missing_code`);
+  }
+
+  try {
+    // Exchange code for access + refresh tokens
+    const redirectUri = `${getAppUrl(req)}/api/oauth/google/callback`;
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: redirectUri
+      }).toString()
+    });
+
+    if (!tokenResponse.ok) {
+      return res.redirect(`${getAppUrl(req)}?oauth=google&status=error&message=token_exchange_failed`);
+    }
+
+    const tokenData = await tokenResponse.json();
+    if (!tokenData.access_token) {
+      return res.redirect(`${getAppUrl(req)}?oauth=google&status=error&message=no_access_token`);
+    }
+
+    storeGoogleTokens(userId, tokenData.access_token, tokenData.refresh_token || null, tokenData.expires_in);
+
+    res.redirect(`${getAppUrl(req)}?oauth=google&status=success`);
+  } catch (err) {
+    console.error('Google OAuth callback error:', err.message);
+    res.redirect(`${getAppUrl(req)}?oauth=google&status=error&message=token_exchange_failed`);
+  }
+});
+
 // GET /api/oauth/status - Check OAuth connection status
 router.get('/status', (req, res) => {
   const shopifyToken = db.prepare(
@@ -293,6 +460,10 @@ router.get('/status', (req, res) => {
     'SELECT value FROM user_state WHERE user_id = ? AND key = ?'
   ).get(req.user.id, 'oauth_github_token');
 
+  const googleToken = db.prepare(
+    'SELECT value FROM user_state WHERE user_id = ? AND key = ?'
+  ).get(req.user.id, 'oauth_google_token');
+
   res.json({
     shopify: {
       connected: !!shopifyToken,
@@ -300,6 +471,9 @@ router.get('/status', (req, res) => {
     },
     github: {
       connected: !!githubToken
+    },
+    google: {
+      connected: !!googleToken
     }
   });
 });
@@ -314,6 +488,14 @@ router.delete('/shopify/disconnect', (req, res) => {
 // DELETE /api/oauth/github/disconnect - Remove GitHub OAuth tokens
 router.delete('/github/disconnect', (req, res) => {
   db.prepare('DELETE FROM user_state WHERE user_id = ? AND key = ?').run(req.user.id, 'oauth_github_token');
+  res.json({ success: true });
+});
+
+// DELETE /api/oauth/google/disconnect - Remove Google OAuth tokens
+router.delete('/google/disconnect', (req, res) => {
+  for (const key of ['oauth_google_token', 'oauth_google_refresh', 'oauth_google_expires']) {
+    db.prepare('DELETE FROM user_state WHERE user_id = ? AND key = ?').run(req.user.id, key);
+  }
   res.json({ success: true });
 });
 
