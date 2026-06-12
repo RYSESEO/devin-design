@@ -139,6 +139,16 @@ router.put('/connectors', (req, res) => {
   res.json({ success: true });
 });
 
+// DELETE /api/state/connectors/:connectorId - Remove stored connector credentials
+router.delete('/connectors/:connectorId', (req, res) => {
+  const userId = req.user.id;
+  const stateKey = `connector_${req.params.connectorId}`;
+
+  db.prepare('DELETE FROM user_state WHERE user_id = ? AND key = ?').run(userId, stateKey);
+
+  res.json({ success: true });
+});
+
 // GET /api/state/chat-history - Return last 100 chat messages
 router.get('/chat-history', (req, res) => {
   const userId = req.user.id;

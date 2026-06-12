@@ -182,6 +182,17 @@ class BaseConnector {
 
   async disconnect() {
     await CredentialVault.remove(this.id);
+    // Remove the server-side stored credentials too, otherwise the
+    // connection silently comes back on the next page load
+    const token = (typeof window.getToken === 'function') ? window.getToken() : null;
+    if (token) {
+      try {
+        await fetch(`/api/state/connectors/${this._getServerConnectorId()}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } catch { /* ignore network errors */ }
+    }
     this.status = 'disconnected';
     this.lastError = null;
     this.lastSync = null;
@@ -271,6 +282,7 @@ class ShopifyConnector extends BaseConnector {
         }).catch(() => null),
       ]);
 
+      let productsFromOrders = false;
       if (ordersResp?.ok) {
         const { orders } = await ordersResp.json();
         const totalRevenue = orders.reduce((s, o) => s + parseFloat(o.total_price || 0), 0);
@@ -280,9 +292,25 @@ class ShopifyConnector extends BaseConnector {
         DataStore.set('shopify_revenue', totalRevenue, 'shopify');
         DataStore.set('shopify_orders_chart', { labels: dailyOrders.labels, orders: dailyOrders.values, revenue: dailyRevenue.values }, 'shopify');
         DataStore.set('shopify_order_count', orders.length, 'shopify');
+
+        // Top products by actual sales (units & revenue from order line items)
+        const byProduct = {};
+        orders.forEach(o => (o.line_items || []).forEach(li => {
+          const key = li.product_id || li.title;
+          if (!key) return;
+          if (!byProduct[key]) byProduct[key] = { name: li.title || 'Unknown', units: 0, revenue: 0, image: null };
+          const qty = parseInt(li.quantity, 10) || 0;
+          byProduct[key].units += qty;
+          byProduct[key].revenue += parseFloat(li.price || 0) * qty;
+        }));
+        const topSelling = Object.values(byProduct).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+        if (topSelling.length) {
+          DataStore.set('shopify_products', topSelling, 'shopify');
+          productsFromOrders = true;
+        }
       }
 
-      if (productsResp?.ok) {
+      if (productsResp?.ok && !productsFromOrders) {
         const { products } = await productsResp.json();
         const topProducts = products.slice(0, 5).map(p => ({
           name: p.title,
@@ -394,23 +422,28 @@ class GitHubConnector extends BaseConnector {
   async fetchData(creds) {
     try {
       const headers = getAuthHeaders();
-      const owner = creds.owner || '';
 
-      const [userResp, eventsResp] = await Promise.all([
-        fetch('/api/proxy/github', {
-          method: 'POST', headers,
-          body: JSON.stringify({ endpoint: '/user', method: 'GET' })
-        }),
-        fetch('/api/proxy/github', {
-          method: 'POST', headers,
-          body: JSON.stringify({ endpoint: owner ? `/users/${owner}/events?per_page=30` : '/events?per_page=30', method: 'GET' })
-        }).catch(() => null),
-      ]);
+      const userResp = await fetch('/api/proxy/github', {
+        method: 'POST', headers,
+        body: JSON.stringify({ endpoint: '/user', method: 'GET' })
+      });
 
+      let login = null;
       if (userResp.ok) {
         const user = await userResp.json();
+        login = user.login;
         DataStore.set('github_user', { login: user.login, avatar: user.avatar_url, repos: user.public_repos }, 'github');
       }
+
+      // Without an owner, fall back to the token holder's own events -
+      // never the global public /events firehose
+      const owner = creds.owner || login;
+      if (!owner) return;
+
+      const eventsResp = await fetch('/api/proxy/github', {
+        method: 'POST', headers,
+        body: JSON.stringify({ endpoint: `/users/${encodeURIComponent(owner)}/events?per_page=30`, method: 'GET' })
+      }).catch(() => null);
 
       if (eventsResp?.ok) {
         const events = await eventsResp.json();
@@ -600,11 +633,12 @@ class SearchConsoleConnector extends BaseConnector {
       const endDate = new Date().toISOString().split('T')[0];
       const startDate = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
 
+      // No endpoint: the server builds /sites/{siteUrl}/searchAnalytics/query
+      // from the stored site URL
       const resp = await fetch('/api/proxy/search-console', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
-          endpoint: '/searchAnalytics/query',
           method: 'POST',
           params: {
             startDate,
@@ -944,13 +978,13 @@ const SettingsPanel = {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
         const connector = ConnectorManager.get(id);
-        const creds = await CredentialVault.load(id);
-        if (creds) {
-          await connector.fetchData(creds);
-          connector.lastSync = Date.now();
-          self.render();
-          if (!ConnectorManager.demoMode) rebuildAllWidgets();
-        }
+        // Credentials may live only server-side (OAuth or restored session);
+        // fetchData goes through the server proxy which resolves them
+        const creds = (await CredentialVault.load(id)) || {};
+        await connector.fetchData(creds);
+        connector.lastSync = Date.now();
+        self.render();
+        if (!ConnectorManager.demoMode) rebuildAllWidgets();
       });
     });
   },
@@ -1124,6 +1158,9 @@ function rebuildAllWidgets() {
     if (typeof animateCounters === 'function') {
       animateCounters();
     }
+    if (typeof renderLiveLists === 'function') {
+      renderLiveLists();
+    }
     updateDataSourceBadges();
   }, 200);
 }
@@ -1165,12 +1202,73 @@ async function initConnectors() {
   initDemoModeToggle();
   await ConnectorManager.restoreAll();
   updateDataSourceBadges();
-  await checkOAuthStatus();
   handleOAuthRedirect();
+
+  // Auth is restored asynchronously by main.js - the token is usually NOT
+  // available yet when this runs. Restore remote connections as soon as
+  // main.js announces the auth state (and again after a fresh login).
+  document.addEventListener('ryse:auth-ready', (e) => {
+    if (e.detail && e.detail.authenticated) restoreRemoteConnections();
+  });
+  if (typeof window.getToken === 'function' && window.getToken()) {
+    await restoreRemoteConnections();
+  }
+
   // After all connections restored, ensure dashboard reflects live state
   if (ConnectorManager.hasAnyConnected()) {
     ConnectorManager.toggleDemoMode(false);
     rebuildAllWidgets();
+  }
+}
+
+/**
+ * Restore connections whose credentials live server-side: OAuth tokens and
+ * manually configured connectors (the local vault key is per-session, so
+ * server state is the only durable record of manual connections).
+ */
+async function restoreRemoteConnections() {
+  await checkOAuthStatus();
+  await restoreServerConnectors();
+  if (ConnectorManager.hasAnyConnected() && ConnectorManager.demoMode) {
+    ConnectorManager.toggleDemoMode(false);
+  }
+  if (ConnectorManager.hasAnyConnected()) {
+    rebuildAllWidgets();
+  }
+  updateDataSourceBadges();
+}
+
+async function restoreServerConnectors() {
+  const token = (typeof window.getToken === 'function') ? window.getToken() : null;
+  if (!token) return;
+
+  try {
+    const r = await fetch('/api/state', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!r.ok) return;
+    const state = await r.json();
+    const configured = (state && state.connectors) || {};
+
+    // Server connector ids -> client connector ids
+    const idMap = { 'search-console': 'gsc' };
+    const fetches = [];
+    for (const serverId of Object.keys(configured)) {
+      if (!configured[serverId] || !configured[serverId].connected) continue;
+      const connector = ConnectorManager.get(idMap[serverId] || serverId);
+      if (connector && connector.status !== 'connected') {
+        connector.status = 'connected';
+        connector.lastSync = Date.now();
+        // Credentials resolve server-side via the proxy
+        fetches.push(connector.fetchData({}).catch(() => {}));
+      }
+    }
+    if (fetches.length > 0) {
+      await Promise.allSettled(fetches);
+      ConnectorManager.notify();
+    }
+  } catch {
+    // Silently ignore - dashboard stays in demo mode
   }
 }
 

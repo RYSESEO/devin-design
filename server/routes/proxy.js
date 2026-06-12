@@ -191,9 +191,22 @@ router.post('/analytics', async (req, res) => {
   const { endpoint, method = 'POST', params } = req.body;
   const { propertyId, accessToken } = credentials;
 
+  if (!/^[0-9]+$/.test(String(propertyId || ''))) {
+    return res.status(400).json({ error: 'Invalid GA4 property ID. Please reconfigure the connector.' });
+  }
+
   try {
     const baseUrl = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}`;
-    const url = validateProxyUrl(endpoint || ':runReport', baseUrl);
+    const requestedEndpoint = endpoint || ':runReport';
+    let url;
+    if (requestedEndpoint.startsWith(':')) {
+      // GA4 method-style endpoints (e.g. :runReport) attach directly to the
+      // property resource with no path separator
+      url = new URL(baseUrl + requestedEndpoint);
+      if (url.origin !== new URL(baseUrl).origin) url = null;
+    } else {
+      url = validateProxyUrl(requestedEndpoint, baseUrl);
+    }
     if (!url) {
       return res.status(400).json({ error: 'Invalid endpoint: URL must stay within the target API origin' });
     }
@@ -265,7 +278,15 @@ router.post('/search-console', async (req, res) => {
 
   try {
     const baseUrl = 'https://searchconsole.googleapis.com/webmasters/v3';
-    const url = validateProxyUrl(endpoint || `/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`, baseUrl);
+    // All site-scoped Search Console endpoints live under /sites/{siteUrl}.
+    // Prefix endpoints that omit it so callers can pass e.g. /searchAnalytics/query.
+    let effectiveEndpoint = endpoint;
+    if (!effectiveEndpoint) {
+      effectiveEndpoint = `/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`;
+    } else if (!effectiveEndpoint.replace(/^\/+/, '').startsWith('sites')) {
+      effectiveEndpoint = `/sites/${encodeURIComponent(siteUrl)}/${effectiveEndpoint.replace(/^\/+/, '')}`;
+    }
+    const url = validateProxyUrl(effectiveEndpoint, baseUrl);
     if (!url) {
       return res.status(400).json({ error: 'Invalid endpoint: URL must stay within the target API origin' });
     }

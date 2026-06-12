@@ -136,6 +136,11 @@ export async function refreshToken() {
 
     const data = await res.json();
     currentToken = data.token;
+    // The server rotates refresh tokens on every use - persist the new one
+    // or the next restore attempt will fail with a stale token
+    if (data.refreshToken) {
+      storeRefreshToken(data.refreshToken);
+    }
     scheduleRefresh();
     return data.token;
   } catch {

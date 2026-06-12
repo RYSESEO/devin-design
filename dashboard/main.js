@@ -11,6 +11,14 @@ import { registerPanel, initLazyPanels } from './lib/lazy-panels.js';
 window.saveConnectorConfig = saveConnectorConfig;
 window.getToken = getToken;
 
+// Announce auth state to non-module scripts (connectors.js) so they can
+// restore server-side connections once a token is actually available.
+function announceAuth() {
+  document.dispatchEvent(new CustomEvent('ryse:auth-ready', {
+    detail: { authenticated: isAuthenticated() }
+  }));
+}
+
 // Initialize realtime client after DOM is ready
 function initRealtime() {
   const client = new RealtimeClient({ getToken });
@@ -35,11 +43,39 @@ function initRealtime() {
     updateLiveIndicator(state);
   });
 
-  client.connect();
+  // The /ws endpoint requires a JWT; connecting while logged out just
+  // produces a 401 reconnect loop, so wait for auth if needed.
+  if (isAuthenticated()) {
+    client.connect();
+  } else {
+    const onAuth = (e) => {
+      if (e.detail && e.detail.authenticated) {
+        document.removeEventListener('ryse:auth-ready', onAuth);
+        client.connect();
+      }
+    };
+    document.addEventListener('ryse:auth-ready', onAuth);
+  }
   window.__realtimeClient = client;
 }
 
+// Metrics owned by live connectors must not be overwritten by the
+// simulated demo streams when demo mode is off.
+const LIVE_KPI_KEYS = {
+  agents: ['agent_sessions'],
+  revenue: ['shopify_revenue', 'stripe_revenue'],
+  leads: ['lead_sources'],
+  views: ['content_views']
+};
+
+function hasLiveSource(keys) {
+  if (typeof ConnectorManager === 'undefined' || typeof DataStore === 'undefined') return false;
+  if (ConnectorManager.demoMode) return false;
+  return keys.some((k) => DataStore.getSource(k) !== 'demo');
+}
+
 function updateKpiValue(data) {
+  if (hasLiveSource(LIVE_KPI_KEYS[data.metric] || [])) return;
   const metricMap = {
     agents: 0,
     revenue: 1,
@@ -105,6 +141,7 @@ function animateValue(el, from, to, prefix) {
 }
 
 function prependActivityItem(data) {
+  if (hasLiveSource(['github_activity'])) return;
   const feed = document.getElementById('agent-feed');
   if (!feed) return;
 
@@ -363,6 +400,7 @@ function initAuthUI() {
         hideAuthOverlay();
         showUserMenu(user);
         await applyServerState();
+        announceAuth();
       } catch (err) {
         if (errorEl) {
           errorEl.textContent = err.message;
@@ -463,6 +501,9 @@ async function initApp() {
       }, 50);
     });
   }
+
+  // Session restore (or lack of one) is now resolved - tell listeners
+  announceAuth();
 }
 
 /**

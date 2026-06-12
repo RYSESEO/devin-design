@@ -8,18 +8,22 @@ function debounce(fn, ms) {
 }
 
 /* ─── Chart.js Global Config ──────────────────────────────── */
-Chart.defaults.color = '#71717a';
-Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
-Chart.defaults.font.family = "'Inter', sans-serif";
-Chart.defaults.font.size = 11;
-Chart.defaults.plugins.legend.display = false;
-Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(9,9,11,0.92)';
-Chart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,0.1)';
-Chart.defaults.plugins.tooltip.borderWidth = 1;
-Chart.defaults.plugins.tooltip.cornerRadius = 8;
-Chart.defaults.plugins.tooltip.padding = 10;
-Chart.defaults.plugins.tooltip.titleFont = { weight: '600', size: 12 };
-Chart.defaults.plugins.tooltip.bodyFont = { size: 11 };
+// Guarded so the rest of the dashboard (connectors, settings, live data)
+// still boots even if the chart library fails to load
+if (typeof Chart !== 'undefined') {
+  Chart.defaults.color = '#71717a';
+  Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.plugins.legend.display = false;
+  Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(9,9,11,0.92)';
+  Chart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,0.1)';
+  Chart.defaults.plugins.tooltip.borderWidth = 1;
+  Chart.defaults.plugins.tooltip.cornerRadius = 8;
+  Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.plugins.tooltip.titleFont = { weight: '600', size: 12 };
+  Chart.defaults.plugins.tooltip.bodyFont = { size: 11 };
+}
 
 const COLORS = {
   accent:  '#a855f7',
@@ -50,23 +54,32 @@ function fadeGradient(ctx, color, h) {
 }
 
 /* ─── KPI Counter Animation ──────────────────────────────── */
+// Sets a KPI target from live data; remembers the original demo value so
+// toggling back to demo mode restores it (getLiveData returns null in demo mode)
+function setKpiCount(selector, value) {
+  var el = document.querySelector(selector);
+  if (!el) return;
+  if (el.dataset.demoCount === undefined) el.dataset.demoCount = el.dataset.count;
+  el.dataset.count = (value === null || value === undefined)
+    ? el.dataset.demoCount
+    : String(Math.round(value));
+}
+
 function animateCounters() {
-  // Update revenue KPI with live data if available
+  // Update KPIs with live data where connected
   if (typeof getLiveData === 'function') {
     var liveRevenue = getLiveData('shopify_revenue', null);
-    if (liveRevenue !== null) {
-      var revenueCard = document.querySelector('.kpi-revenue .kpi-value');
-      if (revenueCard) {
-        revenueCard.setAttribute('data-count', liveRevenue);
-      }
-    }
-    var liveOrders = getLiveData('shopify_order_count', null);
-    if (liveOrders !== null) {
-      var ordersCard = document.querySelector('.kpi-orders .kpi-value');
-      if (ordersCard) {
-        ordersCard.setAttribute('data-count', liveOrders);
-      }
-    }
+    if (liveRevenue === null) liveRevenue = getLiveData('stripe_revenue', null);
+    setKpiCount('.kpi-revenue .kpi-value', liveRevenue);
+
+    setKpiCount('.kpi-agents .kpi-value', getLiveData('agent_sessions', null));
+
+    var liveLeads = getLiveData('lead_sources', null);
+    setKpiCount('.kpi-leads .kpi-value', (liveLeads && liveLeads.length)
+      ? liveLeads.reduce(function(s, d) { return s + (d.value || 0); }, 0)
+      : null);
+
+    setKpiCount('.kpi-content .kpi-value', getLiveData('content_views', null));
   }
   document.querySelectorAll('.kpi-value').forEach(el => {
     const target = parseInt(el.dataset.count, 10);
@@ -161,13 +174,17 @@ function initLeadSources() {
   const ctx = document.getElementById('chart-lead-sources').getContext('2d');
   const theme = document.documentElement.getAttribute('data-theme') || 'default';
   const donutBorder = (THEME_CHART_COLORS[theme] || THEME_CHART_COLORS.default).donutBorder;
-  const data = [
-    { label: 'Organic Search', value: 142, color: COLORS.accent },
-    { label: 'Paid Ads', value: 78, color: COLORS.blue },
-    { label: 'Referral', value: 62, color: COLORS.teal },
-    { label: 'Social', value: 48, color: COLORS.pink },
-    { label: 'Direct', value: 32, color: COLORS.amber },
-  ];
+  const palette = [COLORS.accent, COLORS.blue, COLORS.teal, COLORS.pink, COLORS.amber];
+  const liveSources = (typeof getLiveData === 'function') ? getLiveData('lead_sources', null) : null;
+  const data = (liveSources && liveSources.length)
+    ? liveSources.map((d, i) => ({ label: d.label, value: d.value, color: palette[i % palette.length] }))
+    : [
+        { label: 'Organic Search', value: 142, color: COLORS.accent },
+        { label: 'Paid Ads', value: 78, color: COLORS.blue },
+        { label: 'Referral', value: 62, color: COLORS.teal },
+        { label: 'Social', value: 48, color: COLORS.pink },
+        { label: 'Direct', value: 32, color: COLORS.amber },
+      ];
   new Chart(ctx, {
     type: 'doughnut',
     data: {
@@ -248,14 +265,23 @@ function initShopifyChart() {
 /* ─── Content Performance Chart ───────────────────────────── */
 function initContentChart() {
   const ctx = document.getElementById('chart-content').getContext('2d');
+  const liveContent = (typeof getLiveData === 'function') ? getLiveData('content_chart', null) : null;
+  let contentLabels = DAYS_7;
+  let contentViews = [8200, 9400, 14200, 11800, 16400, 15200, 14220];
+  let contentEngagement = [3200, 4100, 5800, 4600, 6200, 5800, 5400];
+  if (liveContent && liveContent.labels && liveContent.labels.length) {
+    contentLabels = liveContent.labels;
+    contentViews = liveContent.views || [];
+    contentEngagement = liveContent.engagement || [];
+  }
   new Chart(ctx, {
     type: 'line',
     data: {
-      labels: DAYS_7,
+      labels: contentLabels,
       datasets: [
         {
           label: 'Page Views',
-          data: [8200, 9400, 14200, 11800, 16400, 15200, 14220],
+          data: contentViews,
           borderColor: COLORS.pink,
           backgroundColor: fadeGradient(ctx, COLORS.pink),
           fill: true,
@@ -266,7 +292,7 @@ function initContentChart() {
         },
         {
           label: 'Engagement',
-          data: [3200, 4100, 5800, 4600, 6200, 5800, 5400],
+          data: contentEngagement,
           borderColor: COLORS.amber,
           backgroundColor: 'transparent',
           fill: false,
@@ -327,6 +353,87 @@ function initTokenChart() {
 
   const legend = document.getElementById('token-legend');
   legend.innerHTML = data.map(d => `<li><span style="background:${d.color};width:8px;height:8px;border-radius:50%;display:inline-block"></span>${d.label} - ${(d.value / 1000).toFixed(0)}k</li>`).join('');
+}
+
+/* ─── Live Lists (Top Products & Agent Feed) ──────────────── */
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = String(s == null ? '' : s);
+  return d.innerHTML;
+}
+
+function relativeTime(iso) {
+  const t = new Date(iso).getTime();
+  if (isNaN(t)) return '';
+  const mins = Math.max(0, Math.round((Date.now() - t) / 60000));
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + ' min ago';
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return hours + 'h ago';
+  return Math.round(hours / 24) + 'd ago';
+}
+
+// Demo markup is snapshotted on first replacement so toggling back to
+// demo mode restores the original content
+const _demoListSnapshots = {};
+
+function renderLiveLists() {
+  renderTopProductsTable();
+  renderAgentFeedList();
+}
+
+function renderTopProductsTable() {
+  const tbody = document.querySelector('[data-widget="top-products"] .data-table tbody');
+  if (!tbody) return;
+  if (_demoListSnapshots.products === undefined) _demoListSnapshots.products = tbody.innerHTML;
+
+  const live = (typeof getLiveData === 'function') ? getLiveData('shopify_products', null) : null;
+  if (!live || !live.length) {
+    tbody.innerHTML = _demoListSnapshots.products;
+    return;
+  }
+
+  const palette = [COLORS.accent, COLORS.accent2, COLORS.pink, COLORS.teal, COLORS.amber];
+  tbody.innerHTML = live.map((p, i) => {
+    const revenue = p.revenue ? '$' + Math.round(p.revenue).toLocaleString() : '—';
+    return `<tr><td><span class="product-dot" style="--dot:${palette[i % palette.length]}"></span>${escapeHtml(p.name)}</td><td>${p.units || 0}</td><td>${revenue}</td><td>—</td></tr>`;
+  }).join('');
+}
+
+function renderAgentFeedList() {
+  const feed = document.getElementById('agent-feed');
+  if (!feed) return;
+  if (_demoListSnapshots.feed === undefined) _demoListSnapshots.feed = feed.innerHTML;
+
+  const live = (typeof getLiveData === 'function') ? getLiveData('github_activity', null) : null;
+  if (!live || !live.events || !live.events.length) {
+    feed.innerHTML = _demoListSnapshots.feed;
+    return;
+  }
+
+  const eventMeta = {
+    PushEvent: { label: 'pushed commits to', dot: 'green' },
+    PullRequestEvent: { label: 'pull request in', dot: 'purple' },
+    IssuesEvent: { label: 'issue in', dot: 'amber' },
+    IssueCommentEvent: { label: 'commented on', dot: 'blue' },
+    CreateEvent: { label: 'created ref in', dot: 'blue' },
+    DeleteEvent: { label: 'deleted ref in', dot: 'amber' },
+    ReleaseEvent: { label: 'published release in', dot: 'green' },
+    WatchEvent: { label: 'starred', dot: 'purple' },
+    ForkEvent: { label: 'forked', dot: 'blue' },
+  };
+
+  feed.innerHTML = live.events.map(e => {
+    const meta = eventMeta[e.type] || { label: e.type.replace(/Event$/, '').toLowerCase(), dot: 'blue' };
+    const action = e.action ? escapeHtml(e.action) + ' ' + meta.label : meta.label;
+    return `<li class="feed-item">
+      <span class="feed-dot dot-${meta.dot}"></span>
+      <div class="feed-body">
+        <strong>GitHub</strong> ${action} <code>${escapeHtml(e.repo)}</code>
+        <time>${relativeTime(e.time)}</time>
+      </div>
+    </li>`;
+  }).join('');
 }
 
 /* ─── Animate channel bars on scroll ──────────────────────── */
@@ -391,6 +498,10 @@ function applyTheme(theme) {
   document.querySelector(`.theme-btn[data-theme="${theme}"]`)?.classList.add('active');
 
   const tc = THEME_CHART_COLORS[theme] || THEME_CHART_COLORS.default;
+  if (typeof Chart === 'undefined') {
+    localStorage.setItem('ryse-theme', theme);
+    return;
+  }
   Chart.defaults.color = tc.tickColor;
   Chart.defaults.borderColor = tc.gridColor;
   Chart.defaults.plugins.tooltip.backgroundColor = tc.tooltipBg;
@@ -412,6 +523,7 @@ function applyTheme(theme) {
 }
 
 function rebuildCharts(tc) {
+  if (typeof Chart === 'undefined') return;
   Chart.helpers.each(Chart.instances, chart => chart.destroy());
 
   initAgentChart();
@@ -968,35 +1080,41 @@ function initAutoDetect() {
 }
 
 /* ─── Boot ────────────────────────────────────────────────── */
+// One failing widget must not abort the rest of the boot sequence
+function safeInit(fn) {
+  try { fn(); } catch (e) { console.error('Dashboard init step failed:', e); }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  animateCounters();
-  initAgentChart();
-  initLeadSources();
-  initShopifyChart();
-  initContentChart();
-  initTokenChart();
-  initBarAnimations();
-  initPeriodButtons();
-  initThemeSwitcher();
-  initCommandPalette();
-  initKeyboardShortcuts();
-  initFocusMode();
-  initNotifications();
-  initDateControls();
-  initAutoDetect();
-  if (typeof initConnectors === 'function') initConnectors();
-  if (typeof initCrossPost === 'function') initCrossPost();
-  if (typeof initCinematic === 'function') initCinematic();
-  if (typeof initOnboarding === 'function') initOnboarding();
-  if (typeof initHealthMonitor === 'function') initHealthMonitor();
-  if (typeof initFreshness === 'function') initFreshness();
+  safeInit(animateCounters);
+  safeInit(initAgentChart);
+  safeInit(initLeadSources);
+  safeInit(initShopifyChart);
+  safeInit(initContentChart);
+  safeInit(initTokenChart);
+  safeInit(initBarAnimations);
+  safeInit(initPeriodButtons);
+  safeInit(initThemeSwitcher);
+  safeInit(initCommandPalette);
+  safeInit(initKeyboardShortcuts);
+  safeInit(initFocusMode);
+  safeInit(initNotifications);
+  safeInit(initDateControls);
+  safeInit(initAutoDetect);
+  if (typeof initConnectors === 'function') safeInit(initConnectors);
+  if (typeof initCrossPost === 'function') safeInit(initCrossPost);
+  if (typeof initCinematic === 'function') safeInit(initCinematic);
+  if (typeof initOnboarding === 'function') safeInit(initOnboarding);
+  if (typeof initHealthMonitor === 'function') safeInit(initHealthMonitor);
+  if (typeof initFreshness === 'function') safeInit(initFreshness);
 
   // Initialize dashboard tabs and shareable links immediately (not lazily)
-  if (typeof DashboardTabs !== 'undefined') DashboardTabs.init();
-  if (typeof ShareableLinks !== 'undefined') ShareableLinks.init();
+  if (typeof DashboardTabs !== 'undefined') safeInit(() => DashboardTabs.init());
+  if (typeof ShareableLinks !== 'undefined') safeInit(() => ShareableLinks.init());
 
   /* ─── Performance: debounced resize handler ─── */
   window.addEventListener('resize', debounce(function() {
+    if (typeof Chart === 'undefined') return;
     Chart.helpers.each(Chart.instances, function(chart) { chart.resize(); });
   }, 250));
 });

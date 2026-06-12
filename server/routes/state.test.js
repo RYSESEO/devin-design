@@ -139,6 +139,35 @@ describe('State Routes', () => {
     });
   });
 
+  describe('DELETE /api/state/connectors/:connectorId', () => {
+    it('removes stored connector credentials', async () => {
+      await put('/api/state/connectors', {
+        connectorId: 'stripe',
+        credentials: { secretKey: 'sk_test_abc' }
+      }, authToken);
+
+      const res = await fetch(`${baseUrl}/api/state/connectors/stripe`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.success).toBe(true);
+
+      const row = db.prepare(
+        "SELECT value FROM user_state WHERE user_id = ? AND key = 'connector_stripe'"
+      ).get(testUserId);
+      expect(row).toBeUndefined();
+    });
+
+    it('returns 401 without auth', async () => {
+      const res = await fetch(`${baseUrl}/api/state/connectors/stripe`, {
+        method: 'DELETE'
+      });
+      expect(res.status).toBe(401);
+    });
+  });
+
   describe('GET /api/state', () => {
     it('returns all user state', async () => {
       const res = await get('/api/state', authToken);
