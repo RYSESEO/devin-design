@@ -58,6 +58,16 @@ function copyLegacyScripts() {
       if (existsSync(manifestSrc)) {
         copyFileSync(manifestSrc, path.join(outDir, 'manifest.json'));
       }
+      // Copy vendored libraries (Chart.js is served same-origin so the
+      // dashboard works offline and without third-party CDN availability)
+      const vendorSrc = path.resolve(__dirname, 'dashboard', 'vendor');
+      if (existsSync(vendorSrc)) {
+        const vendorOut = path.join(outDir, 'vendor');
+        mkdirSync(vendorOut, { recursive: true });
+        for (const file of readdirSync(vendorSrc)) {
+          copyFileSync(path.join(vendorSrc, file), path.join(vendorOut, file));
+        }
+      }
     }
   };
 }
