@@ -2,6 +2,7 @@ import { Router } from 'express';
 import db from '../db/index.js';
 import { decrypt } from '../middleware/encryption.js';
 import { requireAuth } from '../middleware/auth.js';
+import { getGoogleAccessToken } from './oauth.js';
 
 const router = Router();
 
@@ -183,14 +184,20 @@ router.post('/github', async (req, res) => {
 
 // POST /api/proxy/analytics - Forward to GA4 Data API
 router.post('/analytics', async (req, res) => {
+  // Prefer Google OAuth token (auto-refreshed); fall back to manual credentials
   const credentials = getCredentials(req.user.id, 'ga4');
-  if (!credentials) {
+  const oauthToken = await getGoogleAccessToken(req.user.id);
+  if (!credentials && !oauthToken) {
     return res.status(400).json({ error: 'Connector not configured' });
   }
 
   const { endpoint, method = 'POST', params } = req.body;
-  const { propertyId, accessToken } = credentials;
+  const propertyId = credentials?.propertyId;
+  const accessToken = oauthToken || credentials?.accessToken;
 
+  if (!accessToken) {
+    return res.status(400).json({ error: 'Missing access token. Connect Google OAuth or provide an access token.' });
+  }
   if (!/^[0-9]+$/.test(String(propertyId || ''))) {
     return res.status(400).json({ error: 'Invalid GA4 property ID. Please reconfigure the connector.' });
   }
@@ -268,13 +275,23 @@ router.post('/stripe', async (req, res) => {
 
 // POST /api/proxy/search-console - Forward to Search Console API
 router.post('/search-console', async (req, res) => {
+  // Prefer Google OAuth token (auto-refreshed); fall back to manual credentials
   const credentials = getCredentials(req.user.id, 'search-console');
-  if (!credentials) {
+  const oauthToken = await getGoogleAccessToken(req.user.id);
+  if (!credentials && !oauthToken) {
     return res.status(400).json({ error: 'Connector not configured' });
   }
 
   const { endpoint, method = 'POST', params } = req.body;
-  const { siteUrl, accessToken } = credentials;
+  const siteUrl = credentials?.siteUrl;
+  const accessToken = oauthToken || credentials?.accessToken;
+
+  if (!accessToken) {
+    return res.status(400).json({ error: 'Missing access token. Connect Google OAuth or provide an access token.' });
+  }
+  if (!siteUrl) {
+    return res.status(400).json({ error: 'Site URL not configured. Please set your Search Console site URL.' });
+  }
 
   try {
     const baseUrl = 'https://searchconsole.googleapis.com/webmasters/v3';
